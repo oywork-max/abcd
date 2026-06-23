@@ -17,7 +17,7 @@
 
 body {
     margin: 0;
-    padding: 24px 16px;
+    padding: 24px 16px 60px 16px; /* 하단 여백 추가 */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg-color);
     color: var(--text-main);
@@ -168,7 +168,7 @@ h1 {
     transform: scale(0.98);
 }
 
-/* 🎯 요청 반영: 결과값 영역 디자인 */
+/* 결과값 영역 */
 .result-card {
     display: none;
     margin-top: 24px;
@@ -203,7 +203,6 @@ h1 {
     border: 1px solid #edf2f7;
 }
 
-/* 컬러 뱃지 */
 .result-color-badge {
     padding: 6px 14px;
     border-radius: 12px;
@@ -215,25 +214,53 @@ h1 {
     text-align: center;
 }
 
-/* 플레이어 이름 (A, B, C...) */
 .result-user {
     font-size: 18px;
     font-weight: 800;
     color: var(--text-main);
 }
 
-/* 대시 구분선 */
 .result-divider {
     color: #cbd5e1;
     font-weight: bold;
 }
 
-/* 휴게 순서 텍스트 */
 .result-order {
     font-size: 15px;
     font-weight: 600;
-    color: #4f46e5; /* 세련된 인디고 블루 포인트 */
-    margin-left: auto; /* 우측 정렬로 시각적 균형감 확보 */
+    color: #4f46e5;
+    margin-left: auto;
+}
+
+/* 🔄 작고 세련된 초기화 버튼 */
+.reset-btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+.reset-btn {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.reset-btn:hover {
+    background: #edf2f7;
+    color: var(--text-main);
+}
+
+.reset-btn:active {
+    transform: scale(0.96);
 }
 
 @keyframes slideUp {
@@ -267,6 +294,10 @@ h1 {
     <div class="result-list" id="result-content"></div>
 </div>
 
+<div class="reset-btn-container">
+    <button class="reset-btn" onclick="resetAll()">🔄 선택 초기화</button>
+</div>
+
 <script>
 let people = 4;
 const alphabet = 'ABCDEFGHIJKL'.split('');
@@ -276,7 +307,6 @@ const colors = [
     {n:'갈색', c:'#8d6e63'}, {n:'회색', c:'#9e9e9e'}, {n:'검정', c:'#424242'}, {n:'민트', c:'#26c6da'}
 ];
 
-// 휴게 순서 텍스트 맵
 const orderTexts = ["첫번째 휴게시작", "두번째 휴게시작", "세번째 휴게시작", "네번째 휴게시작", "다섯번째 휴게시작", "여섯번째 휴게시작", "일곱번째 휴게시작", "여덟번째 휴게시작", "아홉번째 휴게시작", "열번째 휴게시작", "열한번째 휴게시작", "열두번째 휴게시작"];
 
 let selected = [];
@@ -323,10 +353,16 @@ function changePeople(num){
     people += num;
     if(people < 2) people = 2;
     if(people > 12) people = 12;
+    resetAll(); // 인원 변경 시 상태 깔끔하게 초기화
+}
+
+/* 🎯 모든 상태를 깔끔하게 되돌리는 초기화 함수 */
+function resetAll() {
     selected = [];
     renderColors();
     document.getElementById('peopleCount').innerText = people + "명";
     document.getElementById('result-box').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // 최상단으로 스크롤 부드럽게 이동
 }
 
 function shuffle(arr){
@@ -351,7 +387,6 @@ function drawResult(){
         const isBright = ['#ffd600', '#4fc3f7', '#26c6da'].includes(colorItem.c);
         const fontColor = isBright ? '#222' : '#fff';
 
-        // 요청하신 포맷: [컬러] - 알파벳 - 휴게순서 반영 및 UI 고도화
         html += `
             <div class="result-row">
                 <span class="result-color-badge" style="background: ${colorItem.c}; color: ${fontColor};">
