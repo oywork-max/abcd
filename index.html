@@ -60,7 +60,7 @@ body {
     position: relative;
 }
 
-/* 페이지 전환 뷰 컨테이너 */
+/* 페이지 전환 뷰 */
 .view {
     display: none;
     flex-direction: column;
@@ -83,7 +83,6 @@ body {
     }
 }
 
-/* 상단 타이틀 헤더 */
 .header {
     text-align: center;
     margin-bottom: 22px;
@@ -109,7 +108,6 @@ h1 {
     color: var(--text-main);
 }
 
-/* 클레이 카드 */
 .clay-card {
     background: var(--card-bg);
     border-radius: 28px;
@@ -119,7 +117,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* 인원 설정 영역 */
 .people-section {
     display: flex;
     justify-content: space-between;
@@ -191,7 +188,6 @@ h1 {
     color: var(--text-main);
 }
 
-/* 상태 인디케이터 배너 */
 .guide-banner {
     display: flex;
     justify-content: space-between;
@@ -220,7 +216,6 @@ h1 {
     color: #1e3a03;
 }
 
-/* 컬러 선택 그리드 */
 .color-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -250,7 +245,6 @@ h1 {
     transform: scale(0.93);
 }
 
-/* 선택된 컬러 칩 하이라이트 */
 .clay-color-chip.selected {
     transform: scale(0.96);
     border-color: var(--highlight);
@@ -278,7 +272,6 @@ h1 {
     box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
 
-/* 메인 하이라이트 액션 버튼 */
 .btn-primary-clay {
     width: 100%;
     height: 60px;
@@ -303,7 +296,18 @@ h1 {
     box-shadow: 0 4px 10px rgba(130, 220, 40, 0.4), inset 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* 결과 페이지 스타일 */
+/* 주사위 굴릴 때 흔들리는 효과 */
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg) scale(1.05); }
+    75% { transform: rotate(10deg) scale(1.05); }
+}
+
+.rolling-icon {
+    display: inline-block;
+    animation: shake 0.15s infinite;
+}
+
 .result-header {
     text-align: center;
     margin-bottom: 22px;
@@ -407,7 +411,6 @@ h1 {
     transform: scale(0.97);
 }
 
-/* 알림 토스트 */
 .toast {
     position: fixed;
     bottom: 24px;
@@ -461,11 +464,10 @@ h1 {
             <span class="guide-pill" id="guidePill">0 / 4</span>
         </div>
 
-        <!-- 컬러 그리드 -->
         <div class="color-grid" id="grid"></div>
 
-        <button class="btn-primary-clay" onclick="drawResult()">
-            <span>✨</span> 휴게 순서 뽑기
+        <button class="btn-primary-clay" id="drawBtn" onclick="startDrawProcess()">
+            <span id="drawIcon">✨</span> <span id="drawBtnText">휴게 순서 뽑기</span>
         </button>
     </div>
 
@@ -491,7 +493,6 @@ h1 {
 
 </div>
 
-<!-- 미니 토스트 메시지 -->
 <div id="toast" class="toast"></div>
 
 <script>
@@ -519,8 +520,126 @@ const orderTexts = [
 ];
 
 let selected = [];
+let audioCtx = null;
 
-// 토스트 메시지 함수
+// 공용 AudioContext 초기화 (모바일 자동재생 정책 대응)
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+// 🔔 1. 컬러 선택 '띠링~' 효과음
+function playChimeSound(isSelect = true) {
+    try {
+        const ctx = getAudioContext();
+        const baseFreq = isSelect ? 880 : 587; // A5 또는 D5
+        const secondFreq = isSelect ? 1318.5 : 440; // E6 또는 A4
+
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+
+        osc1.frequency.setValueAtTime(baseFreq, ctx.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(secondFreq, ctx.currentTime + 0.12);
+
+        osc2.frequency.setValueAtTime(baseFreq * 1.5, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc1.start(ctx.currentTime);
+        osc2.start(ctx.currentTime);
+        osc1.stop(ctx.currentTime + 0.3);
+        osc2.stop(ctx.currentTime + 0.3);
+    } catch(e) {}
+}
+
+// 🎲 2. 주사위 굴러가는 "또르르르~" 사운드
+function playDiceRollSound() {
+    try {
+        const ctx = getAudioContext();
+        const totalClicks = 10;
+        const duration = 0.65;
+
+        for (let i = 0; i < totalClicks; i++) {
+            const timeOffset = Math.pow(i / totalClicks, 1.3) * duration;
+            const clickTime = ctx.currentTime + timeOffset;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            // 주사위 깍두기가 부딪히는 나무/플라스틱 톤 (랜덤 주파수)
+            const freq = 450 + Math.random() * 350;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, clickTime);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.4, clickTime + 0.04);
+
+            gain.gain.setValueAtTime(0.35, clickTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, clickTime + 0.04);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(clickTime);
+            osc.stop(clickTime + 0.04);
+        }
+    } catch(e) {}
+}
+
+// 🎉 3. 컨페티 팡! + 축하 멜로디 사운드
+function playConfettiSound() {
+    try {
+        const ctx = getAudioContext();
+
+        // 팡! 소리
+        const popOsc = ctx.createOscillator();
+        const popGain = ctx.createGain();
+        popOsc.type = 'triangle';
+        popOsc.frequency.setValueAtTime(140, ctx.currentTime);
+        popOsc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.15);
+        popGain.gain.setValueAtTime(0.7, ctx.currentTime);
+        popGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        popOsc.connect(popGain);
+        popGain.connect(ctx.destination);
+        popOsc.start(ctx.currentTime);
+        popOsc.stop(ctx.currentTime + 0.15);
+
+        // 챠르르 올라가는 축하 실로폰음 (C5, E5, G5, C6)
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.06 + (idx * 0.08);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.45);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.45);
+        });
+    } catch (e) {}
+}
+
 function showToast(msg) {
     const toast = document.getElementById('toast');
     toast.innerText = msg;
@@ -530,7 +649,6 @@ function showToast(msg) {
     }, 2000);
 }
 
-// 컬러 렌더링
 function renderColors() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -565,15 +683,19 @@ function updateGuide() {
 function toggleColor(index) {
     const idx = selected.indexOf(index);
     if (idx > -1) {
+        // 선택 해제
         selected.splice(idx, 1);
         document.getElementById('c' + index).classList.remove('selected');
+        playChimeSound(false);
     } else {
+        // 새로 선택
         if (selected.length >= people) {
             showToast(`인원 수(${people}명)만큼만 선택할 수 있습니다.`);
             return;
         }
         selected.push(index);
         document.getElementById('c' + index).classList.add('selected');
+        playChimeSound(true); // 🔔 '띠링~' 사운드
     }
     updateGuide();
 }
@@ -598,7 +720,6 @@ function resetAll() {
     renderColors();
 }
 
-// 셔플 알고리즘
 function shuffle(arr) {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -608,8 +729,9 @@ function shuffle(arr) {
     return copy;
 }
 
-// 하이라이트(#82DC28) 포함 컨페티 폭죽 효과
 function triggerConfetti() {
+    playConfettiSound(); // 🎉 팡! 사운드
+
     if (typeof confetti === 'function') {
         const count = 200;
         const defaults = {
@@ -631,22 +753,43 @@ function triggerConfetti() {
     }
 }
 
-// 추첨 실행 및 결과 페이지 랜딩
-function drawResult() {
+// 🎲 주사위 굴리는 시뮬레이션 후 결과 페이지 랜딩
+function startDrawProcess() {
     if (selected.length !== people) {
         showToast(`인원 수와 동일하게 ${people}개의 컬러를 선택해주세요.`);
         return;
     }
-    
-    renderResultRows();
 
-    // 페이지 전환 (선택화면 Hide -> 결과화면 Show)
-    document.getElementById('selectionView').classList.remove('active');
-    document.getElementById('resultView').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const drawBtn = document.getElementById('drawBtn');
+    const drawIcon = document.getElementById('drawIcon');
+    const drawBtnText = document.getElementById('drawBtnText');
 
-    // 축하 컨페티 실행
-    triggerConfetti();
+    // 버튼 애니메이션 & 사운드
+    drawBtn.disabled = true;
+    drawIcon.innerText = "🎲";
+    drawIcon.classList.add('rolling-icon');
+    drawBtnText.innerText = "순서 섞는 중...";
+
+    // 🎲 "또르르르~" 주사위 굴러가는 소리 재생
+    playDiceRollSound();
+
+    // 0.65초 뒤 주사위가 멈추고 결과 페이지로 전환
+    setTimeout(() => {
+        renderResultRows();
+
+        document.getElementById('selectionView').classList.remove('active');
+        document.getElementById('resultView').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // 버튼 원래 상태로 복구
+        drawBtn.disabled = false;
+        drawIcon.innerText = "✨";
+        drawIcon.classList.remove('rolling-icon');
+        drawBtnText.innerText = "휴게 순서 뽑기";
+
+        // 컨페티 & 축하 사운드 폭죽
+        triggerConfetti();
+    }, 650);
 }
 
 function renderResultRows() {
@@ -674,20 +817,21 @@ function renderResultRows() {
     document.getElementById('result-content').innerHTML = html;
 }
 
-// 동일 조합으로 다시 뽑기
+// 결과 페이지 내 '다시 뽑기' 버튼
 function reRoll() {
-    renderResultRows();
-    triggerConfetti();
+    playDiceRollSound();
+    setTimeout(() => {
+        renderResultRows();
+        triggerConfetti();
+    }, 400);
 }
 
-// 다시 컬러 선택 화면으로 복귀
 function goBackToSelection() {
     document.getElementById('resultView').classList.remove('active');
     document.getElementById('selectionView').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 초기화 실행
 renderColors();
 </script>
 
