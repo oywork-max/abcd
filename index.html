@@ -49,7 +49,7 @@
 
 body {
     margin: 0;
-    padding: 20px 16px 40px;
+    padding: 20px 14px 40px;
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-clay);
     color: var(--text-main);
@@ -91,10 +91,10 @@ body.theme-anpanman {
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 클레이 공통 헤더 */
+/* 헤더 */
 .header {
     text-align: center;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .title-badge {
@@ -109,57 +109,33 @@ body.theme-anpanman {
 }
 
 h1 {
-    font-size: 25px;
+    font-size: 24px;
     font-weight: 900;
     margin: 0;
     letter-spacing: -0.6px;
     color: var(--text-main);
 }
 
-/* 🌈 호빵맨 레퍼런스 스타일 포스터 헤더 */
+/* 🌈 호빵맨 테마 헤더 배너 */
 .anpanman-header-poster {
     background: #ffffff;
-    border: 3.5px solid #231815;
-    border-radius: 22px;
-    padding: 12px 14px 10px;
+    border: 3px solid #231815;
+    border-radius: 20px;
+    padding: 10px 12px;
     text-align: center;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.12), inset 0 2px 0 rgba(255,255,255,0.9);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.12);
     margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-}
-
-.anpanman-header-poster::before {
-    content: "★";
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #ffd600;
-    text-shadow: 0 0 2px #ff9800;
-}
-
-.anpanman-header-poster::after {
-    content: "★";
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #ffd600;
-    text-shadow: 0 0 2px #ff9800;
 }
 
 .anpanman-jp-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
     color: #ff3838;
     text-shadow: 
         -1.5px -1.5px 0 #fff,  1.5px -1.5px 0 #fff,
         -1.5px  1.5px 0 #fff,  1.5px  1.5px 0 #fff,
-         0 3px 0 #2b2b2b;
-    letter-spacing: 0.5px;
+         0 2.5px 0 #2b2b2b;
+    letter-spacing: 0.3px;
     margin-bottom: 2px;
 }
 
@@ -167,17 +143,17 @@ h1 {
     font-size: 11px;
     font-weight: 800;
     color: #475569;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
 }
 
-/* 인원 설정 카드 */
+/* 카드 공통 */
 .clay-card {
-    background: var(--card-bg, #ffffff);
-    border-radius: 24px;
-    padding: 16px 20px;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 14px 18px;
     box-shadow: var(--clay-card-shadow);
     border: 2px solid var(--clay-border);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -185,13 +161,13 @@ h1 {
 
 .poster-card {
     background: #ffffff;
-    border: 3px solid #231815;
-    border-radius: 20px;
-    box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+    border: 2.5px solid #231815;
+    border-radius: 18px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.12);
 }
 
 .label-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
 }
@@ -200,23 +176,23 @@ h1 {
     background: #edf2f7;
     border: none;
     color: var(--text-muted);
-    padding: 6px 10px;
-    border-radius: 12px;
+    padding: 5px 9px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 2px 2px 6px rgba(163, 177, 198, 0.3);
+    box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.3);
 }
 
 .stepper {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .btn-circle {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: none;
     background: #ffffff;
@@ -237,20 +213,20 @@ h1 {
 }
 
 .count-display {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 900;
-    min-width: 40px;
+    min-width: 36px;
     text-align: center;
 }
 
-/* 색상 직접 추가 바 (클레이 전용) */
+/* 클레이 전용: 새 색상 추가 영역 */
 .add-color-section {
     background: #ffffff;
-    border-radius: 20px;
+    border-radius: 18px;
     padding: 10px 12px;
     box-shadow: var(--clay-card-shadow);
     border: 2px solid var(--clay-border);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -258,9 +234,9 @@ h1 {
 
 .color-picker-wrapper {
     position: relative;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: var(--clay-btn-shadow);
     cursor: pointer;
@@ -271,31 +247,31 @@ h1 {
     position: absolute;
     top: -10px;
     left: -10px;
-    width: 62px;
-    height: 62px;
+    width: 58px;
+    height: 58px;
     border: none;
     cursor: pointer;
 }
 
 .color-name-input {
     flex: 1;
-    height: 42px;
+    height: 38px;
     border: none;
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 0 12px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     outline: none;
     box-shadow: var(--clay-input-shadow);
 }
 
 .btn-add-color {
-    height: 42px;
-    padding: 0 16px;
+    height: 38px;
+    padding: 0 14px;
     background: #ffffff;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
@@ -303,17 +279,17 @@ h1 {
     white-space: nowrap;
 }
 
-/* 안내 배너 */
+/* 가이드 배너 */
 .guide-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     padding: 0 4px;
 }
 
 .guide-banner span {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
 }
@@ -321,8 +297,8 @@ h1 {
 .guide-pill {
     font-size: 12px;
     font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
     background: #e2e8f0;
     color: #475569;
 }
@@ -332,19 +308,19 @@ h1 {
     color: #1e3a03;
 }
 
-/* 🎨 그리드 영역 */
+/* 4열 그리드 (클레이 & 호빵맨 공통 적용) */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 22px;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 
-/* 클레이 칩 스타일 */
+/* 클레이 칩 */
 .clay-color-chip {
-    height: 66px;
-    border-radius: 18px;
-    border: 3px solid rgba(255, 255, 255, 0.65);
+    height: 62px;
+    border-radius: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.7);
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
@@ -352,11 +328,11 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.15s ease, box-shadow 0.15s;
     box-shadow: 
-        5px 6px 14px rgba(163, 177, 198, 0.4),
-        inset 2px 2px 5px rgba(255, 255, 255, 0.65),
-        inset -2px -3px 6px rgba(0, 0, 0, 0.2);
+        4px 5px 12px rgba(163, 177, 198, 0.4),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.65),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s;
 }
 
 .clay-color-chip.selected {
@@ -369,20 +345,20 @@ h1 {
 .anpan-card.selected::after {
     content: "✓";
     position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 22px;
-    height: 22px;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
     background: var(--highlight);
     color: #112800;
     border-radius: 50%;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 900;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     z-index: 5;
 }
 
@@ -390,97 +366,98 @@ h1 {
     position: absolute;
     top: -4px;
     left: -4px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #ff4757;
     color: white;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
-    border: 2px solid #ffffff;
+    border: 1.5px solid #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 }
 
-/* 🖼️ 레퍼런스 포스터 호빵맨 카드 (3열 구성) */
-.anpanman-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
+/* 🖼️ [4열 3행 완벽 크롭] 호빵맨 카드 */
 .anpan-card {
-    border-radius: 16px;
-    border: 2.5px solid #231815;
-    padding: 8px 6px 6px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #231815;
+    padding: 6px 3px 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
     position: relative;
-    box-shadow: 0 4px 0 #231815;
+    box-shadow: 0 3px 0 #231815;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
-    overflow: hidden;
     user-select: none;
 }
 
 .anpan-card:active {
-    transform: translateY(3px);
+    transform: translateY(2px);
     box-shadow: 0 1px 0 #231815;
 }
 
 .anpan-card.selected {
-    outline: 4px solid var(--highlight);
+    outline: 3px solid var(--highlight);
     outline-offset: 1px;
 }
 
-/* 🎯 레퍼런스 포스터 원본 이미지 크롭 영역 */
-.anpan-avatar-box {
-    width: 72px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* 4x3 이미지 크롭 뷰포트 */
+.anpan-crop-viewport {
+    width: 100%;
+    aspect-ratio: 1 / 1.05;
     position: relative;
-    margin-bottom: 4px;
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
+    margin-bottom: 4px;
+    background: #f1f5f9;
 }
 
-/* CSS 스프라이트: 3×4 격자로 원본 포스터의 캐릭터 부위를 정확하게 크롭 */
-.anpan-crop-img {
+.anpan-crop-viewport img {
     position: absolute;
-    width: 300%;  /* 3열 기준 300% 가로 확대 */
-    height: 400%; /* 4행 기준 400% 세로 확대 */
-    object-fit: cover;
+    /* 4열 = 400%, 3행 = 300% */
+    width: 400%;
+    height: 300%;
+    object-fit: fill;
     pointer-events: none;
 }
 
 .anpan-name-badge {
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 900;
     color: #1a1a1a;
     line-height: 1.1;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .anpan-sub-name {
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 700;
-    color: #334155;
+    color: #64748b;
     margin-top: 1px;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-/* 메인 하이라이트(#82DC28) 실행 버튼 */
+/* 메인 실행 버튼 */
 .btn-primary-action {
     width: 100%;
-    height: 58px;
+    height: 56px;
     background: var(--highlight);
     border: none;
-    border-radius: 22px;
-    font-size: 18px;
+    border-radius: 20px;
+    font-size: 17px;
     font-weight: 900;
     color: #1a3303;
     cursor: pointer;
@@ -490,7 +467,7 @@ h1 {
     gap: 8px;
     box-shadow: var(--clay-highlight-shadow);
     transition: all 0.15s ease;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .btn-primary-action:active {
@@ -498,13 +475,13 @@ h1 {
 }
 
 .theme-anpanman .btn-primary-action {
-    border: 3px solid #231815;
-    box-shadow: 0 5px 0 #231815;
-    border-radius: 20px;
+    border: 2.5px solid #231815;
+    box-shadow: 0 4px 0 #231815;
+    border-radius: 18px;
 }
 
 .theme-anpanman .btn-primary-action:active {
-    transform: translateY(4px);
+    transform: translateY(3px);
     box-shadow: 0 1px 0 #231815;
 }
 
@@ -519,64 +496,57 @@ h1 {
     animation: shake 0.15s infinite;
 }
 
-/* 🔄 맨 아래 테마 전환 버튼 */
+/* 테마 전환 버튼 */
 .theme-switch-btn {
     width: 100%;
-    height: 54px;
+    height: 50px;
     background: #ffffff;
     border: 2px solid var(--clay-border);
-    border-radius: 20px;
-    font-size: 15px;
+    border-radius: 18px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
     box-shadow: var(--clay-card-shadow);
-    transition: all 0.2s ease;
-}
-
-.theme-switch-btn:active {
-    transform: scale(0.97);
 }
 
 .theme-anpanman .theme-switch-btn {
-    border: 2.5px solid #231815;
-    box-shadow: 0 4px 0 #231815;
-    background: #fff;
+    border: 2px solid #231815;
+    box-shadow: 0 3px 0 #231815;
 }
 
 /* 결과 페이지 */
 .result-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .result-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .result-card-item {
     background: #ffffff;
-    border-radius: 18px;
-    padding: 12px 14px;
+    border-radius: 16px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 6px 8px 18px rgba(163, 177, 198, 0.25);
+    box-shadow: 4px 6px 14px rgba(163, 177, 198, 0.25);
     border: 1.5px solid rgba(255, 255, 255, 0.85);
     animation: itemPop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
 .theme-anpanman .result-card-item {
-    border: 2.5px solid #231815;
-    box-shadow: 0 4px 0 #231815;
-    border-radius: 18px;
+    border: 2px solid #231815;
+    box-shadow: 0 3px 0 #231815;
 }
 
 @keyframes itemPop {
@@ -585,19 +555,18 @@ h1 {
 }
 
 .color-dot-badge {
-    min-width: 68px;
-    height: 38px;
-    border-radius: 12px;
+    min-width: 64px;
+    height: 36px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     font-weight: 800;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .user-tag {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 900;
     color: var(--text-main);
     display: flex;
@@ -606,24 +575,24 @@ h1 {
 }
 
 .user-tag span {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
     font-weight: 600;
 }
 
 .order-badge {
     margin-left: auto;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 800;
-    padding: 6px 12px;
-    border-radius: 12px;
+    padding: 6px 10px;
+    border-radius: 10px;
     background: #edf9db;
     color: var(--highlight-dark);
     white-space: nowrap;
 }
 
 .theme-anpanman .order-badge {
-    border: 2px solid #231815;
+    border: 1.5px solid #231815;
     background: var(--highlight);
     color: #1a3303;
 }
@@ -635,11 +604,11 @@ h1 {
 
 .btn-secondary {
     flex: 1;
-    height: 54px;
+    height: 52px;
     background: #ffffff;
     border: none;
-    border-radius: 20px;
-    font-size: 15px;
+    border-radius: 18px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
     cursor: pointer;
@@ -647,21 +616,21 @@ h1 {
 }
 
 .theme-anpanman .btn-secondary {
-    border: 2.5px solid #231815;
-    box-shadow: 0 4px 0 #231815;
+    border: 2px solid #231815;
+    box-shadow: 0 3px 0 #231815;
 }
 
-.toast {k
+.toast {
     position: fixed;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(70px);
     background: #1e293b;
     color: #fff;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 700;
-    padding: 12px 20px;
-    border-radius: 20px;
+    padding: 10px 18px;
+    border-radius: 18px;
     box-shadow: 0 10px 24px rgba(0,0,0,0.2);
     opacity: 0;
     pointer-events: none;
@@ -683,13 +652,11 @@ h1 {
     <!-- [PAGE 1] 설정 및 선택 뷰 -->
     <div id="selectionView" class="view active">
         
-        <!-- 동적 헤더 (클레이 vs 호빵맨 포스터) -->
         <header id="mainHeader" class="header">
             <span class="title-badge">CLAY COLOR PICKER</span>
             <h1>🎲 휴게 순서 뽑기</h1>
         </header>
 
-        <!-- 참여 인원 설정 -->
         <section id="peopleCard" class="clay-card">
             <div>
                 <span class="label-title">참여 인원</span>
@@ -702,42 +669,40 @@ h1 {
             </div>
         </section>
 
-        <!-- 클레이 전용: 새 색상 추가 영역 -->
+        <!-- 클레이 전용: 색상 추가 섹션 -->
         <section id="addColorSection" class="add-color-section">
             <div class="color-picker-wrapper">
                 <input type="color" id="newColorPicker" value="#82DC28">
             </div>
-            <input type="text" id="newColorName" class="color-name-input" placeholder="새 색상 이름 (예: 라임, 네이비)" maxlength="6">
+            <input type="text" id="newColorName" class="color-name-input" placeholder="새 색상 이름 (예: 라임)" maxlength="6">
             <button class="btn-add-color" onclick="addNewColor()">＋ 추가</button>
         </section>
 
-        <!-- 가이드 안내 바 -->
         <div class="guide-banner">
             <span id="guideText">컬러를 인원수(4개)만큼 선택하세요</span>
             <span class="guide-pill" id="guidePill">0 / 4</span>
         </div>
 
-        <!-- 아이템 그리드 (컬러 모드 / 호빵맨 모드 공용) -->
+        <!-- 4열 그리드 -->
         <div class="grid-container" id="grid"></div>
 
-        <!-- 메인 실행 버튼 -->
         <button class="btn-primary-action" id="drawBtn" onclick="startDrawProcess()">
             <span id="drawIcon">✨</span> <span id="drawBtnText">휴게 순서 뽑기</span>
         </button>
 
-        <!-- 🔄 맨 아래 테마 전환 아이콘 버튼 -->
+        <!-- 테마 전환 버튼 -->
         <button class="theme-switch-btn" onclick="toggleTheme()">
-            <span id="themeBtnIcon" style="font-size: 20px;">🍞</span>
+            <span id="themeBtnIcon" style="font-size: 18px;">🍞</span>
             <span id="themeBtnText">호빵맨 캐릭터 도감 테마로 이동</span>
         </button>
     </div>
 
-    <!-- [PAGE 2] 전용 결과 랜딩 뷰 -->
+    <!-- [PAGE 2] 결과 랜딩 뷰 -->
     <div id="resultView" class="view">
         <header class="result-header">
-            <span class="title-badge" id="resultBadge">RESULT</span>
-            <h1 id="resultMainTitle">🎉 휴게 매칭 결과</h1>
-            <p style="margin: 6px 0 0; color: var(--text-muted); font-size: 14px;">선택된 순번에 맞춰 휴식을 진행해주세요!</p>
+            <span class="title-badge">RESULT</span>
+            <h1>🎉 휴게 매칭 결과</h1>
+            <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 13px;">선택된 순번에 맞춰 휴식을 진행해주세요!</p>
         </header>
 
         <div class="result-list" id="result-content"></div>
@@ -746,7 +711,7 @@ h1 {
             <button class="btn-secondary" onclick="goBackToSelection()">
                 ← 다시 고르기
             </button>
-            <button class="btn-primary-action" style="flex: 1.2; height: 54px; margin-bottom: 0;" onclick="reRoll()">
+            <button class="btn-primary-action" style="flex: 1.2; height: 52px; margin-bottom: 0;" onclick="reRoll()">
                 🎲 다시 뽑기
             </button>
         </div>
@@ -757,15 +722,14 @@ h1 {
 <div id="toast" class="toast"></div>
 
 <script>
-// 📌 올려주신 레퍼런스 포스터 파일 경로
-// (동일 폴더에 poster.png로 저장하거나 아래 파일명을 맞추시면 원본 이미지가 정확히 잘려서 들어갑니다)
+// 📌 이미지 파일명 지정 (동일 폴더의 파일명과 일치시켜 주세요)
 const POSTER_IMAGE_URL = 'poster.jpeg';
 
-let currentTheme = 'clay'; // 'clay' | 'anpanman'
+let currentTheme = 'clay';
 let people = 4;
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-// 1. 기본 클레이 컬러 데이터
+// 1. 클레이 기본 컬러
 let colors = [
     { n: '빨강', c: '#ff5c5c', text: '#fff' },
     { n: '노랑', c: '#ffd600', text: '#333' },
@@ -781,20 +745,25 @@ let colors = [
     { n: '민트', c: '#2dd4bf', text: '#111' }
 ];
 
-// 2. 호빵맨 12인 레퍼런스 캐릭터 데이터 (3열 4행 포스터 좌표 매핑)
+// 2. [가로 4칸 × 세로 3줄] 호빵맨 12인 정확한 그리드 좌표 매핑 (col: 0~3, row: 0~2)
 const anpanmanCharacters = [
-    { n: '호빵맨', en: 'Anpanman', bg: '#f87158', col: 0, row: 0, voice: "용기가 솟아난다! 호빵맨 출동!" },
-    { n: '식빵맨', en: 'Shokupanman', bg: '#92d0ec', col: 1, row: 0, voice: "아름다운 마음을 가진 식빵맨입니다." },
-    { n: '카레빵맨', en: 'Currypanman', bg: '#ffdd44', col: 2, row: 0, voice: "뜨거운 매운맛 카레 펀치 맛 좀 볼래!" },
-    { n: '잼아저씨', en: 'Uncle Jam', bg: '#c7e6a3', col: 0, row: 1, voice: "새로운 얼굴을 구웠단다! 호빵맨!" },
-    { n: '버터누나', en: 'Batako-san', bg: '#fbb4b4', col: 1, row: 1, voice: "호빵맨 힘내! 내가 던져줄게!" },
-    { n: '명견 치즈', en: 'Meiken Cheese', bg: '#d4edfb', col: 2, row: 1, voice: "멍멍! 안프앙~ 멍멍!" },
-    { n: '메론빵나', en: 'Melonpanna', bg: '#ffe5e5', col: 0, row: 2, voice: "메로메로 펀치로 사랑을 전할게요~" },
-    { n: '롤빵나', en: 'Rollpanna', bg: '#dec4e8', col: 1, row: 2, voice: "롤링 리본! 악과 싸우겠어." },
-    { n: '크림판다', en: 'Creampanda', bg: '#fde047', col: 2, row: 2, voice: "구-쵸키-파! 크림판다도 도울게!" },
-    { n: '세균맨', en: 'Baikinman', bg: '#93c5fd', col: 0, row: 3, voice: "하히후헤호! 세균맨님이시다!" },
-    { n: '짤랑이', en: 'Dokinchan', bg: '#f472b6', col: 1, row: 3, voice: "식빵맨님~ 너무 멋져요! 호호호" },
-    { n: '딸랑이', en: 'Kokinchan', bg: '#67e8f9', col: 2, row: 3, voice: "딸랑딸랑 눈물 발사! 으앙~" }
+    // 1행 (가로 4명)
+    { n: '호빵맨', en: 'Anpanman', col: 0, row: 0, voice: "용기가 솟아난다! 호빵맨 출동!" },
+    { n: '식빵맨', en: 'Shokupanman', col: 1, row: 0, voice: "아름다운 마음을 가진 식빵맨입니다." },
+    { n: '카레빵맨', en: 'CureyCanman', col: 2, row: 0, voice: "뜨거운 매운맛 카레 펀치 맛 좀 볼래!" },
+    { n: '잼아저씨', en: 'Uncle Jam', col: 3, row: 0, voice: "새로운 얼굴을 구웠단다! 호빵맨!" },
+
+    // 2행 (가로 4명)
+    { n: '버터누나', en: 'Batako-san', col: 0, row: 1, voice: "호빵맨 힘내! 내가 던져줄게!" },
+    { n: '명견 치즈', en: 'Meiken Fheese', col: 1, row: 1, voice: "멍멍! 안프앙~ 멍멍!" },
+    { n: '메론빵나', en: 'Melonpanna', col: 2, row: 1, voice: "메로메로 펀치로 사랑을 전할게요~" },
+    { n: '롤빵나', en: 'Rollpanna', col: 3, row: 1, voice: "롤링 리본! 악과 싸우겠어." },
+
+    // 3행 (가로 4명)
+    { n: '크림판다', en: 'Creampanda', col: 0, row: 2, voice: "구-쵸키-파! 크림판다도 도울게!" },
+    { n: '세균맨', en: 'Baikinman', col: 1, row: 2, voice: "하히후헤호! 세균맨님이시다!" },
+    { n: '짤랑이', en: 'Dokinchan', col: 2, row: 2, voice: "식빵맨님~ 너무 멋져요! 호호호" },
+    { n: '딸랑이', en: 'Kokinchan', col: 3, row: 2, voice: "딸랑딸랑 눈물 발사! 으앙~" }
 ];
 
 const orderTexts = [
@@ -816,7 +785,6 @@ function getAudioContext() {
     return audioCtx;
 }
 
-// 🔊 효과음 1: 차임벨
 function playChimeSound(isSelect = true) {
     try {
         const ctx = getAudioContext();
@@ -836,7 +804,6 @@ function playChimeSound(isSelect = true) {
     } catch(e) {}
 }
 
-// 🎲 효과음 2: 주사위 롤
 function playDiceRollSound() {
     try {
         const ctx = getAudioContext();
@@ -858,7 +825,6 @@ function playDiceRollSound() {
     } catch(e) {}
 }
 
-// 🎉 효과음 3: 폭죽 & 팡파레
 function playConfettiSound() {
     try {
         const ctx = getAudioContext();
@@ -890,13 +856,11 @@ function playConfettiSound() {
     } catch (e) {}
 }
 
-// 🗣️ 호빵맨 캐릭터 보이스 (Web Speech API)
 function speakCharacter(text, index) {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
-
     const pitches = [1.3, 1.0, 1.25, 0.85, 1.35, 1.7, 1.45, 0.95, 1.5, 0.75, 1.6, 1.75];
     const rates = [1.1, 1.0, 1.2, 0.95, 1.1, 1.3, 1.1, 1.0, 1.25, 1.15, 1.25, 1.3];
     u.pitch = pitches[index % pitches.length] || 1.1;
@@ -911,7 +875,6 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
-// 🔄 테마 전환 로직
 function toggleTheme() {
     selected = [];
     currentTheme = (currentTheme === 'clay') ? 'anpanman' : 'clay';
@@ -931,7 +894,7 @@ function applyThemeStyles() {
 
     if (currentTheme === 'anpanman') {
         body.className = 'theme-anpanman';
-        addColorSection.style.display = 'none'; // 호빵맨 모드에선 색상추가 숨김
+        addColorSection.style.display = 'none';
         peopleCard.className = 'clay-card poster-card';
         minusBtn.className = 'btn-circle poster-stepper-btn';
         plusBtn.className = 'btn-circle poster-stepper-btn';
@@ -962,13 +925,11 @@ function applyThemeStyles() {
     }
 }
 
-// 📦 그리드 렌더링
 function renderGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
 
     if (currentTheme === 'clay') {
-        grid.className = 'grid-container';
         colors.forEach((item, index) => {
             const isSel = selected.includes(index) ? 'selected' : '';
             const delBtn = item.custom 
@@ -982,26 +943,25 @@ function renderGrid() {
             `;
         });
     } else {
-        grid.className = 'grid-container anpanman-grid';
         anpanmanCharacters.forEach((char, index) => {
             const isSel = selected.includes(index) ? 'selected' : '';
 
-            // 레퍼런스 포스터 속 (열, 행)에 맞춘 백분율 오프셋 계산
-            // 3열 x 4행 구조
-            const leftPct = -(char.col * 100);
-            const topPct = -(char.row * 98);
+            // 🎯 [4열 3행 완벽 크롭 계산식]
+            // 가로: 4칸 (col: 0, 1, 2, 3 -> 0%, -100%, -200%, -300%)
+            // 세로: 3행 (row: 0, 1, 2 -> 0%, -100%, -200%)
+            const leftOffset = -(char.col * 100);
+            const topOffset = -(char.row * 100);
 
             grid.innerHTML += `
-                <div class="anpan-card ${isSel}" id="item-${index}" style="background-color: ${char.bg};" onclick="toggleItem(${index})">
-                    <div class="anpan-avatar-box">
+                <div class="anpan-card ${isSel}" id="item-${index}" onclick="toggleItem(${index})">
+                    <div class="anpan-crop-viewport">
                         <img 
                             src="${POSTER_IMAGE_URL}" 
-                            class="anpan-crop-img" 
-                            style="left: ${leftPct}%; top: ${topPct}%;" 
+                            style="left: ${leftOffset}%; top: ${topOffset}%;" 
                             alt="${char.n}"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                         />
-                        <div style="display:none; font-size: 32px;">🍞</div>
+                        <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:24px;">🍞</div>
                     </div>
                     <div class="anpan-name-badge">${char.n}</div>
                     <div class="anpan-sub-name">${char.en}</div>
@@ -1070,7 +1030,6 @@ function resetAll() {
     renderGrid();
 }
 
-// 클레이 전용: 새 색상 추가
 function addNewColor() {
     const picker = document.getElementById('newColorPicker');
     const nameInput = document.getElementById('newColorName');
@@ -1125,7 +1084,6 @@ function triggerConfetti() {
     }
 }
 
-// 🎲 주사위 롤 후 결과 페이지 전환
 function startDrawProcess() {
     if (selected.length !== people) {
         showToast(`인원 수와 동일하게 ${people}개를 선택해주세요.`);
@@ -1184,16 +1142,15 @@ function renderResultRows() {
             `;
         } else {
             const char = anpanmanCharacters[idx];
-            const leftPct = -(char.col * 100);
-            const topPct = -(char.row * 98);
+            const leftOffset = -(char.col * 100);
+            const topOffset = -(char.row * 100);
 
             html += `
                 <div class="result-card-item" style="animation-delay: ${delay}s">
-                    <div class="anpan-avatar-box" style="width: 44px; height: 44px; margin: 0; background: ${char.bg};">
+                    <div class="anpan-crop-viewport" style="width: 42px; height: 42px; margin: 0; flex-shrink: 0;">
                         <img 
                             src="${POSTER_IMAGE_URL}" 
-                            class="anpan-crop-img" 
-                            style="left: ${leftPct}%; top: ${topPct}%;" 
+                            style="left: ${leftOffset}%; top: ${topOffset}%;" 
                             alt="${char.n}"
                         />
                     </div>
@@ -1228,7 +1185,6 @@ function goBackToSelection() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// 최초 실행
 applyThemeStyles();
 renderGrid();
 </script>
