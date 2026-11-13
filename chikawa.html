@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#B8E0F2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>휴게시간 순서뽑기 - 치이카와</title>
+
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --accent-lime: #82DC28;
+      --accent-lime-dark: #4A9C06;
+      --accent-coral: #FF7878;
+      --text-primary: #2B2320;
+      --outline-brown: #5D4338;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100dvh;
+      background-color: #D7E8BF;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* ==========================================
+       업로드된 치이카와 초원 배경 (세로로 길게 확장)
+       폴더 내 ./chikawa/bg.jpg 가 있으면 우선 적용 가능하며,
+       기본적으로 업로드 이미지와 동일한 수채화풍 일러스트가 세로 전체에 고정/확장됩니다.
+    =========================================== */
+    .meadow-bg-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      background-color: #D7E8BF;
+      overflow: hidden;
+    }
+
+    /* 상단 하늘 + 산 + 수풀 영역 */
+    .meadow-horizon-svg {
+      width: 100%;
+      height: 210px;
+      min-height: 190px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    /* 하단 세로로 길게 이어지는 잔디밭 영역 */
+    .meadow-grass-field {
+      flex: 1;
+      width: 100%;
+      background: linear-gradient(180deg, #D9EAC3 0%, #D5E7BD 55%, #CEE2B4 100%);
+      position: relative;
+    }
+
+    /* 잔디 풀포기 반복 패턴 (세로로 자연스럽게 이어짐) */
+    .meadow-grass-tufts {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='360' height='420' viewBox='0 0 360 420' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M98 22L97 30M102 27L101 31' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M25 84L27 94M31 85L30 93' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M174 72L175 83M182 71L179 82' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M244 66L245 76M249 70L248 75' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M328 74L327 86M333 73L331 85' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M96 196L97 203M101 195L101 202' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M292 248L292 264M297 259L297 265' stroke='%2363483D' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M201 278L201 284M205 278L205 284' stroke='%2363483D' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M72 345L74 356M77 351L77 356' stroke='%2363483D' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M147 332L145 352M152 346L150 353' stroke='%2363483D' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M241 348L240 362M246 355L245 362' stroke='%2363483D' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 360px 420px;
+      opacity: 0.92;
+    }
+
+    /* 화면 전환 페이드 효과 */
+    .view-section {
+      transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1), transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .view-hidden {
+      opacity: 0 !important;
+      transform: translateY(8px) scale(0.99);
+      pointer-events: none;
+    }
+
+    /* ==========================================
+       캐릭터 1:1 하얀 바탕 라운드 네모칸 (3x5 격자)
+    =========================================== */
+    .char-card {
+      position: relative;
+      background: #FFFFFF;
+      border-radius: 18px;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      box-shadow:
+        0 6px 14px -4px rgba(59, 77, 40, 0.12),
+        0 2px 4px rgba(0, 0, 0, 0.04),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+      border: 2.5px solid rgba(255, 255, 255, 0.95);
+      transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .char-card:active {
+      transform: scale(0.94);
+    }
+
+    /* 선택되었을 때 스타일 */
+    .char-card.selected {
+      border-color: #6CD014;
+      background: #FFFFFF;
+      box-shadow:
+        0 8px 18px -4px rgba(108, 208, 20, 0.32),
+        0 0 0 3px rgba(130, 220, 40, 0.32);
+      transform: translateY(-2px);
+    }
+
+    /* 캐릭터 이미지 1:1 영역 */
+    .char-img-wrap {
+      width: 100%;
+      height: 100%;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      background: #FFFFFF;
+    }
+
+    .char-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .char-card.selected .char-img-wrap img {
+      transform: scale(1.05);
+    }
+
+    /* 캐릭터 이름 라벨 (하단 오버레이 캡슐) */
+    .char-name-pill {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      right: 5px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      border-radius: 999px;
+      padding: 2px 4px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #332924;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(93, 67, 56, 0.08);
+      z-index: 5;
+    }
+
+    .char-card.selected .char-name-pill {
+      background: #82DC28;
+      color: #1B3B00;
+      border-color: transparent;
+    }
+
+    /* 선택 체크 뱃지 */
+    .check-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #6CD014;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(74, 156, 6, 0.35);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 6;
+    }
+
+    .char-card.selected .check-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ==========================================
+       결과 화면: 1:1 격자 옆에 A, B, C, D 배지 배치
+    =========================================== */
+    .result-item-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .alpha-badge {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #5D4338, #3D2B24);
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(61, 43, 36, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+
+    /* A, B, C 상위 순번 포인트 컬러 */
+    .alpha-badge.rank-0 {
+      background: linear-gradient(145deg, #FF7878, #E64949);
+      box-shadow: 0 4px 10px rgba(230, 73, 73, 0.3);
+    }
+    .alpha-badge.rank-1 {
+      background: linear-gradient(145deg, #5AA9E6, #3482C4);
+      box-shadow: 0 4px 10px rgba(52, 130, 196, 0.28);
+    }
+    .alpha-badge.rank-2 {
+      background: linear-gradient(145deg, #6CD014, #4A9C06);
+      box-shadow: 0 4px 10px rgba(74, 156, 6, 0.28);
+    }
+
+    .result-square-card {
+      position: relative;
+      background: #FFFFFF;
+      border-radius: 16px;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      box-shadow:
+        0 6px 14px -4px rgba(59, 77, 40, 0.14),
+        0 2px 4px rgba(0, 0, 0, 0.04);
+      border: 2px solid #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 5px;
+    }
+
+    /* ==========================================
+       바텀시트 (N명의 캐릭터 선택하였습니다.)
+    =========================================== */
+    #bottom-sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(25, 31, 40, 0.38);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.32s ease;
+    }
+
+    #bottom-sheet-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #bottom-sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 101;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 28px 28px 0 0;
+      box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.14);
+      padding: 20px 24px 36px;
+      transform: translateY(105%);
+      opacity: 0;
+      transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+    }
+
+    #bottom-sheet.active {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+
+    #bottom-sheet.fade-out {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.88) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .animate-result-item {
+      animation: popIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col items-center">
+
+  <!-- ==========================================
+       치이카와 초원 배경 (세로 확장형)
+  =========================================== -->
+  <div class="meadow-bg-container" aria-hidden="true">
+    <!-- 상단 하늘, 산, 수풀, 경계선 (업로드한 배경 재현) -->
+    <svg class="meadow-horizon-svg" viewBox="0 0 800 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#A8D8EC" />
+          <stop offset="65%" stop-color="#CBEAF6" />
+          <stop offset="100%" stop-color="#E5F5FA" />
+        </linearGradient>
+      </defs>
+
+      <!-- 하늘 -->
+      <rect width="800" height="230" fill="url(#skyGrad)" />
+
+      <!-- 뒤쪽 보라빛 산 능선 -->
+      <path d="M-20 195 Q45 140 85 136 Q135 145 215 170 L280 185 L430 185 Q525 142 585 132 Q650 142 745 162 L820 185 L820 230 L-20 230 Z"
+            fill="#BDBAC9" />
+      <path d="M-10 190 Q45 142 83 136 Q128 145 172 162 M218 168 L272 174 M455 165 Q535 140 586 132 Q642 142 702 156"
+            stroke="#63483D" stroke-width="4.5" stroke-linecap="round" fill="none" />
+
+      <!-- 초록 수풀 구름 모양 -->
+      <path d="M-15 225
+               C-12 195, 10 186, 26 198
+               C36 172, 72 172, 82 200
+               C90 192, 106 196, 112 208
+               C118 175, 152 175, 162 196
+               C178 162, 224 165, 232 195
+               C248 182, 272 186, 282 204
+               C295 165, 326 155, 342 168
+               C358 174, 372 192, 376 208
+               C386 194, 402 196, 408 210
+               C418 178, 456 180, 468 206
+               C474 202, 482 206, 486 218
+               C505 186, 535 178, 556 190
+               C572 168, 610 172, 622 204
+               C635 180, 668 180, 682 206
+               C698 186, 728 184, 742 198
+               C752 162, 785 152, 808 166
+               L815 228 Z"
+            fill="#8AB875" stroke="#63483D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- 수풀 내부 나뭇가지 디테일 -->
+      <path d="M188 218 L194 198 M194 208 L204 196 M186 202 L192 210" stroke="#63483D" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M332 218 L334 192 M334 206 L346 192 M320 198 L332 210" stroke="#63483D" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M568 218 L562 202 M565 210 L574 200" stroke="#63483D" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M720 218 L724 202 M714 204 L722 214" stroke="#63483D" stroke-width="4.5" stroke-linecap="round" />
+
+      <!-- 우측 나무 기둥 포인트 -->
+      <rect x="782" y="0" width="24" height="226" fill="#534232" />
+
+      <!-- 수풀 아래 연한 아이보리 수평선 & 잔디 시작부 -->
+      <rect x="0" y="220" width="800" height="42" fill="#D9EAC3" />
+      <path d="M-10 221 Q400 217 788 221" stroke="#F4F9E8" stroke-width="11" stroke-linecap="round" />
+    </svg>
+
+    <!-- 하단 길게 이어지는 연두색 초원 + 잔디 패턴 -->
+    <div class="meadow-grass-field">
+      <div class="meadow-grass-tufts"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       메인 앱 컨테이너
+  =========================================== -->
+  <main class="relative z-10 w-full max-w-[440px] min-h-screen flex flex-col px-4 pt-3 pb-28">
+
+    <!-- 상단 헤더 -->
+    <header class="flex items-center justify-between py-2 mb-2">
+      <a href="index.html" class="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur border border-white shadow-sm flex items-center justify-center text-[#5D4338] active:scale-95 transition" aria-label="뒤로가기">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+
+      <div class="bg-white/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm border border-white flex items-center gap-2">
+        <span class="text-sm font-extrabold text-[#47332B] tracking-tight">치이카와 순서뽑기</span>
+      </div>
+
+      <button type="button" onclick="resetSelection()" class="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur border border-white shadow-sm flex items-center justify-center text-[#5D4338] active:scale-95 transition" aria-label="초기화">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- ==========================================
+         VIEW 1: 캐릭터 선택 화면 (3x5 격자)
+    =========================================== -->
+    <section id="selection-view" class="view-section flex-1 flex flex-col justify-between">
+      <!-- 3x5 캐릭터 격자 -->
+      <div id="char-grid" class="grid grid-cols-3 gap-2.5 my-auto py-1">
+        <!-- JS에서 1번~15번 캐릭터 렌더링 -->
+      </div>
+
+      <!-- 하단 고정 선택하기 버튼 영역 -->
+      <div class="fixed bottom-0 left-0 right-0 z-30 pointer-events-none flex justify-center px-4 pb-5 pt-3 bg-gradient-to-t from-[#CEE2B4] via-[#CEE2B4]/85 to-transparent">
+        <div class="w-full max-w-[408px] pointer-events-auto">
+          <button
+            id="submit-btn"
+            type="button"
+            onclick="handleConfirmSelection()"
+            disabled
+            class="w-full py-4 rounded-2xl font-extrabold text-[17px] tracking-tight shadow-lg transition-all duration-200 flex items-center justify-center gap-2 bg-slate-300/90 text-slate-500 cursor-not-allowed border border-white/60"
+          >
+            <span id="submit-btn-text">선택하기</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: 결과값 페이지 (페이드인 + 1:1 격자 옆 A,B,C,D 배지)
+    =========================================== -->
+    <section id="result-view" class="view-section view-hidden hidden flex-1 flex flex-col">
+      <!-- 결과 안내 배너 -->
+      <div class="bg-white/90 backdrop-blur rounded-2xl px-4 py-2.5 mb-3 shadow-sm border border-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#6CD014]"></span>
+          <span class="text-sm font-extrabold text-[#3D2B24]">순서 추첨 결과</span>
+        </div>
+        <span id="result-count-badge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#82DC28]/25 text-[#387B02]">
+          총 0명
+        </span>
+      </div>
+
+      <!-- 결과 격자 (1:1 네모칸 옆에 A, B, C, D... 배지 배치) -->
+      <div id="result-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 my-auto py-1">
+        <!-- JS에서 추첨 결과 렌더링 -->
+      </div>
+
+      <!-- 결과 하단 버튼 -->
+      <div class="fixed bottom-0 left-0 right-0 z-30 pointer-events-none flex justify-center px-4 pb-5 pt-3 bg-gradient-to-t from-[#CEE2B4] via-[#CEE2B4]/85 to-transparent">
+        <div class="w-full max-w-[408px] pointer-events-auto flex gap-2.5">
+          <button
+            type="button"
+            onclick="returnToSelection()"
+            class="flex-1 py-3.5 rounded-2xl font-extrabold text-[16px] bg-white text-[#47332B] shadow-md border border-white active:scale-95 transition"
+          >
+            다시 선택하기
+          </button>
+          <button
+            type="button"
+            onclick="reshuffleCurrentResult()"
+            class="flex-1 py-3.5 rounded-2xl font-extrabold text-[16px] bg-[#6CD014] text-white shadow-md border border-[#82DC28] active:scale-95 transition"
+          >
+            순서 다시 섞기
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       바텀시트: "0명의 캐릭터 선택하였습니다."
+  =========================================== -->
+  <div id="bottom-sheet-backdrop"></div>
+  <div id="bottom-sheet" role="status" aria-live="polite">
+    <div class="w-11 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+    <div class="flex flex-col items-center text-center">
+      <div class="w-14 h-14 rounded-2xl bg-[#F2FBE9] border border-[#CBEFA4] flex items-center justify-center mb-3 shadow-inner">
+        <svg class="w-8 h-8 text-[#5BB90B] animate-bounce" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p id="sheet-message" class="text-[19px] font-extrabold text-slate-900 tracking-tight mb-1">
+        0명의 캐릭터 선택하였습니다.
+      </p>
+      <p class="text-xs font-semibold text-slate-400">
+        잠시 후 결과 페이지로 이동합니다...
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // 1번 ~ 15번 치이카와 캐릭터 데이터 (폴더 chikawa/1.png ~ 15.png 연동)
+    const CHARACTERS = [
+      { id: 1, name: '치이카와', img: 'chikawa/1.png', color: '#FFE8F0' },
+      { id: 2, name: '하치와레', img: 'chikawa/2.png', color: '#E3F2FD' },
+      { id: 3, name: '우사기', img: 'chikawa/3.png', color: '#FFF8DC' },
+      { id: 4, name: '랏코', img: 'chikawa/4.png', color: '#F3E5AB' },
+      { id: 5, name: '쿠리만쥬', img: 'chikawa/5.png', color: '#EFEBE9' },
+      { id: 6, name: '시사', img: 'chikawa/6.png', color: '#FFF3E0' },
+      { id: 7, name: '모몽가', img: 'chikawa/7.png', color: '#F3E5F5' },
+      { id: 8, name: '카니', img: 'chikawa/8.png', color: '#FFEBEE' },
+      { id: 9, name: '파자마 파티즈', img: 'chikawa/9.png', color: '#E8F5E9' },
+      { id: 10, name: '풍뎅이', img: 'chikawa/10.png', color: '#F5F5F5' },
+      { id: 11, name: '고블린', img: 'chikawa/11.png', color: '#E0F2F1' },
+      { id: 12, name: '포쉐트 갑옷 씨', img: 'chikawa/12.png', color: '#ECEFF1' },
+      { id: 13, name: '세이렌', img: 'chikawa/13.png', color: '#E0F7FA' },
+      { id: 14, name: '아노코', img: 'chikawa/14.png', color: '#FCE4EC' },
+      { id: 15, name: '꿀맛맨', img: 'chikawa/15.png', color: '#FFFDE7' }
+    ];
+
+    // 선택된 캐릭터 ID 집합 (인원 제한 설정 없이 1~15명 자유 선택)
+    const selectedIds = new Set();
+    let isTransitioning = false;
+
+    // 로컬 이미지 파일(chikawa/1.png~15.png)이 아직 없을 때 표시할 귀여운 SVG 폴백 생성
+    function getFallbackSvg(char) {
+      return `
+        <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="8" fill="${char.color}" stroke="#5D4338" stroke-width="2.5"/>
+          <circle cx="56" cy="24" r="8" fill="${char.color}" stroke="#5D4338" stroke-width="2.5"/>
+          <rect x="16" y="22" width="48" height="40" rx="20" fill="#FFFFFF" stroke="#5D4338" stroke-width="2.5"/>
+          <ellipse cx="27" cy="44" rx="4" ry="2.5" fill="#FF9EBB"/>
+          <ellipse cx="53" cy="44" rx="4" ry="2.5" fill="#FF9EBB"/>
+          <circle cx="32" cy="39" r="2.6" fill="#3D2B24"/>
+          <circle cx="48" cy="39" r="2.6" fill="#3D2B24"/>
+          <path d="M37 44.5C38.2 46 39.8 46 40 44.5C40.2 46 41.8 46 43 44.5" stroke="#3D2B24" stroke-width="2" stroke-linecap="round"/>
+          <text x="40" y="20" text-anchor="middle" fill="#8C7A70" font-size="9" font-weight="800">#${char.id}</text>
+        </svg>
+      `;
+    }
+
+    // 3x5 캐릭터 선택 그리드 렌더링
+    function renderCharacterGrid() {
+      const grid = document.getElementById('char-grid');
+      grid.innerHTML = CHARACTERS.map((char) => {
+        const isSelected = selectedIds.has(char.id);
+        return `
+          <button
+            type="button"
+            onclick="toggleCharacter(${char.id})"
+            class="char-card ${isSelected ? 'selected' : ''}"
+            aria-pressed="${isSelected}"
+            aria-label="${char.name}"
+          >
+            <div class="check-badge">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div class="char-img-wrap">
+              <img
+                src="${char.img}"
+                alt="${char.name}"
+                loading="lazy"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+              />
+              <div style="display:none" class="w-full h-full items-center justify-center pb-3">
+                ${getFallbackSvg(char)}
+              </div>
+            </div>
+            <span class="char-name-pill">${char.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      updateSubmitButton();
+    }
+
+    // 캐릭터 선택/해제 토글
+    function toggleCharacter(id) {
+      if (isTransitioning) return;
+
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      renderCharacterGrid();
+    }
+
+    // 선택 초기화
+    function resetSelection() {
+      if (isTransitioning) return;
+      selectedIds.clear();
+      renderCharacterGrid();
+      returnToSelection();
+    }
+
+    // 하단 '선택하기' 버튼 상태 업데이트
+    function updateSubmitButton() {
+      const btn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('submit-btn-text');
+      const count = selectedIds.size;
+
+      if (count > 0) {
+        btn.disabled = false;
+        btn.className = 'w-full py-4 rounded-2xl font-extrabold text-[17px] tracking-tight shadow-lg transition-all duration-200 flex items-center justify-center gap-2 bg-[#6CD014] text-white active:scale-[0.98] border border-[#82DC28] cursor-pointer';
+        btnText.textContent = `선택하기 (${count}명)`;
+      } else {
+        btn.disabled = true;
+        btn.className = 'w-full py-4 rounded-2xl font-extrabold text-[17px] tracking-tight shadow-lg transition-all duration-200 flex items-center justify-center gap-2 bg-slate-300/90 text-slate-500 cursor-not-allowed border border-white/60';
+        btnText.textContent = '선택하기';
+      }
+    }
+
+    // Fisher-Yates 랜덤 셔플
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // '선택하기' 클릭 -> 바텀시트 노출 -> 페이드아웃 -> 결과 페이지 페이드인
+    function handleConfirmSelection() {
+      const count = selectedIds.size;
+      if (count === 0 || isTransitioning) return;
+
+      isTransitioning = true;
+
+      const backdrop = document.getElementById('bottom-sheet-backdrop');
+      const sheet = document.getElementById('bottom-sheet');
+      const sheetMsg = document.getElementById('sheet-message');
+      const selectionView = document.getElementById('selection-view');
+      const resultView = document.getElementById('result-view');
+
+      // 1. 바텀시트 문구 설정 및 슬라이드 업
+      sheetMsg.textContent = `${count}명의 캐릭터 선택하였습니다.`;
+      sheet.classList.remove('fade-out');
+      backdrop.classList.add('active');
+      sheet.classList.add('active');
+
+      // 2. 잠시 후 바텀시트와 선택 화면 페이드아웃
+      setTimeout(() => {
+        sheet.classList.add('fade-out');
+        backdrop.classList.remove('active');
+        selectionView.classList.add('view-hidden');
+
+        // 3. 페이드아웃 완료 후 결과 페이지 렌더링 및 페이드인
+        setTimeout(() => {
+          sheet.classList.remove('active', 'fade-out');
+          selectionView.classList.add('hidden');
+
+          renderResultGrid();
+
+          resultView.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              resultView.classList.remove('view-hidden');
+              isTransitioning = false;
+            });
+          });
+        }, 380);
+      }, 1150);
+    }
+
+    // 결과 화면 렌더링 (1:1 격자 옆에 A, B, C, D... 배지 배치)
+    function renderResultGrid() {
+      const selectedChars = CHARACTERS.filter((c) => selectedIds.has(c.id));
+      const shuffled = shuffleArray(selectedChars);
+
+      const countBadge = document.getElementById('result-count-badge');
+      countBadge.textContent = `총 ${shuffled.length}명`;
+
+      const resultGrid = document.getElementById('result-grid');
+
+      // 선택 인원이 많을 때 한눈에 보이도록 반응형 3열/2열 자동 최적화
+      if (shuffled.length >= 7) {
+        resultGrid.className = 'grid grid-cols-3 gap-2.5 my-auto py-1';
+      } else {
+        resultGrid.className = 'grid grid-cols-2 gap-3 my-auto py-1';
+      }
+
+      resultGrid.innerHTML = shuffled.map((char, idx) => {
+        // A, B, C, D, E ... 알파벳 배지 생성
+        const alphaLabel = String.fromCharCode(65 + idx);
+        const rankClass = idx < 3 ? `rank-${idx}` : '';
+
+        return `
+          <div class="result-item-row animate-result-item" style="animation-delay: ${idx * 45}ms">
+            <!-- 1:1 격자 옆 A, B, C, D 배지 -->
+            <div class="alpha-badge ${rankClass}">
+              ${alphaLabel}
+            </div>
+
+            <!-- 하얀 바탕 라운드 1:1 캐릭터 네모칸 -->
+            <div class="result-square-card">
+              <div class="char-img-wrap">
+                <img
+                  src="${char.img}"
+                  alt="${char.name}"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                />
+                <div style="display:none" class="w-full h-full items-center justify-center pb-3">
+                  ${getFallbackSvg(char)}
+                </div>
+              </div>
+              <span class="char-name-pill">${char.name}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 현재 선택된 인원 그대로 순서만 다시 섞기
+    function reshuffleCurrentResult() {
+      if (isTransitioning) return;
+      renderResultGrid();
+    }
+
+    // 결과 페이지에서 다시 캐릭터 선택 화면으로 복귀
+    function returnToSelection() {
+      if (isTransitioning) return;
+      const selectionView = document.getElementById('selection-view');
+      const resultView = document.getElementById('result-view');
+
+      resultView.classList.add('view-hidden');
+      setTimeout(() => {
+        resultView.classList.add('hidden');
+        selectionView.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            selectionView.classList.remove('view-hidden');
+          });
+        });
+      }, 300);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCharacterGrid();
+    });
+  </script>
+</body>
+</html>
