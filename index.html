@@ -1,1193 +1,457 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>🎲 프리미엄 뽑기 (클레이 & 호빵맨)</title>
-
-<!-- Pretendard 폰트 & Confetti 라이브러리 -->
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-<style>
-:root {
-    --highlight: #82DC28;
-    --highlight-dark: #65b01c;
-    --bg-clay: #f1f4f9;
-    --bg-anpanman: #dcf2fd;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --clay-border: rgba(255, 255, 255, 0.85);
-
-    /* Claymorphism Shadows */
-    --clay-card-shadow: 
-        12px 16px 28px rgba(163, 177, 198, 0.35),
-        -10px -10px 24px rgba(255, 255, 255, 0.9),
-        inset 2px 2px 4px rgba(255, 255, 255, 0.8),
-        inset -3px -3px 6px rgba(163, 177, 198, 0.2);
-
-    --clay-btn-shadow:
-        6px 8px 16px rgba(163, 177, 198, 0.35),
-        -6px -6px 14px rgba(255, 255, 255, 0.95),
-        inset 2px 2px 3px rgba(255, 255, 255, 0.8),
-        inset -2px -2px 4px rgba(0, 0, 0, 0.08);
-
-    --clay-highlight-shadow:
-        0 10px 22px rgba(130, 220, 40, 0.45),
-        inset 0 3px 6px rgba(255, 255, 255, 0.6),
-        inset 0 -4px 8px rgba(0, 0, 0, 0.15);
-
-    --clay-input-shadow:
-        inset 2px 3px 6px rgba(163, 177, 198, 0.25),
-        inset -2px -2px 5px rgba(255, 255, 255, 0.9);
-}
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    margin: 0;
-    padding: 20px 14px 40px;
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-clay);
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    transition: background-color 0.3s ease;
-}
-
-body.theme-anpanman {
-    background-color: var(--bg-anpanman);
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(255,220,100,0.3) 0%, transparent 25%),
-        radial-gradient(#b8e2f8 1.5px, transparent 1.5px);
-    background-size: auto, auto, 20px 20px;
-}
-
-.app-container {
-    width: 100%;
-    max-width: 440px;
-    position: relative;
-}
-
-/* 뷰 전환 */
-.view {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    animation: fadeIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-}
-
-.view.active {
-    display: flex;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* 헤더 */
-.header {
-    text-align: center;
-    margin-bottom: 16px;
-}
-
-.title-badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 800;
-    padding: 5px 12px;
-    border-radius: 20px;
-    background: #e2f7c6;
-    color: var(--highlight-dark);
-    margin-bottom: 6px;
-}
-
-h1 {
-    font-size: 24px;
-    font-weight: 900;
-    margin: 0;
-    letter-spacing: -0.6px;
-    color: var(--text-main);
-}
-
-/* 🌈 호빵맨 테마 헤더 배너 */
-.anpanman-header-poster {
-    background: #ffffff;
-    border: 3px solid #231815;
-    border-radius: 20px;
-    padding: 10px 12px;
-    text-align: center;
-    box-shadow: 0 5px 0 rgba(0,0,0,0.12);
-    margin-bottom: 16px;
-}
-
-.anpanman-jp-title {
-    font-size: 16px;
-    font-weight: 900;
-    color: #ff3838;
-    text-shadow: 
-        -1.5px -1.5px 0 #fff,  1.5px -1.5px 0 #fff,
-        -1.5px  1.5px 0 #fff,  1.5px  1.5px 0 #fff,
-         0 2.5px 0 #2b2b2b;
-    letter-spacing: 0.3px;
-    margin-bottom: 2px;
-}
-
-.anpanman-en-sub {
-    font-size: 11px;
-    font-weight: 800;
-    color: #475569;
-    letter-spacing: 0.6px;
-}
-
-/* 카드 공통 */
-.clay-card {
-    background: #ffffff;
-    border-radius: 22px;
-    padding: 14px 18px;
-    box-shadow: var(--clay-card-shadow);
-    border: 2px solid var(--clay-border);
-    margin-bottom: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.poster-card {
-    background: #ffffff;
-    border: 2.5px solid #231815;
-    border-radius: 18px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.12);
-}
-
-.label-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-main);
-}
-
-.btn-mini-reset {
-    background: #edf2f7;
-    border: none;
-    color: var(--text-muted);
-    padding: 5px 9px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.3);
-}
-
-.stepper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.btn-circle {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: none;
-    background: #ffffff;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-main);
-    cursor: pointer;
-    box-shadow: var(--clay-btn-shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.poster-stepper-btn {
-    border: 2px solid #231815;
-    box-shadow: 0 3px 0 #231815;
-    background: #fff9e6;
-}
-
-.count-display {
-    font-size: 20px;
-    font-weight: 900;
-    min-width: 36px;
-    text-align: center;
-}
-
-/* 클레이 전용: 새 색상 추가 영역 */
-.add-color-section {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 10px 12px;
-    box-shadow: var(--clay-card-shadow);
-    border: 2px solid var(--clay-border);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.color-picker-wrapper {
-    position: relative;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: var(--clay-btn-shadow);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.color-picker-wrapper input[type="color"] {
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    width: 58px;
-    height: 58px;
-    border: none;
-    cursor: pointer;
-}
-
-.color-name-input {
-    flex: 1;
-    height: 38px;
-    border: none;
-    background: #f8fafc;
-    border-radius: 10px;
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 700;
-    outline: none;
-    box-shadow: var(--clay-input-shadow);
-}
-
-.btn-add-color {
-    height: 38px;
-    padding: 0 14px;
-    background: #ffffff;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: var(--clay-btn-shadow);
-    white-space: nowrap;
-}
-
-/* 가이드 배너 */
-.guide-banner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 0 4px;
-}
-
-.guide-banner span {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-}
-
-.guide-pill {
-    font-size: 12px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 10px;
-    background: #e2e8f0;
-    color: #475569;
-}
-
-.guide-pill.completed {
-    background: var(--highlight);
-    color: #1e3a03;
-}
-
-/* 4열 그리드 (클레이 & 호빵맨 공통 적용) */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-/* 클레이 칩 */
-.clay-color-chip {
-    height: 62px;
-    border-radius: 16px;
-    border: 2.5px solid rgba(255, 255, 255, 0.7);
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 
-        4px 5px 12px rgba(163, 177, 198, 0.4),
-        inset 2px 2px 4px rgba(255, 255, 255, 0.65),
-        inset -2px -2px 5px rgba(0, 0, 0, 0.18);
-    transition: transform 0.12s;
-}
-
-.clay-color-chip.selected {
-    transform: scale(0.96);
-    border-color: var(--highlight);
-    box-shadow: 0 0 0 2px var(--highlight), inset 2px 3px 8px rgba(0, 0, 0, 0.35);
-}
-
-.clay-color-chip.selected::after,
-.anpan-card.selected::after {
-    content: "✓";
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 20px;
-    height: 20px;
-    background: var(--highlight);
-    color: #112800;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 5;
-}
-
-.chip-delete-btn {
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #ff4757;
-    color: white;
-    font-size: 10px;
-    font-weight: 900;
-    border: 1.5px solid #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-/* 🖼️ [4열 3행 완벽 크롭] 호빵맨 카드 */
-.anpan-card {
-    background: #ffffff;
-    border-radius: 14px;
-    border: 2px solid #231815;
-    padding: 6px 3px 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-    box-shadow: 0 3px 0 #231815;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    user-select: none;
-}
-
-.anpan-card:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #231815;
-}
-
-.anpan-card.selected {
-    outline: 3px solid var(--highlight);
-    outline-offset: 1px;
-}
-
-/* 4x3 이미지 크롭 뷰포트 */
-.anpan-crop-viewport {
-    width: 100%;
-    aspect-ratio: 1 / 1.05;
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 4px;
-    background: #f1f5f9;
-}
-
-.anpan-crop-viewport img {
-    position: absolute;
-    /* 4열 = 400%, 3행 = 300% */
-    width: 400%;
-    height: 300%;
-    object-fit: fill;
-    pointer-events: none;
-}
-
-.anpan-name-badge {
-    font-size: 11.5px;
-    font-weight: 900;
-    color: #1a1a1a;
-    line-height: 1.1;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.anpan-sub-name {
-    font-size: 9px;
-    font-weight: 700;
-    color: #64748b;
-    margin-top: 1px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-/* 메인 실행 버튼 */
-.btn-primary-action {
-    width: 100%;
-    height: 56px;
-    background: var(--highlight);
-    border: none;
-    border-radius: 20px;
-    font-size: 17px;
-    font-weight: 900;
-    color: #1a3303;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: var(--clay-highlight-shadow);
-    transition: all 0.15s ease;
-    margin-bottom: 14px;
-}
-
-.btn-primary-action:active {
-    transform: scale(0.97);
-}
-
-.theme-anpanman .btn-primary-action {
-    border: 2.5px solid #231815;
-    box-shadow: 0 4px 0 #231815;
-    border-radius: 18px;
-}
-
-.theme-anpanman .btn-primary-action:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #231815;
-}
-
-@keyframes shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg) scale(1.05); }
-    75% { transform: rotate(10deg) scale(1.05); }
-}
-
-.rolling-icon {
-    display: inline-block;
-    animation: shake 0.15s infinite;
-}
-
-/* 테마 전환 버튼 */
-.theme-switch-btn {
-    width: 100%;
-    height: 50px;
-    background: #ffffff;
-    border: 2px solid var(--clay-border);
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: var(--clay-card-shadow);
-}
-
-.theme-anpanman .theme-switch-btn {
-    border: 2px solid #231815;
-    box-shadow: 0 3px 0 #231815;
-}
-
-/* 결과 페이지 */
-.result-header {
-    text-align: center;
-    margin-bottom: 18px;
-}
-
-.result-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.result-card-item {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 4px 6px 14px rgba(163, 177, 198, 0.25);
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
-    animation: itemPop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-}
-
-.theme-anpanman .result-card-item {
-    border: 2px solid #231815;
-    box-shadow: 0 3px 0 #231815;
-}
-
-@keyframes itemPop {
-    from { opacity: 0; transform: translateY(14px) scale(0.96); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.color-dot-badge {
-    min-width: 64px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.user-tag {
-    font-size: 16px;
-    font-weight: 900;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.user-tag span {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.order-badge {
-    margin-left: auto;
-    font-size: 12.5px;
-    font-weight: 800;
-    padding: 6px 10px;
-    border-radius: 10px;
-    background: #edf9db;
-    color: var(--highlight-dark);
-    white-space: nowrap;
-}
-
-.theme-anpanman .order-badge {
-    border: 1.5px solid #231815;
-    background: var(--highlight);
-    color: #1a3303;
-}
-
-.action-row {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-secondary {
-    flex: 1;
-    height: 52px;
-    background: #ffffff;
-    border: none;
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-main);
-    cursor: pointer;
-    box-shadow: var(--clay-btn-shadow);
-}
-
-.theme-anpanman .btn-secondary {
-    border: 2px solid #231815;
-    box-shadow: 0 3px 0 #231815;
-}
-
-.toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(70px);
-    background: #1e293b;
-    color: #fff;
-    font-size: 13.5px;
-    font-weight: 700;
-    padding: 10px 18px;
-    border-radius: 18px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.25s ease;
-    z-index: 1000;
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#F5F7FA" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="휴게순서뽑기" />
+  <title>휴게시간 순서뽑기</title>
+
+  <!-- 홈화면 및 앱 아이콘 -->
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="icon" type="image/png" href="icon-180.png" />
+
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg-main: #F5F7FA;
+      --accent-lime: #82DC28;
+      --accent-coral: #FF7878;
+      --accent-sky: #60B6FF;
+      --text-primary: #191F28;
+      --text-secondary: #6B7684;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      min-height: 100dvh;
+      user-select: none;
+    }
+
+    /* 배경 은은한 데코레이션 블롭 */
+    .bg-blob-1 {
+      position: fixed;
+      top: -80px;
+      right: -60px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(130, 220, 40, 0.15) 0%, rgba(130, 220, 40, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-blob-2 {
+      position: fixed;
+      bottom: -90px;
+      left: -70px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255, 120, 120, 0.12) 0%, rgba(255, 120, 120, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 스플래시 화면 스타일 */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(165deg, #FFFFFF 0%, #F2F6FA 55%, #EBF3E6 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.4s;
+    }
+
+    #splash-screen.hidden-splash {
+      opacity: 0;
+      transform: scale(1.03);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-icon-box {
+      width: 116px;
+      height: 116px;
+      border-radius: 32px;
+      background: linear-gradient(145deg, #ffffff, #eef2f6);
+      box-shadow: 
+        0 20px 38px -10px rgba(25, 31, 40, 0.14),
+        0 4px 12px rgba(130, 220, 40, 0.18),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9),
+        inset 0 -4px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: floatIcon 2.2s ease-in-out infinite;
+    }
+
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .splash-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #82DC28, #4AD295);
+      border-radius: 999px;
+      transition: width 1.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* 컬렉션 카드 스타일 */
+    .collection-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      box-shadow: 
+        0 10px 24px -6px rgba(25, 31, 40, 0.06),
+        0 2px 6px -1px rgba(25, 31, 40, 0.03),
+        inset 0 1px 1px rgba(255, 255, 255, 0.85);
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .collection-card:active {
+      transform: scale(0.975);
+    }
+
+    @media (hover: hover) {
+      .collection-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+          0 14px 28px -6px rgba(25, 31, 40, 0.1),
+          0 4px 10px -2px rgba(25, 31, 40, 0.04);
+        border-color: rgba(130, 220, 40, 0.5);
+      }
+    }
+
+    /* 왼쪽 썸네일 이미지 박스 */
+    .thumb-box {
+      width: 82px;
+      height: 82px;
+      min-width: 82px;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        inset 0 2px 5px rgba(255, 255, 255, 0.75),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.05),
+        0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    /* 산리오 회색 실루엣 필터 */
+    .silhouette-filter {
+      filter: grayscale(100%) brightness(0.6) contrast(1.25);
+      opacity: 0.85;
+    }
+
+    .card-sanrio {
+      background: rgba(241, 245, 249, 0.85);
+      border: 1px dashed #CBD5E1;
+    }
+
+    /* 순차 등장 애니메이션 */
+    @keyframes fadeUpIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stagger-1 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+    .stagger-2 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.11s both; }
+    .stagger-3 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.17s both; }
+    .stagger-4 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.23s both; }
+  </style>
 </head>
+<body class="relative flex flex-col items-center justify-center min-h-screen py-6">
 
-<body>
+  <!-- 배경 소프트 블롭 -->
+  <div class="bg-blob-1"></div>
+  <div class="bg-blob-2"></div>
 
-<div class="app-container">
+  <!-- ==========================================
+       1. 스플래시 화면 (인트로 아이콘 표시 후 자동 전환)
+  =========================================== -->
+  <div id="splash-screen" onclick="hideSplash()" role="dialog" aria-label="휴게시간 순서뽑기 스플래시 화면">
+    <div class="flex flex-col items-center px-6 text-center max-w-sm w-full">
+      <div class="splash-icon-box mb-5">
+        <img 
+          src="icon-180.png" 
+          alt="휴게시간 순서뽑기 아이콘" 
+          class="w-full h-full object-cover rounded-[32px] absolute inset-0 z-10"
+          onerror="this.style.display='none'"
+        />
+        <!-- 기본 아이콘 그래픽 폴백 -->
+        <svg class="w-20 h-20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="26" y="14" width="52" height="64" rx="14" transform="rotate(10 26 14)" fill="#FF7878" />
+          <rect x="16" y="18" width="52" height="64" rx="14" transform="rotate(-8 16 18)" fill="#60B6FF" />
+          <rect x="22" y="20" width="56" height="64" rx="15" fill="#82DC28" stroke="#FFFFFF" stroke-width="3"/>
+          <circle cx="50" cy="48" r="15" fill="#FFFFFF" />
+          <path d="M50 40V48L55 52" stroke="#191F28" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M43 71H57" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="72" cy="24" r="9" fill="#FFE66D" stroke="#FFFFFF" stroke-width="2.5"/>
+          <text x="72" y="27.5" text-anchor="middle" fill="#191F28" font-size="10" font-weight="900">1</text>
+        </svg>
+      </div>
 
-    <!-- [PAGE 1] 설정 및 선택 뷰 -->
-    <div id="selectionView" class="view active">
-        
-        <header id="mainHeader" class="header">
-            <span class="title-badge">CLAY COLOR PICKER</span>
-            <h1>🎲 휴게 순서 뽑기</h1>
-        </header>
+      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-5">
+        휴게시간 순서뽑기
+      </h1>
 
-        <section id="peopleCard" class="clay-card">
-            <div>
-                <span class="label-title">참여 인원</span>
-                <button class="btn-mini-reset" onclick="resetAll()">🔄 초기화</button>
-            </div>
-            <div class="stepper">
-                <button class="btn-circle" id="minusBtn" onclick="changePeople(-1)">－</button>
-                <span class="count-display" id="peopleCount">4명</span>
-                <button class="btn-circle" id="plusBtn" onclick="changePeople(1)">＋</button>
-            </div>
-        </section>
-
-        <!-- 클레이 전용: 색상 추가 섹션 -->
-        <section id="addColorSection" class="add-color-section">
-            <div class="color-picker-wrapper">
-                <input type="color" id="newColorPicker" value="#82DC28">
-            </div>
-            <input type="text" id="newColorName" class="color-name-input" placeholder="새 색상 이름 (예: 라임)" maxlength="6">
-            <button class="btn-add-color" onclick="addNewColor()">＋ 추가</button>
-        </section>
-
-        <div class="guide-banner">
-            <span id="guideText">컬러를 인원수(4개)만큼 선택하세요</span>
-            <span class="guide-pill" id="guidePill">0 / 4</span>
-        </div>
-
-        <!-- 4열 그리드 -->
-        <div class="grid-container" id="grid"></div>
-
-        <button class="btn-primary-action" id="drawBtn" onclick="startDrawProcess()">
-            <span id="drawIcon">✨</span> <span id="drawBtnText">휴게 순서 뽑기</span>
-        </button>
-
-        <!-- 테마 전환 버튼 -->
-        <button class="theme-switch-btn" onclick="toggleTheme()">
-            <span id="themeBtnIcon" style="font-size: 18px;">🍞</span>
-            <span id="themeBtnText">호빵맨 캐릭터 도감 테마로 이동</span>
-        </button>
+      <div class="w-40 h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+        <div id="splash-bar" class="splash-progress-bar"></div>
+      </div>
     </div>
+  </div>
 
-    <!-- [PAGE 2] 결과 랜딩 뷰 -->
-    <div id="resultView" class="view">
-        <header class="result-header">
-            <span class="title-badge">RESULT</span>
-            <h1>🎉 휴게 매칭 결과</h1>
-            <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 13px;">선택된 순번에 맞춰 휴식을 진행해주세요!</p>
-        </header>
-
-        <div class="result-list" id="result-content"></div>
-
-        <div class="action-row">
-            <button class="btn-secondary" onclick="goBackToSelection()">
-                ← 다시 고르기
-            </button>
-            <button class="btn-primary-action" style="flex: 1.2; height: 52px; margin-bottom: 0;" onclick="reRoll()">
-                🎲 다시 뽑기
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-// 📌 이미지 파일명 지정 (동일 폴더의 파일명과 일치시켜 주세요)
-const POSTER_IMAGE_URL = 'poster.jpeg';
-
-let currentTheme = 'clay';
-let people = 4;
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-// 1. 클레이 기본 컬러
-let colors = [
-    { n: '빨강', c: '#ff5c5c', text: '#fff' },
-    { n: '노랑', c: '#ffd600', text: '#333' },
-    { n: '파랑', c: '#3b82f6', text: '#fff' },
-    { n: '초록', c: '#10b981', text: '#fff' },
-    { n: '보라', c: '#a855f7', text: '#fff' },
-    { n: '주황', c: '#f97316', text: '#fff' },
-    { n: '핑크', c: '#ec4899', text: '#fff' },
-    { n: '하늘', c: '#38bdf8', text: '#222' },
-    { n: '갈색', c: '#8d6e63', text: '#fff' },
-    { n: '회색', c: '#94a3b8', text: '#fff' },
-    { n: '검정', c: '#334155', text: '#fff' },
-    { n: '민트', c: '#2dd4bf', text: '#111' }
-];
-
-// 2. [가로 4칸 × 세로 3줄] 호빵맨 12인 정확한 그리드 좌표 매핑 (col: 0~3, row: 0~2)
-const anpanmanCharacters = [
-    // 1행 (가로 4명)
-    { n: '호빵맨', en: 'Anpanman', col: 0, row: 0, voice: "용기가 솟아난다! 호빵맨 출동!" },
-    { n: '식빵맨', en: 'Shokupanman', col: 1, row: 0, voice: "아름다운 마음을 가진 식빵맨입니다." },
-    { n: '카레빵맨', en: 'CureyCanman', col: 2, row: 0, voice: "뜨거운 매운맛 카레 펀치 맛 좀 볼래!" },
-    { n: '잼아저씨', en: 'Uncle Jam', col: 3, row: 0, voice: "새로운 얼굴을 구웠단다! 호빵맨!" },
-
-    // 2행 (가로 4명)
-    { n: '버터누나', en: 'Batako-san', col: 0, row: 1, voice: "호빵맨 힘내! 내가 던져줄게!" },
-    { n: '명견 치즈', en: 'Meiken Fheese', col: 1, row: 1, voice: "멍멍! 안프앙~ 멍멍!" },
-    { n: '메론빵나', en: 'Melonpanna', col: 2, row: 1, voice: "메로메로 펀치로 사랑을 전할게요~" },
-    { n: '롤빵나', en: 'Rollpanna', col: 3, row: 1, voice: "롤링 리본! 악과 싸우겠어." },
-
-    // 3행 (가로 4명)
-    { n: '크림판다', en: 'Creampanda', col: 0, row: 2, voice: "구-쵸키-파! 크림판다도 도울게!" },
-    { n: '세균맨', en: 'Baikinman', col: 1, row: 2, voice: "하히후헤호! 세균맨님이시다!" },
-    { n: '짤랑이', en: 'Dokinchan', col: 2, row: 2, voice: "식빵맨님~ 너무 멋져요! 호호호" },
-    { n: '딸랑이', en: 'Kokinchan', col: 3, row: 2, voice: "딸랑딸랑 눈물 발사! 으앙~" }
-];
-
-const orderTexts = [
-    "첫번째 휴게시작", "두번째 휴게시작", "세번째 휴게시작", "네번째 휴게시작",
-    "다섯번째 휴게시작", "여섯번째 휴게시작", "일곱번째 휴게시작", "여덟번째 휴게시작",
-    "아홉번째 휴게시작", "열번째 휴게시작", "열한번째 휴게시작", "열두번째 휴게시작"
-];
-
-let selected = [];
-let audioCtx = null;
-
-function getAudioContext() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    return audioCtx;
-}
-
-function playChimeSound(isSelect = true) {
-    try {
-        const ctx = getAudioContext();
-        const baseFreq = isSelect ? 880 : 587;
-        const secondFreq = isSelect ? 1318.5 : 440;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(secondFreq, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.28);
-    } catch(e) {}
-}
-
-function playDiceRollSound() {
-    try {
-        const ctx = getAudioContext();
-        const total = 10;
-        for (let i = 0; i < total; i++) {
-            const time = ctx.currentTime + (Math.pow(i / total, 1.3) * 0.65);
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            const freq = 450 + Math.random() * 350;
-            osc.frequency.setValueAtTime(freq, time);
-            osc.frequency.exponentialRampToValueAtTime(freq * 0.4, time + 0.04);
-            gain.gain.setValueAtTime(0.35, time);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.04);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(time);
-            osc.stop(time + 0.04);
-        }
-    } catch(e) {}
-}
-
-function playConfettiSound() {
-    try {
-        const ctx = getAudioContext();
-        const popOsc = ctx.createOscillator();
-        const popGain = ctx.createGain();
-        popOsc.frequency.setValueAtTime(140, ctx.currentTime);
-        popOsc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.15);
-        popGain.gain.setValueAtTime(0.7, ctx.currentTime);
-        popGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        popOsc.connect(popGain);
-        popGain.connect(ctx.destination);
-        popOsc.start(ctx.currentTime);
-        popOsc.stop(ctx.currentTime + 0.15);
-
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            const start = ctx.currentTime + 0.06 + (idx * 0.08);
-            osc.frequency.setValueAtTime(freq, start);
-            gain.gain.setValueAtTime(0, start);
-            gain.gain.linearRampToValueAtTime(0.28, start + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(start);
-            osc.stop(start + 0.45);
-        });
-    } catch (e) {}
-}
-
-function speakCharacter(text, index) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR';
-    const pitches = [1.3, 1.0, 1.25, 0.85, 1.35, 1.7, 1.45, 0.95, 1.5, 0.75, 1.6, 1.75];
-    const rates = [1.1, 1.0, 1.2, 0.95, 1.1, 1.3, 1.1, 1.0, 1.25, 1.15, 1.25, 1.3];
-    u.pitch = pitches[index % pitches.length] || 1.1;
-    u.rate = rates[index % rates.length] || 1.1;
-    window.speechSynthesis.speak(u);
-}
-
-function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-}
-
-function toggleTheme() {
-    selected = [];
-    currentTheme = (currentTheme === 'clay') ? 'anpanman' : 'clay';
-    applyThemeStyles();
-    renderGrid();
-}
-
-function applyThemeStyles() {
-    const body = document.body;
-    const header = document.getElementById('mainHeader');
-    const peopleCard = document.getElementById('peopleCard');
-    const addColorSection = document.getElementById('addColorSection');
-    const themeBtnIcon = document.getElementById('themeBtnIcon');
-    const themeBtnText = document.getElementById('themeBtnText');
-    const minusBtn = document.getElementById('minusBtn');
-    const plusBtn = document.getElementById('plusBtn');
-
-    if (currentTheme === 'anpanman') {
-        body.className = 'theme-anpanman';
-        addColorSection.style.display = 'none';
-        peopleCard.className = 'clay-card poster-card';
-        minusBtn.className = 'btn-circle poster-stepper-btn';
-        plusBtn.className = 'btn-circle poster-stepper-btn';
-
-        header.className = '';
-        header.innerHTML = `
-            <div class="anpanman-header-poster">
-                <div class="anpanman-jp-title">アンパンマン＆仲間たち: メインキャラクター</div>
-                <div class="anpanman-en-sub">ANPANMAN & FRIENDS: Main Characters</div>
-            </div>
-        `;
-        themeBtnIcon.innerText = "🎨";
-        themeBtnText.innerText = "클레이모피즘 컬러 테마로 이동";
-    } else {
-        body.className = '';
-        addColorSection.style.display = 'flex';
-        peopleCard.className = 'clay-card';
-        minusBtn.className = 'btn-circle';
-        plusBtn.className = 'btn-circle';
-
-        header.className = 'header';
-        header.innerHTML = `
-            <span class="title-badge">CLAY COLOR PICKER</span>
-            <h1>🎲 휴게 순서 뽑기</h1>
-        `;
-        themeBtnIcon.innerText = "🍞";
-        themeBtnText.innerText = "호빵맨 캐릭터 도감 테마로 이동";
-    }
-}
-
-function renderGrid() {
-    const grid = document.getElementById('grid');
-    grid.innerHTML = '';
-
-    if (currentTheme === 'clay') {
-        colors.forEach((item, index) => {
-            const isSel = selected.includes(index) ? 'selected' : '';
-            const delBtn = item.custom 
-                ? `<div class="chip-delete-btn" onclick="removeColor(event, ${index})">✕</div>` 
-                : '';
-            grid.innerHTML += `
-                <button class="clay-color-chip ${isSel}" id="item-${index}" style="background:${item.c}; color:${item.text};" onclick="toggleItem(${index})">
-                    ${delBtn}
-                    ${item.n}
-                </button>
-            `;
-        });
-    } else {
-        anpanmanCharacters.forEach((char, index) => {
-            const isSel = selected.includes(index) ? 'selected' : '';
-
-            // 🎯 [4열 3행 완벽 크롭 계산식]
-            // 가로: 4칸 (col: 0, 1, 2, 3 -> 0%, -100%, -200%, -300%)
-            // 세로: 3행 (row: 0, 1, 2 -> 0%, -100%, -200%)
-            const leftOffset = -(char.col * 100);
-            const topOffset = -(char.row * 100);
-
-            grid.innerHTML += `
-                <div class="anpan-card ${isSel}" id="item-${index}" onclick="toggleItem(${index})">
-                    <div class="anpan-crop-viewport">
-                        <img 
-                            src="${POSTER_IMAGE_URL}" 
-                            style="left: ${leftOffset}%; top: ${topOffset}%;" 
-                            alt="${char.n}"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                        />
-                        <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-size:24px;">🍞</div>
-                    </div>
-                    <div class="anpan-name-badge">${char.n}</div>
-                    <div class="anpan-sub-name">${char.en}</div>
-                </div>
-            `;
-        });
-    }
-    updateGuide();
-}
-
-function updateGuide() {
-    const guideText = document.getElementById('guideText');
-    const guidePill = document.getElementById('guidePill');
-    const targetName = (currentTheme === 'clay') ? '컬러' : '캐릭터';
-    guideText.innerText = `${targetName}를 인원수(${people}개)만큼 선택하세요`;
-    guidePill.innerText = `${selected.length} / ${people}`;
+  <!-- ==========================================
+       2. 메인 컬렉션 선택 화면
+  =========================================== -->
+  <main class="w-full max-w-md px-5 z-10 flex flex-col justify-center">
     
-    if (selected.length === people) {
-        guidePill.classList.add('completed');
-    } else {
-        guidePill.classList.remove('completed');
+    <!-- 심플 헤더 -->
+    <header class="mb-6 flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+        <img 
+          src="icon-180.png" 
+          alt="아이콘" 
+          class="w-full h-full object-cover"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        />
+        <div style="display:none" class="w-full h-full items-center justify-center bg-gradient-to-br from-[#82DC28]/20 to-[#FF7878]/20 text-xl">
+          🎲
+        </div>
+      </div>
+      <div>
+        <span class="text-[11px] font-extrabold tracking-wider text-[#4a9c06] uppercase block">
+          COLLECTION
+        </span>
+        <h2 class="text-[22px] font-extrabold tracking-tight text-slate-900 leading-tight">
+          휴게시간 순서뽑기
+        </h2>
+      </div>
+    </header>
+
+    <!-- ==========================================
+         3. 컬렉션 카드 목록 (왼쪽 이미지 · 오른쪽 테마명)
+    =========================================== -->
+    <section class="flex flex-col gap-3.5" aria-label="컬렉션 목록">
+
+      <!-- 1. 컬러 (color.html) -->
+      <a href="color.html" class="collection-card stagger-1 p-3.5 flex items-center gap-4 group">
+        <div class="thumb-box bg-gradient-to-br from-[#F0F9E8] via-[#FFF5F5] to-[#EBF6FF]">
+          <img 
+            src="thumb-color.png" 
+            alt="컬러" 
+            class="w-full h-full object-cover absolute inset-0 z-10"
+            onerror="this.style.display='none'"
+          />
+          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="18" width="26" height="38" rx="7" transform="rotate(-16 14 18)" fill="#FF7878" stroke="#FFFFFF" stroke-width="2.5"/>
+            <rect x="24" y="14" width="26" height="38" rx="7" transform="rotate(-4 24 14)" fill="#FFD166" stroke="#FFFFFF" stroke-width="2.5"/>
+            <rect x="34" y="15" width="26" height="38" rx="7" transform="rotate(9 34 15)" fill="#60B6FF" stroke="#FFFFFF" stroke-width="2.5"/>
+            <rect x="26" y="25" width="28" height="38" rx="8" fill="#82DC28" stroke="#FFFFFF" stroke-width="2.5"/>
+            <circle cx="40" cy="44" r="7.5" fill="#FFFFFF" fill-opacity="0.92"/>
+            <path d="M36.5 44L39 46.5L44 41.5" stroke="#3c8505" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="flex-1 flex items-center justify-between pr-1">
+          <div>
+            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#82DC28]/20 text-[#3c8505] mb-1">
+              COLLECTION 01
+            </span>
+            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
+              컬러
+            </h3>
+          </div>
+          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <!-- 2. 호빵맨 (anpanman.html) -->
+      <a href="anpanman.html" class="collection-card stagger-2 p-3.5 flex items-center gap-4 group">
+        <div class="thumb-box bg-gradient-to-br from-[#FFF3E0] via-[#FFE8D6] to-[#FFDFDF]">
+          <img 
+            src="thumb-anpanman.png" 
+            alt="호빵맨" 
+            class="w-full h-full object-cover absolute inset-0 z-10"
+            onerror="this.style.display='none'"
+          />
+          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="42" r="24" fill="#F4A261" stroke="#FFFFFF" stroke-width="2.5"/>
+            <circle cx="27" cy="43" r="5.5" fill="#FF6B6B"/>
+            <circle cx="53" cy="43" r="5.5" fill="#FF6B6B"/>
+            <circle cx="40" cy="42" r="6.5" fill="#E63946"/>
+            <rect x="38" y="39" width="3" height="3" rx="1" fill="#FFFFFF"/>
+            <rect x="25" y="41" width="2.5" height="2.5" rx="1" fill="#FFFFFF"/>
+            <rect x="51" y="41" width="2.5" height="2.5" rx="1" fill="#FFFFFF"/>
+            <circle cx="33" cy="32" r="2.3" fill="#2B2D42"/>
+            <circle cx="47" cy="32" r="2.3" fill="#2B2D42"/>
+            <path d="M29 27C31 25 35 25 36 27" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
+            <path d="M44 27C45 25 49 25 51 27" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
+            <path d="M33 51C35.5 55 44.5 55 47 51" stroke="#2B2D42" stroke-width="2.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="flex-1 flex items-center justify-between pr-1">
+          <div>
+            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FF7878]/18 text-[#d94848] mb-1">
+              COLLECTION 02
+            </span>
+            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
+              호빵맨
+            </h3>
+          </div>
+          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <!-- 3. 치이카와 (chikawa.html) -->
+      <a href="chikawa.html" class="collection-card stagger-3 p-3.5 flex items-center gap-4 group">
+        <div class="thumb-box bg-gradient-to-br from-[#FFF0F6] via-[#F0F7FF] to-[#FFFDF0]">
+          <img 
+            src="thumb-chikawa.png" 
+            alt="치이카와" 
+            class="w-full h-full object-cover absolute inset-0 z-10"
+            onerror="this.style.display='none'"
+          />
+          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="24" r="7.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
+            <circle cx="55" cy="24" r="7.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
+            <rect x="17" y="23" width="46" height="39" rx="19.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
+            <path d="M22 30C27 23 36 23 40 28C44 23 53 23 58 30" stroke="#72B5F2" stroke-width="4" stroke-linecap="round"/>
+            <ellipse cx="27" cy="45" rx="4" ry="2.5" fill="#FF9EBB"/>
+            <ellipse cx="53" cy="45" rx="4" ry="2.5" fill="#FF9EBB"/>
+            <circle cx="32" cy="40" r="2.6" fill="#2B2D42"/>
+            <circle cx="48" cy="40" r="2.6" fill="#2B2D42"/>
+            <circle cx="31.2" cy="39" r="0.9" fill="#FFFFFF"/>
+            <circle cx="47.2" cy="39" r="0.9" fill="#FFFFFF"/>
+            <path d="M37 45.5C38.2 47 39.8 47 40 45.5C40.2 47 41.8 47 43 45.5" stroke="#2B2D42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="flex-1 flex items-center justify-between pr-1">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
+                COLLECTION 03
+              </span>
+              <span class="inline-block text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#FF7878] text-white">
+                NEW
+              </span>
+            </div>
+            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
+              치이카와
+            </h3>
+          </div>
+          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <!-- 4. 산리오 캐릭터즈 (sanrio.html - 회색 실루엣) -->
+      <a href="sanrio.html" class="collection-card card-sanrio stagger-4 p-3.5 flex items-center gap-4 group">
+        <div class="thumb-box bg-slate-200/90">
+          <img 
+            src="thumb-sanrio.png" 
+            alt="산리오 캐릭터즈" 
+            class="w-full h-full object-cover absolute inset-0 z-10 silhouette-filter"
+            onerror="this.style.display='none'"
+          />
+          <svg class="w-14 h-14 silhouette-filter" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="25" cy="24" rx="7" ry="14" transform="rotate(-18 25 24)" fill="#475569"/>
+            <ellipse cx="55" cy="24" rx="7" ry="14" transform="rotate(18 55 24)" fill="#475569"/>
+            <ellipse cx="40" cy="45" rx="22" ry="18" fill="#475569"/>
+            <circle cx="52" cy="29" r="4" fill="#1E293B"/>
+            <path d="M44 25C47 23 50 26 50 29C50 32 47 35 44 33Z" fill="#1E293B"/>
+            <path d="M60 25C57 23 54 26 54 29C54 32 57 35 60 33Z" fill="#1E293B"/>
+            <text x="40" y="51" text-anchor="middle" fill="#CBD5E1" font-size="16" font-weight="900">?</text>
+          </svg>
+        </div>
+
+        <div class="flex-1 flex items-center justify-between pr-1">
+          <div>
+            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 mb-1">
+              COMING SOON
+            </span>
+            <h3 class="text-[19px] font-extrabold text-slate-500 tracking-tight">
+              산리오 캐릭터즈
+            </h3>
+          </div>
+          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+    </section>
+  </main>
+
+  <script>
+    let splashTimer = null;
+
+    function startSplash() {
+      const bar = document.getElementById('splash-bar');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bar.style.width = '100%';
+        });
+      });
+
+      splashTimer = setTimeout(() => {
+        hideSplash();
+      }, 1350);
     }
-}
 
-function toggleItem(index) {
-    const idx = selected.indexOf(index);
-    if (idx > -1) {
-        selected.splice(idx, 1);
-        document.getElementById('item-' + index).classList.remove('selected');
-        playChimeSound(false);
-    } else {
-        if (selected.length >= people) {
-            showToast(`인원 수(${people}명)만큼만 선택할 수 있습니다.`);
-            return;
-        }
-        selected.push(index);
-        document.getElementById('item-' + index).classList.add('selected');
-
-        if (currentTheme === 'anpanman') {
-            speakCharacter(anpanmanCharacters[index].voice, index);
-        } else {
-            playChimeSound(true);
-        }
-    }
-    updateGuide();
-}
-
-function changePeople(num) {
-    const nextVal = people + num;
-    const maxVal = (currentTheme === 'clay') ? colors.length : anpanmanCharacters.length;
-    if (nextVal < 2) {
-        showToast("최소 인원은 2명입니다.");
-        return;
-    }
-    if (nextVal > maxVal) {
-        showToast(`최대 ${maxVal}명까지 선택 가능합니다.`);
-        return;
-    }
-    people = nextVal;
-    resetAll();
-}
-
-function resetAll() {
-    selected = [];
-    document.getElementById('peopleCount').innerText = people + "명";
-    renderGrid();
-}
-
-function addNewColor() {
-    const picker = document.getElementById('newColorPicker');
-    const nameInput = document.getElementById('newColorName');
-    const name = nameInput.value.trim();
-    if (!name) {
-        showToast('색상 이름을 입력해주세요');
-        return;
-    }
-    if (colors.some(c => c.n === name)) {
-        showToast('이미 존재하는 이름입니다.');
-        return;
-    }
-    const hex = picker.value;
-    const r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
-    const textColor = ((r*299 + g*587 + b*114)/1000 >= 150) ? '#1e293b' : '#ffffff';
-
-    colors.push({ n: name, c: hex, text: textColor, custom: true });
-    nameInput.value = '';
-    renderGrid();
-    showToast(`'${name}' 색상이 추가되었습니다! 🎨`);
-    playChimeSound(true);
-}
-
-function removeColor(e, index) {
-    e.stopPropagation();
-    selected = selected.filter(i => i !== index).map(i => (i > index ? i - 1 : i));
-    colors.splice(index, 1);
-    renderGrid();
-}
-
-function shuffle(arr) {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-}
-
-function triggerConfetti() {
-    playConfettiSound();
-    if (typeof confetti === 'function') {
-        const count = 200;
-        const defaults = {
-            origin: { y: 0.65 },
-            colors: ['#82DC28', '#ffffff', '#ffd600', '#ff5c5c', '#38bdf8']
-        };
-        confetti(Object.assign({}, defaults, { particleCount: 60, spread: 26, startVelocity: 55 }));
-        confetti(Object.assign({}, defaults, { particleCount: 50, spread: 60 }));
-        confetti(Object.assign({}, defaults, { particleCount: 70, spread: 100, decay: 0.91 }));
-        confetti(Object.assign({}, defaults, { particleCount: 20, spread: 120, startVelocity: 45 }));
-    }
-}
-
-function startDrawProcess() {
-    if (selected.length !== people) {
-        showToast(`인원 수와 동일하게 ${people}개를 선택해주세요.`);
-        return;
+    function hideSplash() {
+      clearTimeout(splashTimer);
+      const splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.classList.add('hidden-splash');
+      }
     }
 
-    const drawBtn = document.getElementById('drawBtn');
-    const drawIcon = document.getElementById('drawIcon');
-    const drawBtnText = document.getElementById('drawBtnText');
-
-    drawBtn.disabled = true;
-    drawIcon.innerText = "🎲";
-    drawIcon.classList.add('rolling-icon');
-    drawBtnText.innerText = "순서 섞는 중...";
-
-    playDiceRollSound();
-
-    setTimeout(() => {
-        renderResultRows();
-
-        document.getElementById('selectionView').classList.remove('active');
-        document.getElementById('resultView').classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        drawBtn.disabled = false;
-        drawIcon.innerText = "✨";
-        drawIcon.classList.remove('rolling-icon');
-        drawBtnText.innerText = "휴게 순서 뽑기";
-
-        triggerConfetti();
-    }, 650);
-}
-
-function renderResultRows() {
-    const shuffled = shuffle(selected);
-    let html = '';
-
-    for (let i = 0; i < people; i++) {
-        const idx = shuffled[i];
-        const delay = (i * 0.05).toFixed(2);
-
-        if (currentTheme === 'clay') {
-            const item = colors[idx];
-            html += `
-                <div class="result-card-item" style="animation-delay: ${delay}s">
-                    <div class="color-dot-badge" style="background: ${item.c}; color: ${item.text};">
-                        ${item.n}
-                    </div>
-                    <div class="user-tag">
-                        ${alphabet[i]} <span>조원</span>
-                    </div>
-                    <div class="order-badge">
-                        ${orderTexts[i]}
-                    </div>
-                </div>
-            `;
-        } else {
-            const char = anpanmanCharacters[idx];
-            const leftOffset = -(char.col * 100);
-            const topOffset = -(char.row * 100);
-
-            html += `
-                <div class="result-card-item" style="animation-delay: ${delay}s">
-                    <div class="anpan-crop-viewport" style="width: 42px; height: 42px; margin: 0; flex-shrink: 0;">
-                        <img 
-                            src="${POSTER_IMAGE_URL}" 
-                            style="left: ${leftOffset}%; top: ${topOffset}%;" 
-                            alt="${char.n}"
-                        />
-                    </div>
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-size: 14px; font-weight: 900; color: #1e293b;">${char.n}</span>
-                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">${char.en}</span>
-                    </div>
-                    <div class="user-tag" style="margin-left: 8px;">
-                        ${alphabet[i]} <span>조원</span>
-                    </div>
-                    <div class="order-badge">
-                        ${orderTexts[i]}
-                    </div>
-                </div>
-            `;
-        }
-    }
-    document.getElementById('result-content').innerHTML = html;
-}
-
-function reRoll() {
-    playDiceRollSound();
-    setTimeout(() => {
-        renderResultRows();
-        triggerConfetti();
-    }, 400);
-}
-
-function goBackToSelection() {
-    document.getElementById('resultView').classList.remove('active');
-    document.getElementById('selectionView').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-applyThemeStyles();
-renderGrid();
-</script>
-
+    window.addEventListener('DOMContentLoaded', startSplash);
+  </script>
 </body>
 </html>
