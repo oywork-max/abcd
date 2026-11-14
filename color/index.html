@@ -176,3 +176,703 @@
             height: 68%;
             border-radius: 3px;
             position: relative;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.06) 100%);
+        }
+
+        /* 하단 검정색 폰트 컬러 이름 라벨 영역 */
+        .swatch-label-box {
+            height: 30%;
+            width: 100%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2px 2px 0 2px;
+            background: #FAF8F5;
+        }
+
+        .swatch-code {
+            font-size: 0.52rem;
+            font-weight: 800;
+            color: #555555;
+            letter-spacing: 0.03em;
+            line-height: 1.1;
+        }
+
+        .swatch-name {
+            font-size: 0.74rem;
+            font-weight: 900;
+            color: #111111; /* 선명한 검정색 폰트 */
+            letter-spacing: -0.04em;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* 카드를 선택했을 때 스탬프(도장) 찍히는 느낌의 흔들림 애니메이션 */
+        @keyframes stampShake {
+            0%   { transform: scale(1.14) rotate(-4deg); }
+            30%  { transform: scale(0.92) rotate(3deg); }
+            55%  { transform: scale(1.03) rotate(-2deg); }
+            75%  { transform: scale(0.98) rotate(1deg); }
+            100% { transform: scale(1) rotate(-1deg); }
+        }
+
+        .swatch-card.selected {
+            outline: 2.5px solid var(--primary-lime);
+            box-shadow: 
+                0 8px 15px rgba(0, 0, 0, 0.48),
+                0 0 0 1.5px #3E2723;
+            transform: rotate(-1deg);
+        }
+
+        .swatch-card.stamp-anim {
+            animation: stampShake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+        }
+
+        /* 스탬프 도장 마크 */
+        .stamp-mark {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -65%) rotate(-14deg) scale(1.4);
+            border: 2px solid rgba(17, 17, 17, 0.85);
+            color: rgba(17, 17, 17, 0.9);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+            z-index: 5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .swatch-card.selected .stamp-mark {
+            opacity: 1;
+            transform: translate(-50%, -65%) rotate(-14deg) scale(1);
+        }
+
+        /* 결과 화면 우측 상단 살짝 겹치는 알파벳 배지 (좌우 잘림 없도록 안쪽 정렬 보정) */
+        .result-badge {
+            position: absolute;
+            top: -7px;
+            right: -6px;
+            background: var(--coral-accent);
+            color: #ffffff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.86rem;
+            font-weight: 900;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.38);
+            border: 2px solid #ffffff;
+            z-index: 8;
+            animation: badgePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0) translateY(10px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* 하단 고정 영역 (선택하기 + 아래 뒤로가기 배치) */
+        .footer-action {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;
+            background: linear-gradient(to top, rgba(46, 27, 15, 0.96) 74%, rgba(46, 27, 15, 0));
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            z-index: 15;
+        }
+
+        .footer-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: var(--primary-lime);
+            color: #111111;
+            border: none;
+            border-radius: 13px;
+            padding: 14px;
+            font-size: 0.98rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+            transition: transform 0.15s ease;
+        }
+
+        .primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 선택하기 아래 하단 뒤로가기 버튼 */
+        .sub-back-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.14);
+            color: #FFF8E7;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 11px;
+            padding: 10px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .sub-back-btn:active {
+            background: rgba(255, 255, 255, 0.24);
+            transform: scale(0.98);
+        }
+
+        /* 결과 화면 하단 홈으로 가기 & 뒤로가기 버튼 */
+        .result-nav-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 13px;
+            font-size: 0.94rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        }
+
+        .result-nav-btn.home {
+            background: #FAF8F5;
+            color: #111111;
+        }
+
+        .result-nav-btn.back {
+            background: var(--primary-lime);
+            color: #111111;
+        }
+
+        /* 스낵바 (Snackbar) 스타일 토스트 */
+        .snackbar {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 118px);
+            left: 50%;
+            transform: translateX(-50%) translateY(25px);
+            width: calc(100% - 28px);
+            background: #1E1B18;
+            color: #FFFFFF;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            z-index: 250;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .snackbar-action {
+            color: var(--primary-lime);
+            background: none;
+            border: none;
+            font-weight: 900;
+            font-size: 0.84rem;
+            cursor: pointer;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        /* 바텀시트 모달 */
+        .bottom-sheet-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.58);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.28s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bottom-sheet {
+            width: 100%;
+            background: #FAF8F5;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 26px) 20px;
+            transform: translateY(100%);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+
+        .bottom-sheet-overlay.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 42px;
+            height: 5px;
+            background: #CBD5E1;
+            border-radius: 3px;
+            margin: 0 auto 14px auto;
+        }
+
+        .sheet-msg {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #111111;
+            margin-bottom: 18px;
+        }
+
+        /* 컬러색상지 셔플(섞이는) 애니메이션 오버레이 */
+        .shuffle-stage {
+            position: absolute;
+            inset: 0;
+            background: rgba(43, 25, 14, 0.82);
+            backdrop-filter: blur(4px);
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .shuffle-stage.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .shuffle-deck {
+            position: relative;
+            width: 120px;
+            height: 135px;
+            margin-bottom: 22px;
+        }
+
+        .shuffle-swatch {
+            position: absolute;
+            inset: 0;
+            background: #FAF8F5;
+            border-radius: 8px;
+            padding: 7px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .shuffle-swatch-color {
+            width: 100%;
+            height: 72%;
+            border-radius: 4px;
+        }
+
+        .shuffle-swatch-title {
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: #111111;
+            text-align: left;
+        }
+
+        .shuffle-text {
+            color: #FFF8E7;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        /* 컨페티 캔버스 */
+        #confettiCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 120;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <!-- 컨페티 효과용 캔버스 -->
+        <canvas id="confettiCanvas"></canvas>
+
+        <!-- 상단 헤더 (배터리 영역과 동일한 다크 우드 컬러) -->
+        <header>
+            <span class="header-badge">COLOR CHIP</span>
+            <div class="header-title" id="headerTitle">컬러 색상지 뽑기</div>
+            <div class="selected-counter" id="selectedCounter">0명 선택</div>
+        </header>
+
+        <!-- [페이지 1] 데스크 위 3x5 컬러 색상지 선택 화면 -->
+        <div class="page" id="selectPage">
+            <div class="content-scroll">
+                <div class="swatch-grid" id="swatchGrid"></div>
+            </div>
+            <!-- 하단: 선택하기 버튼 + 그 아래 뒤로가기 버튼 -->
+            <div class="footer-action">
+                <button class="primary-btn" onclick="openBottomSheet()">선택하기</button>
+                <button class="sub-back-btn" onclick="triggerBackSnackbar()">↩ 뒤로가기 (컬렉션 홈)</button>
+            </div>
+        </div>
+
+        <!-- [페이지 2] 결과 화면 -->
+        <div class="page hidden" id="resultPage">
+            <div class="content-scroll">
+                <div class="swatch-grid" id="resultGrid"></div>
+            </div>
+            <!-- 하단: 홈으로 가기 & 뒤로가기 기능 -->
+            <div class="footer-action">
+                <div class="footer-row">
+                    <button class="result-nav-btn home" onclick="navigateHome()">🏠 홈으로 가기</button>
+                    <button class="result-nav-btn back" onclick="goBackToSelect()">↩ 뒤로가기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 컬러 색상지 셔플 애니메이션 스테이지 -->
+        <div class="shuffle-stage" id="shuffleStage">
+            <div class="shuffle-deck" id="shuffleDeck"></div>
+            <div class="shuffle-text">컬러 색상지를 섞는 중입니다...</div>
+        </div>
+
+        <!-- 바텀시트 모달 -->
+        <div class="bottom-sheet-overlay" id="bottomSheetOverlay" onclick="closeBottomSheet(event)">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-handle"></div>
+                <div class="sheet-msg" id="sheetMsg">0명의 캐릭터 선택하였습니다.</div>
+                <button class="primary-btn" onclick="startShuffleAndResult()">결과 보기</button>
+            </div>
+        </div>
+
+        <!-- 스낵바 (Snackbar) -->
+        <div class="snackbar" id="snackbar">
+            <span id="snackbarText">메인 컬렉션 화면으로 이동할까요?</span>
+            <button class="snackbar-action" id="snackbarActionBtn" onclick="navigateHome()">이동하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 나무 데스크 위 15개 컬러 색상지 데이터 (3x5 배열, 검정색 폰트 라벨용)
+        const colorSwatches = [
+            { id: 1,  code: 'CHIP 01', name: '애플 레드',     hex: '#E53935' },
+            { id: 2,  code: 'CHIP 02', name: '선셋 오렌지',   hex: '#FB8C00' },
+            { id: 3,  code: 'CHIP 03', name: '레몬 옐로우',   hex: '#FDD835' },
+            { id: 4,  code: 'CHIP 04', name: '올리브 라임',   hex: '#82DC28' },
+            { id: 5,  code: 'CHIP 05', name: '포레스트 그린', hex: '#2E7D32' },
+            { id: 6,  code: 'CHIP 06', name: '민트 소다',     hex: '#26A69A' },
+            { id: 7,  code: 'CHIP 07', name: '스카이 블루',   hex: '#29B6F6' },
+            { id: 8,  code: 'CHIP 08', name: '코발트 블루',   hex: '#1E88E5' },
+            { id: 9,  code: 'CHIP 09', name: '미드나잇 네이비', hex: '#283593' },
+            { id: 10, code: 'CHIP 10', name: '라벤더 퍼플',   hex: '#8E24AA' },
+            { id: 11, code: 'CHIP 11', name: '피치 코랄',     hex: '#FF7878' },
+            { id: 12, code: 'CHIP 12', name: '버블검 핑크',   hex: '#EC407A' },
+            { id: 13, code: 'CHIP 13', name: '밀크티 베이지', hex: '#D7CCC8' },
+            { id: 14, code: 'CHIP 14', name: '카라멜 브라운', hex: '#6D4C41' },
+            { id: 15, code: 'CHIP 15', name: '차콜 그레이',   hex: '#455A64' }
+        ];
+
+        let selectedIds = [];
+        let lastStampedId = null;
+        let snackbarTimer = null;
+
+        // 3x5 컬러 색상지 렌더링
+        function renderSwatches() {
+            const grid = document.getElementById('swatchGrid');
+            grid.innerHTML = '';
+
+            colorSwatches.forEach(item => {
+                const isSelected = selectedIds.includes(item.id);
+                const isJustStamped = (lastStampedId === item.id);
+
+                const card = document.createElement('div');
+                card.className = `swatch-card ${isSelected ? 'selected' : ''} ${isJustStamped ? 'stamp-anim' : ''}`;
+                card.onclick = () => toggleSwatch(item.id);
+
+                card.innerHTML = `
+                    <div class="stamp-mark">STAMPED</div>
+                    <div class="swatch-paper" style="background-color: ${item.hex};"></div>
+                    <div class="swatch-label-box">
+                        <span class="swatch-code">${item.code}</span>
+                        <span class="swatch-name">${item.name}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('selectedCounter').innerText = `${selectedIds.length}명 선택`;
+        }
+
+        // 카드 선택 시 스탬프 흔들림 효과
+        function toggleSwatch(id) {
+            if (selectedIds.includes(id)) {
+                selectedIds = selectedIds.filter(item => item !== id);
+                lastStampedId = null;
+            } else {
+                selectedIds.push(id);
+                lastStampedId = id;
+            }
+            renderSwatches();
+        }
+
+        // 스낵바 표시 함수
+        function showSnackbar(message, showAction = true) {
+            const bar = document.getElementById('snackbar');
+            const text = document.getElementById('snackbarText');
+            const actionBtn = document.getElementById('snackbarActionBtn');
+
+            text.innerText = message;
+            actionBtn.style.display = showAction ? 'inline-block' : 'none';
+            bar.classList.add('show');
+
+            if (snackbarTimer) clearTimeout(snackbarTimer);
+            snackbarTimer = setTimeout(() => {
+                bar.classList.remove('show');
+            }, 3000);
+        }
+
+        // 선택 화면 하단 '뒤로가기' 클릭 시 스낵바 스타일 구현
+        function triggerBackSnackbar() {
+            showSnackbar('이전 컬렉션 선택 화면으로 돌아갑니다.', true);
+        }
+
+        // 홈으로 이동 (폴더 구조 / 단일 폴더 구조 모두 호환)
+        function navigateHome() {
+            const path = window.location.pathname;
+            if (path.includes('/color/')) {
+                window.location.href = '../index.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 바텀시트 열기
+        function openBottomSheet() {
+            if (selectedIds.length === 0) {
+                showSnackbar('최소 1개 이상의 컬러 색상지를 선택해주세요!', false);
+                return;
+            }
+            document.getElementById('sheetMsg').innerText = `${selectedIds.length}명의 컬러를 선택하였습니다.`;
+            document.getElementById('bottomSheetOverlay').classList.add('active');
+        }
+
+        function closeBottomSheet(e) {
+            if (e && e.target.id === 'bottomSheetOverlay') {
+                document.getElementById('bottomSheetOverlay').classList.remove('active');
+            }
+        }
+
+        // 피셔-예이츠 셔플
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        // 결과 보기 클릭 -> 컬러색상지가 섞이는 애니메이션 후 결과 전환
+        function startShuffleAndResult() {
+            document.getElementById('bottomSheetOverlay').classList.remove('active');
+
+            const stage = document.getElementById('shuffleStage');
+            const deck = document.getElementById('shuffleDeck');
+            deck.innerHTML = '';
+
+            // 선택한 컬러지(최대 6장 시각 표출)를 덱에 생성
+            const previewIds = selectedIds.slice(0, 6);
+            previewIds.forEach((id, idx) => {
+                const item = colorSwatches.find(c => c.id === id);
+                const el = document.createElement('div');
+                el.className = 'shuffle-swatch';
+                el.style.zIndex = idx;
+                el.innerHTML = `
+                    <div class="shuffle-swatch-color" style="background:${item.hex};"></div>
+                    <div class="shuffle-swatch-title">${item.name}</div>
+                `;
+                deck.appendChild(el);
+            });
+
+            stage.classList.add('active');
+
+            // 카드들이 좌우/회전하며 섞이는 모션
+            const cards = deck.querySelectorAll('.shuffle-swatch');
+            let step = 0;
+            const shuffleInterval = setInterval(() => {
+                cards.forEach((card) => {
+                    const randX = (Math.random() - 0.5) * 95;
+                    const randY = (Math.random() - 0.5) * 35;
+                    const randRot = (Math.random() - 0.5) * 32;
+                    card.style.transform = `translate(${randX}px, ${randY}px) rotate(${randRot}deg)`;
+                    card.style.zIndex = Math.floor(Math.random() * 10);
+                });
+                step++;
+                if (step >= 4) {
+                    clearInterval(shuffleInterval);
+                    cards.forEach(card => {
+                        card.style.transform = 'translate(0, 0) rotate(0deg) scale(1.04)';
+                    });
+                }
+            }, 220);
+
+            // 1.15초 뒤 결과 화면 오픈 + 컨페티 발사
+            setTimeout(() => {
+                stage.classList.remove('active');
+                showResultPage();
+            }, 1150);
+        }
+
+        function showResultPage() {
+            const selectPage = document.getElementById('selectPage');
+            const resultPage = document.getElementById('resultPage');
+            const headerTitle = document.getElementById('headerTitle');
+
+            selectPage.classList.add('hidden');
+            headerTitle.innerText = '컬러 순서 결과';
+
+            renderResultGrid();
+
+            setTimeout(() => {
+                resultPage.classList.remove('hidden');
+                launchConfetti();
+            }, 60);
+        }
+
+        // 결과 렌더링
+        function renderResultGrid() {
+            const resultGrid = document.getElementById('resultGrid');
+            resultGrid.innerHTML = '';
+
+            const alphabets = selectedIds.map((_, idx) => String.fromCharCode(65 + idx));
+            const shuffledAlphabets = shuffleArray(alphabets);
+
+            selectedIds.forEach((id, index) => {
+                const item = colorSwatches.find(c => c.id === id);
+                const badgeLetter = shuffledAlphabets[index];
+
+                const card = document.createElement('div');
+                card.className = 'swatch-card selected';
+                card.style.cursor = 'default';
+                card.innerHTML = `
+                    <div class="result-badge" style="animation-delay: ${index * 0.06}s">${badgeLetter}</div>
+                    <div class="swatch-paper" style="background-color: ${item.hex};"></div>
+                    <div class="swatch-label-box">
+                        <span class="swatch-code">ORDER ${badgeLetter}</span>
+                        <span class="swatch-name">${item.name}</span>
+                    </div>
+                `;
+                resultGrid.appendChild(card);
+            });
+        }
+
+        // 결과 화면에서 뒤로가기 (선택 화면으로)
+        function goBackToSelect() {
+            const selectPage = document.getElementById('selectPage');
+            const resultPage = document.getElementById('resultPage');
+            const headerTitle = document.getElementById('headerTitle');
+
+            resultPage.classList.add('hidden');
+            headerTitle.innerText = '컬러 색상지 뽑기';
+            lastStampedId = null;
+
+            setTimeout(() => {
+                selectPage.classList.remove('hidden');
+            }, 200);
+        }
+
+        // 최종 결과 컨페티(Confetti) 파티클 엔진
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const colors = ['#82DC28', '#FF7878', '#FDD835', '#29B6F6', '#AB47BC', '#FFFFFF'];
+            const pieces = Array.from({ length: 75 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height * 0.5,
+                w: Math.random() * 9 + 5,
+                h: Math.random() * 6 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vy: Math.random() * 3.5 + 2.2,
+                vx: (Math.random() - 0.5) * 2.5,
+                angle: Math.random() * 360,
+                spin: (Math.random() - 0.5) * 8
+            }));
+
+            let frame = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.angle += p.spin;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                frame++;
+                if (frame < 150) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animate();
+        }
+
+        window.onload = () => {
+            renderSwatches();
+        };
+    </script>
+</body>
+</html>
