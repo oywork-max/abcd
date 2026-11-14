@@ -57,7 +57,7 @@
             z-index: 0;
         }
 
-        /* 상단 헤더: 블러 및 좌측 버튼 제거, 메인 타이틀 중앙 + 우측 선택 인원만 배치 */
+        /* 상단 헤더: 블러 없음, 메인 타이틀 중앙 + 우측 선택 인원 카운터만 배치 */
         header {
             padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
             padding-bottom: 14px;
@@ -89,6 +89,78 @@
             color: #4d9a0f;
         }
 
+        /* 치이카와 캐릭터 한마디 말풍선 토스트 */
+        .quote-toast {
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 0px) + 58px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-12px) scale(0.95);
+            background: #ffffff;
+            border: 2.5px solid var(--coral);
+            border-radius: 999px;
+            padding: 7px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            z-index: 35;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+        }
+
+        .quote-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        .quote-speaker {
+            background: var(--coral);
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 999px;
+        }
+
+        .quote-text {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* 우측 하단 귀여운 BGM 플로팅 캡슐 (헤더를 건드리지 않음) */
+        .bgm-pill {
+            position: absolute;
+            right: 14px;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+            background: #ffffff;
+            color: var(--text-main);
+            border: 2px solid #cbd5e1;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .bgm-pill.playing {
+            border-color: var(--primary);
+            background: #f7fee7;
+            color: #365314;
+        }
+
+        .bgm-pill:active {
+            transform: scale(0.94);
+        }
+
         .page {
             flex: 1;
             min-height: 0;
@@ -109,10 +181,10 @@
             width: 100%;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 18px 14px 130px 14px;
+            padding: 18px 14px 135px 14px;
         }
 
-        /* 3x5 격자 배치 (좌우 잘림 방지) */
+        /* 3x5 격자 배치 */
         .grid-3x5 {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -140,14 +212,26 @@
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        /* 클릭 시 먼작귀 특유의 말랑한 젤리 바운스 */
+        @keyframes jellyPop {
+            0%   { transform: scale(0.9); }
+            45%  { transform: scale(1.06) translateY(-4px); }
+            75%  { transform: scale(0.98) translateY(-2px); }
+            100% { transform: scale(1) translateY(-3px); }
+        }
+
         .char-card:active {
-            transform: scale(0.94);
+            transform: scale(0.93);
         }
 
         .char-card.selected {
             border-color: var(--primary);
             box-shadow: 0 8px 18px rgba(130, 220, 40, 0.35);
             transform: translateY(-3px);
+        }
+
+        .char-card.just-clicked {
+            animation: jellyPop 0.32s ease forwards;
         }
 
         .select-check {
@@ -239,7 +323,7 @@
                 badgeIdleBounce 1.8s ease-in-out 0.7s infinite;
         }
 
-        /* 하단 고정 버튼 영역 (뿌연 그라데이션 제거 -> 솔리드 화이트 바) */
+        /* 하단 고정 버튼 영역 (솔리드 화이트 바) */
         .footer-action {
             position: absolute;
             bottom: 0;
@@ -272,7 +356,7 @@
             color: var(--text-main);
         }
 
-        /* 바텀시트 모달 (블러 제거) */
+        /* 바텀시트 모달 */
         .bottom-sheet-overlay {
             position: absolute;
             inset: 0;
@@ -320,11 +404,30 @@
             color: var(--text-main);
             margin-bottom: 22px;
         }
+
+        /* 컨페티 캔버스 */
+        #confettiCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+        }
     </style>
 </head>
 <body>
 
-    <div class="mobile-container">
+    <div class="mobile-container" onclick="ensureBgmStartedOnce()">
+        <canvas id="confettiCanvas"></canvas>
+
+        <!-- 외부 MP3 파일을 넣으실 경우 자동 연동 (없으면 내장 치이카와 신디사이저 BGM 자동 재생) -->
+        <audio id="externalBgm" loop preload="auto">
+            <source src="chiikawa/bgm.mp3" type="audio/mpeg">
+            <source src="img/bgm.mp3" type="audio/mpeg">
+            <source src="bgm.mp3" type="audio/mpeg">
+        </audio>
+
         <svg class="scenery-layer" viewBox="0 0 480 120" preserveAspectRatio="none">
             <path d="M0,90 L85,35 L190,85 L330,28 L460,85 L480,75 L480,120 L0,120 Z" fill="#b7b1cb" stroke="#6d5959" stroke-width="3"/>
             <path d="M0,95 Q20,65 45,88 Q70,55 100,88 Q135,60 165,90 Q205,45 245,88 Q280,65 315,90 Q355,55 395,88 Q435,60 480,85 L480,120 L0,120 Z" fill="#88b872" stroke="#5c4938" stroke-width="3"/>
@@ -335,6 +438,17 @@
             <div class="header-title" id="headerTitle">치이카와 선택하기</div>
             <div class="selected-counter" id="selectedCounter">0명 선택</div>
         </header>
+
+        <!-- 캐릭터 클릭 시 귀여운 대사 토스트 -->
+        <div class="quote-toast" id="quoteToast">
+            <span class="quote-speaker" id="quoteSpeaker">치이카와</span>
+            <span class="quote-text" id="quoteText">"와...!! 에-!"</span>
+        </div>
+
+        <!-- 우측 하단 BGM 컨트롤 플로팅 버튼 -->
+        <button class="bgm-pill playing" id="bgmToggleBtn" onclick="event.stopPropagation(); toggleBgm();">
+            🎵 BGM ON
+        </button>
 
         <div class="page" id="selectPage">
             <div class="content-scroll">
@@ -366,25 +480,309 @@
     </div>
 
     <script>
+        /**
+         * 치이카와 15인 캐릭터 데이터 + 클릭 시 나오는 귀여운 시그니처 사운드/감탄사
+         */
         const chiikawaCharacters = [
-            { id: 1,  name: '치이카와',       color: '#FFF9FA' },
-            { id: 2,  name: '하치와레',       color: '#E3F2FD' },
-            { id: 3,  name: '우사기',         color: '#FFF9C4' },
-            { id: 4,  name: '랏코',           color: '#EFEBE9' },
-            { id: 5,  name: '쿠리만쥬',       color: '#FFE0B2' },
-            { id: 6,  name: '시사',           color: '#FFF59D' },
-            { id: 7,  name: '모몽가',         color: '#F3E5F5' },
-            { id: 8,  name: '카니',           color: '#FFCDD2' },
-            { id: 9,  name: '파자마 파티즈',  color: '#E8F5E9' },
-            { id: 10, name: '풍뎅이',         color: '#D7CCC8' },
-            { id: 11, name: '고블린',         color: '#C8E6C9' },
-            { id: 12, name: '포쉐트 갑옷 씨', color: '#CFD8DC' },
-            { id: 13, name: '세이렌',         color: '#B2EBF2' },
-            { id: 14, name: '아노코',         color: '#FCE4EC' },
-            { id: 15, name: '꿀맛맨',         color: '#FFE082' }
+            { id: 1,  name: '치이카와',       color: '#FFF9FA', quote: '와...!! 에-! 으앙~!',           freq: 659.25 },
+            { id: 2,  name: '하치와레',       color: '#E3F2FD', quote: '어라?! 어떻게든 되겠지~!',      freq: 587.33 },
+            { id: 3,  name: '우사기',         color: '#FFF9C4', quote: '우라-!! 야하-!! 푸루야~!',       freq: 783.99 },
+            { id: 4,  name: '랏코',           color: '#EFEBE9', quote: '강해지고 싶나? 달콤한 파르페 최고!', freq: 440.00 },
+            { id: 5,  name: '쿠리만쥬',       color: '#FFE0B2', quote: '하아ー... 크으~!',              freq: 392.00 },
+            { id: 6,  name: '시사',           color: '#FFF59D', quote: '스승님~! 열심히 일하겠습니다!',  freq: 698.46 },
+            { id: 7,  name: '모몽가',         color: '#F3E5F5', quote: '봐라 봐라! 귀여운 척 좀 해봤다!', freq: 739.99 },
+            { id: 8,  name: '카니',           color: '#FFCDD2', quote: '모몽가랑 같이 헌책방 갈래~!',    freq: 659.25 },
+            { id: 9,  name: '파자마 파티즈',  color: '#E8F5E9', quote: '우와와 우와~ 파자마 파티~♪',     freq: 880.00 },
+            { id: 10, name: '풍뎅이',         color: '#D7CCC8', quote: '부스스... 찹쌀떡처럼 말랑말랑~',  freq: 830.61 },
+            { id: 11, name: '고블린',         color: '#C8E6C9', quote: '감옥에서 탈출?! 버섯 볶음 먹자!', freq: 493.88 },
+            { id: 12, name: '포쉐트 갑옷 씨', color: '#CFD8DC', quote: '직접 만든 귀여운 파자마 어때?',   freq: 349.23 },
+            { id: 13, name: '세이렌',         color: '#B2EBF2', quote: '랄랄라~ 내 노래를 들어줘~♪',     freq: 783.99 },
+            { id: 14, name: '아노코',         color: '#FCE4EC', quote: '쿵... 쿵... (해맑은 미소)',      freq: 329.63 },
+            { id: 15, name: '꿀맛맨',         color: '#FFE082', quote: '이거 정말 꿀맛이로구나~!!',      freq: 523.25 }
         ];
 
         let selectedIds = [];
+        let lastClickedId = null;
+        let quoteTimer = null;
+
+        // =========================================================
+        // 사운드 & 먼작귀풍 배경음악(BGM) 엔진 (Web Audio API + 외부 MP3 하이브리드)
+        // =========================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+        let bgmStarted = false;
+        let bgmLoopTimer = null;
+        let usingExternalMp3 = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // 먼작귀(치이카와) 엔딩 '혼자서도 할 수 있어' / '파자마 파티즈' 느낌의 통통 튀는 오르골 멜로디 시퀀스
+        const chiikawaMelody = [
+            // 마디 1: 통통 튀는 밝은 오프닝 (도-미-솔-도-라-솔-미-레)
+            { note: 523.25, bass: 261.63, dur: 0.22 }, // C5
+            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
+            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
+            { note: 1046.50,bass: 0,      dur: 0.32 }, // C6
+            { note: 880.00, bass: 349.23, dur: 0.22 }, // A5
+            { note: 783.99, bass: 0,      dur: 0.22 }, // G5
+            { note: 659.25, bass: 392.00, dur: 0.28 }, // E5
+            { note: 0,      bass: 0,      dur: 0.14 },
+            // 마디 2: 아기자기한 전개 (파-라-솔-미-레-파-미-도)
+            { note: 698.46, bass: 349.23, dur: 0.22 }, // F5
+            { note: 880.00, bass: 0,      dur: 0.22 }, // A5
+            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
+            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
+            { note: 587.33, bass: 293.66, dur: 0.22 }, // D5
+            { note: 698.46, bass: 0,      dur: 0.22 }, // F5
+            { note: 659.25, bass: 392.00, dur: 0.22 }, // E5
+            { note: 587.33, bass: 0,      dur: 0.26 }, // D5
+            // 마디 3: 우와와 우와~ 리듬 (도-미-솔-미-라-솔-파-미)
+            { note: 523.25, bass: 261.63, dur: 0.22 }, // C5
+            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
+            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
+            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
+            { note: 880.00, bass: 349.23, dur: 0.26 }, // A5
+            { note: 783.99, bass: 0,      dur: 0.22 }, // G5
+            { note: 698.46, bass: 293.66, dur: 0.22 }, // F5
+            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
+            // 마디 4: 귀엽게 마무리 (레-미-파-솔-도~)
+            { note: 587.33, bass: 392.00, dur: 0.20 }, // D5
+            { note: 659.25, bass: 0,      dur: 0.20 }, // E5
+            { note: 698.46, bass: 392.00, dur: 0.20 }, // F5
+            { note: 783.99, bass: 0,      dur: 0.24 }, // G5
+            { note: 1046.50,bass: 261.63, dur: 0.42 }, // C6
+            { note: 0,      bass: 0,      dur: 0.30 }
+        ];
+
+        let melodyStep = 0;
+
+        function playSynthBgmStep() {
+            if (!soundEnabled || usingExternalMp3) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const step = chiikawaMelody[melodyStep];
+            const now = audioCtx.currentTime;
+
+            // 메인 멜로디 (맑은 오르골 / 마림바 톤)
+            if (step.note > 0) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(step.note, now);
+
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(0.055, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + step.dur);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + step.dur + 0.02);
+            }
+
+            // 통통 튀는 우쿨렐레/피치카토 베이스 반주
+            if (step.bass > 0) {
+                const bOsc = audioCtx.createOscillator();
+                const bGain = audioCtx.createGain();
+                bOsc.type = 'triangle';
+                bOsc.frequency.setValueAtTime(step.bass, now);
+
+                bGain.gain.setValueAtTime(0.001, now);
+                bGain.gain.linearRampToValueAtTime(0.035, now + 0.015);
+                bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+                bOsc.connect(bGain);
+                bGain.connect(audioCtx.destination);
+                bOsc.start(now);
+                bOsc.stop(now + 0.2);
+            }
+
+            melodyStep = (melodyStep + 1) % chiikawaMelody.length;
+            bgmLoopTimer = setTimeout(playSynthBgmStep, step.dur * 1000);
+        }
+
+        function startBgm() {
+            if (!soundEnabled || bgmStarted) return;
+            bgmStarted = true;
+
+            const extAudio = document.getElementById('externalBgm');
+            if (extAudio) {
+                extAudio.volume = 0.35;
+                const playPromise = extAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        usingExternalMp3 = true;
+                    }).catch(() => {
+                        usingExternalMp3 = false;
+                        if (bgmLoopTimer) clearTimeout(bgmLoopTimer);
+                        playSynthBgmStep();
+                    });
+                    return;
+                }
+            }
+            playSynthBgmStep();
+        }
+
+        function stopBgm() {
+            bgmStarted = false;
+            if (bgmLoopTimer) {
+                clearTimeout(bgmLoopTimer);
+                bgmLoopTimer = null;
+            }
+            const extAudio = document.getElementById('externalBgm');
+            if (extAudio) {
+                extAudio.pause();
+            }
+        }
+
+        function ensureBgmStartedOnce() {
+            if (soundEnabled && !bgmStarted) {
+                startBgm();
+            }
+        }
+
+        function toggleBgm() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('bgmToggleBtn');
+            if (soundEnabled) {
+                btn.innerText = '🎵 BGM ON';
+                btn.classList.add('playing');
+                startBgm();
+            } else {
+                btn.innerText = '🔇 BGM OFF';
+                btn.classList.remove('playing');
+                stopBgm();
+            }
+        }
+
+        // [효과음 1] 캐릭터 클릭 시 귀여운 '뽀옥~!' 물방울 팝 사운드
+        function playChiikawaClickSound(char, isSelecting) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (isSelecting) {
+                // 귀여운 2단 물방울 상승음 (뽀-옥!)
+                const baseFreq = char.freq || 659.25;
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(baseFreq * 0.75, now);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.35, now + 0.11);
+
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.008, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            } else {
+                // 선택 해제 시 작고 부드러운 '톡' 사운드
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.exponentialRampToValueAtTime(320, now + 0.08);
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.008, now + 0.09);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        // [효과음 2] 바텀시트 열릴 때 '띠리링~' 알림음
+        function playSheetOpenSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            [659.25, 880.00].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + i * 0.07);
+                gain.gain.setValueAtTime(0.14, now + i * 0.07);
+                gain.gain.exponentialRampToValueAtTime(0.008, now + i * 0.07 + 0.16);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + i * 0.07);
+                osc.stop(now + i * 0.07 + 0.17);
+            });
+        }
+
+        // [효과음 3] 결과 발표 시 '따라라라~ 짠!' 실로폰 팡파르 + 알파벳 배지 바운스 싱크음
+        function playResultFanfare(badgeCount) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            // 신나는 치이카와 팡파르 화음 (도-미-솔-도-솔-도!)
+            const fanfareNotes = [
+                { f: 523.25, t: 0.00, d: 0.12 },
+                { f: 659.25, t: 0.09, d: 0.12 },
+                { f: 783.99, t: 0.18, d: 0.12 },
+                { f: 1046.50,t: 0.27, d: 0.22 },
+                { f: 783.99, t: 0.44, d: 0.12 },
+                { f: 1046.50,t: 0.55, d: 0.45 }
+            ];
+
+            fanfareNotes.forEach(n => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(n.f, now + n.t);
+                gain.gain.setValueAtTime(0.2, now + n.t);
+                gain.gain.exponentialRampToValueAtTime(0.008, now + n.t + n.d);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + n.t);
+                osc.stop(now + n.t + n.d + 0.02);
+            });
+
+            // 각 캐릭터의 A, B, C, D 배지가 통통 튀어나올 때 맞춘 방울 소리
+            const maxPop = Math.min(badgeCount, 10);
+            for (let i = 0; i < maxPop; i++) {
+                const delay = i * 0.08 + 0.15;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880 + i * 65, now + delay);
+                gain.gain.setValueAtTime(0.08, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + delay + 0.09);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.1);
+            }
+        }
+
+        // 캐릭터 말풍선 표시
+        function showCharacterQuote(char) {
+            const toast = document.getElementById('quoteToast');
+            const speaker = document.getElementById('quoteSpeaker');
+            const text = document.getElementById('quoteText');
+
+            speaker.innerText = char.name;
+            text.innerText = `"${char.quote}"`;
+            toast.classList.add('show');
+
+            if (quoteTimer) clearTimeout(quoteTimer);
+            quoteTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2200);
+        }
 
         function createFallbackSVG(char) {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -427,9 +825,10 @@
 
             chiikawaCharacters.forEach(char => {
                 const isSelected = selectedIds.includes(char.id);
+                const isJustClicked = (lastClickedId === char.id);
                 const card = document.createElement('div');
-                card.className = `char-card ${isSelected ? 'selected' : ''}`;
-                card.onclick = () => toggleSelect(char.id);
+                card.className = `char-card ${isSelected ? 'selected' : ''} ${isJustClicked ? 'just-clicked' : ''}`;
+                card.onclick = () => toggleSelect(char);
 
                 card.innerHTML = `
                     <div class="select-check">✓</div>
@@ -447,11 +846,18 @@
             document.getElementById('selectedCounter').innerText = `${selectedIds.length}명 선택`;
         }
 
-        function toggleSelect(id) {
-            if (selectedIds.includes(id)) {
-                selectedIds = selectedIds.filter(i => i !== id);
+        function toggleSelect(char) {
+            ensureBgmStartedOnce();
+
+            if (selectedIds.includes(char.id)) {
+                selectedIds = selectedIds.filter(i => i !== char.id);
+                lastClickedId = null;
+                playChiikawaClickSound(char, false);
             } else {
-                selectedIds.push(id);
+                selectedIds.push(char.id);
+                lastClickedId = char.id;
+                playChiikawaClickSound(char, true);
+                showCharacterQuote(char);
             }
             renderGrid();
         }
@@ -466,10 +872,12 @@
         }
 
         function openBottomSheet() {
+            ensureBgmStartedOnce();
             if (selectedIds.length === 0) {
                 alert('최소 1명 이상의 캐릭터를 선택해주세요!');
                 return;
             }
+            playSheetOpenSound();
             document.getElementById('sheetMsg').innerText = `${selectedIds.length}명의 캐릭터 선택하였습니다.`;
             document.getElementById('bottomSheetOverlay').classList.add('active');
         }
@@ -492,24 +900,30 @@
 
             renderResultGrid();
             resultPage.classList.remove('hidden');
+
+            // 결과 팡파르 사운드 & 파스텔 컨페티 실행
+            playResultFanfare(selectedIds.length);
+            launchConfetti();
         }
 
-        // [핵심] 선택된 치이카와 캐릭터들을 랜덤으로 섞은 뒤 A, B, C, D... 순서대로 정렬하여 표시
+        // 선택된 캐릭터들을 랜덤으로 섞은 뒤 A, B, C, D... 순서대로 정렬하여 표시
         function renderResultGrid() {
             const resultGrid = document.getElementById('resultGrid');
             resultGrid.innerHTML = '';
 
-            // 선택한 캐릭터 ID들을 랜덤으로 섞음 -> 첫 번째 칸이 A, 두 번째 칸이 B, 세 번째 칸이 C...
             const shuffledCharIds = shuffleArray(selectedIds);
 
             shuffledCharIds.forEach((id, index) => {
                 const char = chiikawaCharacters.find(c => c.id === id);
-                const badgeLetter = String.fromCharCode(65 + index); // A, B, C, D 순서대로!
+                const badgeLetter = String.fromCharCode(65 + index);
                 const delay = (index * 0.08).toFixed(2);
 
                 const card = document.createElement('div');
                 card.className = 'char-card selected';
-                card.style.cursor = 'default';
+                card.onclick = () => {
+                    playChiikawaClickSound(char, true);
+                    showCharacterQuote(char);
+                };
                 card.innerHTML = `
                     <div class="result-badge" style="animation-delay: ${delay}s, ${parseFloat(delay) + 0.65}s">${badgeLetter}</div>
                     <div class="char-img-box">
@@ -531,6 +945,7 @@
 
             resultPage.classList.add('hidden');
             headerTitle.innerText = '치이카와 선택하기';
+            lastClickedId = null;
             selectPage.classList.remove('hidden');
         }
 
@@ -541,6 +956,51 @@
             } else {
                 window.location.href = 'index.html';
             }
+        }
+
+        // 치이카와 파스텔 컨페티 효과
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const colors = ['#FF7878', '#82DC28', '#FFF176', '#81D4FA', '#F48FB1', '#FFFFFF'];
+            const pieces = Array.from({ length: 65 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height * 0.4,
+                w: Math.random() * 8 + 5,
+                h: Math.random() * 6 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vy: Math.random() * 3.2 + 2.0,
+                vx: (Math.random() - 0.5) * 2.2,
+                angle: Math.random() * 360,
+                spin: (Math.random() - 0.5) * 7
+            }));
+
+            let frame = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.angle += p.spin;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                frame++;
+                if (frame < 140) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animate();
         }
 
         window.onload = () => {
