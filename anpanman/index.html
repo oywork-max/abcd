@@ -7,6 +7,26 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>휴게시간 순서뽑기 - 호빵맨 테마 (47인)</title>
+
+    <!-- 스플래시 강제 종료 안전장치 (1.3초 후 무조건 DOM에서 삭제) -->
+    <script>
+        function forceRemoveSplash() {
+            var splash = document.getElementById('anpanSplash');
+            if (!splash) return;
+            splash.style.opacity = '0';
+            splash.style.pointerEvents = 'none';
+            setTimeout(function() {
+                if (splash && splash.parentNode) {
+                    splash.parentNode.removeChild(splash);
+                }
+            }, 350);
+        }
+        setTimeout(forceRemoveSplash, 1300);
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(forceRemoveSplash, 1200);
+        });
+    </script>
+
     <!-- Pretendard & 둥근 타이틀용 Jua 폰트 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
@@ -41,7 +61,7 @@
             justify-content: center;
         }
 
-        /* 모바일 컨테이너: 좌우 잘림 원천 차단 + 스카이블루 & 무지개 배경 */
+        /* 모바일 컨테이너 */
         .mobile-container {
             width: 100%;
             max-width: 480px;
@@ -55,22 +75,8 @@
         }
 
         /* =========================================================
-           1. 인트로 스플래시 화면 (CSS + JS 이중 자동 전환 보장)
+           1. 인트로 스플래시 화면
            ========================================================= */
-        @keyframes splashAutoHide {
-            0%, 72% {
-                opacity: 1;
-                transform: scale(1);
-                visibility: visible;
-            }
-            100% {
-                opacity: 0;
-                transform: scale(1.04);
-                visibility: hidden;
-                pointer-events: none;
-            }
-        }
-
         .anpan-splash {
             position: absolute;
             inset: 0;
@@ -80,19 +86,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
+            transition: opacity 0.35s ease;
             opacity: 1;
-            visibility: visible;
             cursor: pointer;
-            animation: splashAutoHide 2.0s ease forwards;
-        }
-
-        .anpan-splash.fade-out {
-            opacity: 0 !important;
-            transform: scale(1.04) !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-            animation: none !important;
         }
 
         .anpan-splash img {
@@ -124,12 +120,6 @@
             color: var(--anpan-red);
             text-shadow: -3px -3px 0 #fff, 3px -3px 0 #fff, -3px 3px 0 #fff, 3px 3px 0 #fff, 0 5px 0 var(--anpan-brown);
             margin-bottom: 12px;
-            animation: bounceTitle 1.2s ease infinite alternate;
-        }
-
-        @keyframes bounceTitle {
-            from { transform: translateY(0); }
-            to { transform: translateY(-8px); }
         }
 
         .splash-touch-hint {
@@ -290,7 +280,7 @@
             word-break: keep-all;
         }
 
-        /* [핵심 수정] 페이지 레이어: flex:1 + min-height:0 구조로 46, 47번까지 완벽하게 스크롤 보장 */
+        /* 페이지 레이어 */
         .page {
             flex: 1;
             min-height: 0;
@@ -298,18 +288,14 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            transition: opacity 0.3s ease;
-            opacity: 1;
             z-index: 2;
         }
 
         .page.hidden {
             display: none !important;
-            opacity: 0;
-            pointer-events: none;
         }
 
-        /* 컨텐츠 스크롤 영역: 좌우 잘림 방지 & 하단 46, 47번 카드가 버튼 위로 완전히 올라오도록 여유 패딩 150px 부여 */
+        /* 컨텐츠 스크롤 영역 */
         .content-scroll {
             flex: 1;
             min-height: 0;
@@ -320,7 +306,7 @@
             padding: 12px 12px 150px 12px;
         }
 
-        /* [핵심 수정] 4x12 격자 그리드 (4열 배치 + minmax(0, 1fr)로 좌우 팽창 원천 차단) */
+        /* 4x12 격자 그리드 (좌우 잘림 방지) */
         .character-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -329,22 +315,22 @@
             margin: 0 auto;
         }
 
-        /* [핵심 수정] 캐릭터 카드: 내부 패딩을 3px로 최소화하여 캐릭터 이미지 크기 극대화 */
+        /* [수정] 캐릭터 카드: 적당한 기본 패딩(5px)과 안정적인 비율로 복원 */
         .char-card {
             width: 100%;
             min-width: 0;
             background: #ffffff;
             border-radius: 14px;
-            aspect-ratio: 1 / 1.08;
+            aspect-ratio: 1 / 1.12;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 3px 3px 4px 3px; /* 패딩 최소화 */
+            padding: 5px 5px 4px 5px;
             cursor: pointer;
             position: relative;
             border: 2px solid var(--anpan-brown);
-            box-shadow: 0 3.5px 0 var(--anpan-brown), 0 4px 8px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 3px 0 var(--anpan-brown), 0 4px 8px rgba(0, 0, 0, 0.12);
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -353,11 +339,10 @@
             box-shadow: 0 1px 0 var(--anpan-brown);
         }
 
-        /* 선택되었을 때: 호빵맨 레드 & 스타 옐로우 하이라이트 */
         .char-card.selected {
             background: #fffde7;
             border-color: var(--anpan-red);
-            box-shadow: 0 3.5px 0 var(--anpan-red-dark), 0 0 0 2.5px var(--anpan-yellow);
+            box-shadow: 0 3px 0 var(--anpan-red-dark), 0 0 0 2.5px var(--anpan-yellow);
             transform: translateY(-2px);
         }
 
@@ -368,10 +353,10 @@
             left: 4px;
             background: rgba(74, 44, 17, 0.72);
             color: #ffffff;
-            font-size: 0.52rem;
+            font-size: 0.5rem;
             font-weight: 800;
             padding: 1px 4px;
-            border-radius: 5px;
+            border-radius: 4px;
             z-index: 3;
             pointer-events: none;
             line-height: 1.1;
@@ -380,16 +365,16 @@
         /* 선택 체크 뱃지 */
         .select-check {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 20px;
-            height: 20px;
+            top: -4px;
+            right: -4px;
+            width: 19px;
+            height: 19px;
             border-radius: 50%;
             background: var(--anpan-red);
             color: #ffffff;
-            border: 2px solid #ffffff;
+            border: 1.5px solid #ffffff;
             outline: 1.5px solid var(--anpan-brown);
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 900;
             display: flex;
             align-items: center;
@@ -405,27 +390,29 @@
             transform: scale(1);
         }
 
-        /* 개별 이미지(1.png ~ 47.png) 프레임: 카드 면적의 82%를 꽉 채우도록 확대 */
+        /* [핵심 수정] 이미지 확대/크롭(cover)을 삭제하고 캐릭터 전체가 눈 잘림 없이 온전히 나오는 contain 적용 */
         .char-img-box {
             width: 100%;
-            height: 82%;
-            border-radius: 10px;
+            height: 76%;
+            border-radius: 9px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2px;
             background: #ffffff;
         }
 
         .char-img-box img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* 이미지가 절대 잘리지 않고 원본 비율 그대로 표시됨 */
+            object-position: center;
             display: block;
         }
 
         .char-name {
-            font-size: 0.66rem;
+            font-size: 0.64rem;
             font-weight: 900;
             color: var(--anpan-brown);
             text-align: center;
@@ -433,11 +420,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
-            line-height: 1.15;
+            line-height: 1.2;
             letter-spacing: -0.04em;
         }
 
-        /* 결과 화면 우측 상단 알파벳 배지 (좌우 잘림 없도록 4열 사이즈에 최적화) */
+        /* 결과 화면 우측 상단 알파벳 배지 */
         @keyframes badgeBounceIn {
             0%   { opacity: 0; transform: scale(0.2) translateY(-20px); }
             50%  { opacity: 1; transform: scale(1.22) translateY(2px); }
@@ -447,22 +434,22 @@
 
         .result-badge {
             position: absolute;
-            top: -6px;
-            right: -5px;
+            top: -5px;
+            right: -4px;
             background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
             color: #ffffff;
-            min-width: 26px;
-            height: 26px;
+            min-width: 25px;
+            height: 25px;
             padding: 0 4px;
             border-radius: 999px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Jua', sans-serif;
-            font-size: 0.85rem;
-            box-shadow: 0 2.5px 0 var(--anpan-brown), 0 3px 6px rgba(229, 57, 53, 0.45);
-            border: 2px solid #ffffff;
-            outline: 2px solid var(--anpan-brown);
+            font-size: 0.82rem;
+            box-shadow: 0 2px 0 var(--anpan-brown), 0 3px 6px rgba(229, 57, 53, 0.45);
+            border: 1.5px solid #ffffff;
+            outline: 1.5px solid var(--anpan-brown);
             z-index: 6;
             opacity: 0;
             animation: badgeBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -599,9 +586,9 @@
     <div class="mobile-container">
 
         <!-- [1] 호빵맨 인트로 스플래시 화면 -->
-        <div class="anpan-splash" id="anpanSplash" onclick="dismissSplash()" ontouchstart="dismissSplash()">
-            <img src="img/splash.jpg" alt="날아라 호빵맨 인트로" 
-                 onerror="handleSplashImgError(this)">
+        <div class="anpan-splash" id="anpanSplash" onclick="forceRemoveSplash()" ontouchstart="forceRemoveSplash()">
+            <img id="splashImgEl" src="anpanman/splash.jpg" alt="날아라 호빵맨 인트로" 
+                 onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src='img/splash.jpg';}else if(!this.dataset.t2){this.dataset.t2=1;this.src='anpanman-splash.jpg';}else if(!this.dataset.t3){this.dataset.t3=1;this.src='splash.jpg';}else{this.style.display='none';}">
             
             <div class="splash-fallback">
                 <div style="font-family:'Jua',sans-serif; font-size:1.4rem; color:#FFEB3B; text-shadow: -2px -2px 0 #4A2C11, 2px -2px 0 #4A2C11, -2px 2px 0 #4A2C11, 2px 2px 0 #4A2C11; margin-bottom:4px;">날아라!</div>
@@ -745,54 +732,6 @@
         let soundEnabled = true;
         let quoteTimer = null;
         let audioCtx = null;
-        let splashDismissed = false;
-
-        // 스플래시 이미지 경로 다중 폴백 처리
-        function handleSplashImgError(imgEl) {
-            const step = parseInt(imgEl.dataset.step || '0', 10);
-            const candidates = [
-                'anpanman-splash.jpg',
-                'splash.jpg',
-                'anpanman/splash.jpg',
-                'anpanman/img/splash.jpg',
-                'img/splash.png',
-                'splash.png'
-            ];
-            if (step < candidates.length) {
-                imgEl.dataset.step = String(step + 1);
-                imgEl.src = candidates[step];
-            } else {
-                imgEl.style.display = 'none';
-            }
-        }
-
-        // 캐릭터 1~47번 이미지 다중 경로 및 확장자(.png, .PNG, .jpg, .jpeg, .webp) 자동 탐색
-        function handleCharImgError(imgEl, id, bgColor) {
-            const step = parseInt(imgEl.dataset.step || '0', 10);
-            const candidates = [
-                `anpanman/${id}.png`,
-                `${id}.png`,
-                `anpanman/img/${id}.png`,
-                `img/${id}.PNG`,
-                `anpanman/${id}.PNG`,
-                `${id}.PNG`,
-                `img/${id}.jpg`,
-                `anpanman/${id}.jpg`,
-                `${id}.jpg`,
-                `img/${id}.jpeg`,
-                `anpanman/${id}.jpeg`,
-                `${id}.jpeg`,
-                `img/${id}.webp`,
-                `anpanman/${id}.webp`
-            ];
-            if (step < candidates.length) {
-                imgEl.dataset.step = String(step + 1);
-                imgEl.src = candidates[step];
-            } else {
-                imgEl.onerror = null;
-                imgEl.src = createFallbackSVG(bgColor);
-            }
-        }
 
         function createFallbackSVG(bgColor) {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -808,6 +747,27 @@
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
 
+        function bindCharacterImage(imgEl, id, bgColor) {
+            const paths = [
+                `anpanman/${id}.png`,
+                `img/${id}.png`,
+                `${id}.png`,
+                `anpanman/${id}.jpg`,
+                `img/${id}.jpg`
+            ];
+            let idx = 0;
+            imgEl.onerror = function() {
+                idx++;
+                if (idx < paths.length) {
+                    imgEl.src = paths[idx];
+                } else {
+                    imgEl.onerror = null;
+                    imgEl.src = createFallbackSVG(bgColor);
+                }
+            };
+            imgEl.src = paths[0];
+        }
+
         function getOrderLabel(index) {
             if (index < 26) {
                 return String.fromCharCode(65 + index);
@@ -815,21 +775,6 @@
             const first = String.fromCharCode(65 + Math.floor(index / 26) - 1);
             const second = String.fromCharCode(65 + (index % 26));
             return first + second;
-        }
-
-        function dismissSplash() {
-            if (splashDismissed) return;
-            splashDismissed = true;
-
-            const splash = document.getElementById('anpanSplash');
-            if (!splash) return;
-
-            splash.classList.add('fade-out');
-            setTimeout(() => {
-                if (splash && splash.parentNode) {
-                    splash.style.display = 'none';
-                }
-            }, 460);
         }
 
         function navigateHome() {
@@ -920,28 +865,41 @@
             }
         }
 
-        // 4x12 그리드 렌더링 (46, 47번까지 즉시 로드되도록 loading="lazy" 제거)
-        function renderGrid() {
+        function initGridOnce() {
             const grid = document.getElementById('anpanmanGrid');
             if (!grid) return;
             grid.innerHTML = '';
 
             anpanmanCharacters.forEach(char => {
-                const isSelected = selectedIds.includes(char.id);
                 const card = document.createElement('div');
-                card.className = `char-card ${isSelected ? 'selected' : ''}`;
+                card.className = 'char-card';
+                card.id = `char-card-${char.id}`;
                 card.onclick = () => toggleSelect(char);
 
                 card.innerHTML = `
                     <div class="char-num-tag">#${char.id}</div>
                     <div class="select-check">✓</div>
                     <div class="char-img-box" style="background-color: ${char.bg};">
-                        <img src="img/${char.id}.png" alt="${char.name}"
-                             onerror="handleCharImgError(this, ${char.id}, '${char.bg}')">
+                        <img alt="${char.name}">
                     </div>
                     <div class="char-name">${char.name}</div>
                 `;
                 grid.appendChild(card);
+
+                const imgEl = card.querySelector('img');
+                bindCharacterImage(imgEl, char.id, char.bg);
+            });
+        }
+
+        function updateSelectionUI() {
+            anpanmanCharacters.forEach(char => {
+                const card = document.getElementById(`char-card-${char.id}`);
+                if (!card) return;
+                if (selectedIds.includes(char.id)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
             });
 
             const btn = document.getElementById('selectActionBtn');
@@ -958,7 +916,7 @@
                 playChime('select');
                 triggerCharacterQuote(char);
             }
-            renderGrid();
+            updateSelectionUI();
         }
 
         function shuffleArray(arr) {
@@ -1019,12 +977,14 @@
                     <div class="char-num-tag">#${char.id}</div>
                     <div class="result-badge" style="animation-delay: ${delay}s">${badgeLetter}</div>
                     <div class="char-img-box" style="background-color: ${char.bg};">
-                        <img src="img/${char.id}.png" alt="${char.name}"
-                             onerror="handleCharImgError(this, ${char.id}, '${char.bg}')">
+                        <img alt="${char.name}">
                     </div>
                     <div class="char-name">${char.name}</div>
                 `;
                 resultGrid.appendChild(card);
+
+                const imgEl = card.querySelector('img');
+                bindCharacterImage(imgEl, char.id, char.bg);
             });
         }
 
@@ -1038,18 +998,7 @@
             selectPage.classList.remove('hidden');
         }
 
-        function initApp() {
-            renderGrid();
-            setTimeout(() => {
-                dismissSplash();
-            }, 1450);
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+        initGridOnce();
     </script>
 </body>
 </html>
