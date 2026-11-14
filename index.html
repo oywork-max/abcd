@@ -6,8 +6,7 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>올리버스 - 휴게시간 순서뽑기 & 플레이그라운드</title>
-    <!-- Pretendard 폰트 -->
+    <title>올리버스 - 휴게시간 순서뽑기</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <style>
         :root {
@@ -39,31 +38,27 @@
             overflow-x: hidden;
         }
 
-        /* 모바일 컨테이너 */
         .app-container {
             width: 100%;
             max-width: 480px;
             min-height: 100dvh;
-            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%);
+            background-color: var(--bg-dark);
             position: relative;
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* =========================================================
-           1. 스플래시 인트로 화면 (아이콘 스플래시 후 페이드아웃)
-           ========================================================= */
         #splash-screen {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at 50% 38%, #1e293b 0%, #090d16 100%);
+            background-color: #090d16;
             z-index: 999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.55s ease, visibility 0.55s ease;
+            transition: opacity 0.45s ease, visibility 0.45s ease;
         }
 
         #splash-screen.hidden {
@@ -76,12 +71,9 @@
             width: 118px;
             height: 118px;
             border-radius: 30px;
-            background: linear-gradient(145deg, #263449, #151e2e);
+            background: #1e293b;
             padding: 4px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.55),
-                0 0 0 2px rgba(130, 220, 40, 0.35),
-                inset 0 2px 4px rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55), 0 0 0 2px var(--primary-lime);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -121,7 +113,7 @@
         .splash-loader {
             width: 140px;
             height: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #1e293b;
             border-radius: 999px;
             overflow: hidden;
         }
@@ -129,9 +121,9 @@
         .splash-loader-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-lime), #b8f272);
+            background: var(--primary-lime);
             border-radius: 999px;
-            animation: loadProgress 1.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: loadProgress 1.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         @keyframes loadProgress {
@@ -139,60 +131,29 @@
             100% { width: 100%; }
         }
 
-        /* =========================================================
-           2. 상단 헤더 (배터리/상태바 컬러 완벽 통일)
-           ========================================================= */
         header {
-            padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
-            padding-bottom: 14px;
+            padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+            padding-bottom: 16px;
             padding-left: 20px;
             padding-right: 20px;
-            background: rgba(15, 23, 42, 0.88);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            background-color: var(--bg-dark);
+            border-bottom: 1px solid #1e293b;
             position: sticky;
             top: 0;
             z-index: 20;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .brand-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--primary-lime);
-            box-shadow: 0 0 10px var(--primary-lime);
+            justify-content: center;
         }
 
         .header-title {
-            font-size: 1.2rem;
+            font-size: 1.18rem;
             font-weight: 900;
             letter-spacing: -0.03em;
             color: #ffffff;
+            text-align: center;
         }
 
-        .crew-badge {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: var(--primary-lime);
-            background: rgba(130, 220, 40, 0.14);
-            border: 1px solid rgba(130, 220, 40, 0.35);
-            padding: 4px 10px;
-            border-radius: 999px;
-            letter-spacing: 0.04em;
-        }
-
-        /* =========================================================
-           3. 컬렉션 카드 리스트 (왼쪽 이미지 · 오른쪽 텍스트)
-           ========================================================= */
         main {
             flex: 1;
             padding: 20px 18px calc(env(safe-area-inset-bottom, 0px) + 36px) 18px;
@@ -208,25 +169,21 @@
         }
 
         .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             padding: 0 4px;
             margin-bottom: 2px;
         }
 
         .section-label {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 800;
             color: var(--text-muted);
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
 
-        /* 가로형 카드 (좌측 썸네일 이미지 · 우측 테마명) */
         .collection-card {
             background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid #334155;
             border-radius: 22px;
             padding: 12px 16px 12px 12px;
             display: flex;
@@ -243,10 +200,9 @@
         .collection-card:active {
             transform: scale(0.97);
             background: var(--bg-card-hover);
-            border-color: rgba(130, 220, 40, 0.45);
+            border-color: var(--primary-lime);
         }
 
-        /* 좌측 1:1 썸네일 박스 */
         .thumb-box {
             width: 74px;
             height: 74px;
@@ -258,7 +214,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            border: 1px solid #334155;
         }
 
         .thumb-box img {
@@ -268,7 +224,6 @@
             display: block;
         }
 
-        /* 우측 텍스트 영역 */
         .card-info {
             flex: 1;
             display: flex;
@@ -298,17 +253,15 @@
             font-weight: 900;
             padding: 2px 6px;
             border-radius: 6px;
-            letter-spacing: 0.04em;
         }
 
         .badge-soon {
-            background: rgba(148, 163, 184, 0.2);
+            background: #334155;
             color: #cbd5e1;
             font-size: 0.62rem;
             font-weight: 800;
             padding: 2px 6px;
             border-radius: 6px;
-            letter-spacing: 0.04em;
         }
 
         .collection-name {
@@ -328,16 +281,13 @@
             margin-left: 4px;
         }
 
-        /* =========================================================
-           4. 향후 오픈 예정 (회색 실루엣 카드 스타일)
-           ========================================================= */
         .collection-card.locked {
-            background: rgba(30, 41, 59, 0.55);
-            border-color: rgba(255, 255, 255, 0.04);
+            background: #151e2e;
+            border-color: #1e293b;
         }
 
         .collection-card.locked .thumb-box {
-            filter: grayscale(100%) brightness(0.58) contrast(1.1);
+            filter: grayscale(100%) brightness(0.6);
         }
 
         .collection-card.locked .collection-order {
@@ -351,7 +301,6 @@
         .lock-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(15, 23, 42, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -369,7 +318,6 @@
             animation: shakeLocked 0.32s ease;
         }
 
-        /* 하단 스낵바 토스트 */
         .snackbar {
             position: fixed;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
@@ -399,10 +347,8 @@
 </head>
 <body>
 
-    <!-- [1] 스플래시 인트로 화면 -->
     <div id="splash-screen" onclick="hideSplash()">
         <div class="splash-icon-wrap">
-            <!-- icon-180.png 또는 assets/icon-180.png 우선 로드, 없을 시 내장 SVG 아이콘 표시 -->
             <img src="icon-180.png" alt="휴게시간 순서뽑기 아이콘"
                  onerror="handleSplashIconError(this)">
         </div>
@@ -413,24 +359,17 @@
         </div>
     </div>
 
-    <!-- [2] 메인 앱 컨테이너 -->
     <div class="app-container">
         <header>
-            <div class="brand-wrap">
-                <span class="brand-dot"></span>
-                <h1 class="header-title">휴게시간 순서뽑기</h1>
-            </div>
-            <span class="crew-badge">CREW ONLY</span>
+            <h1 class="header-title">휴게시간 순서뽑기</h1>
         </header>
 
         <main>
-            <!-- 섹션 1: 휴게시간 순서뽑기 테마 컬렉션 -->
             <section class="section-group">
                 <div class="section-header">
                     <span class="section-label">Breaktime Order Collection</span>
                 </div>
 
-                <!-- 1. 컬러 -->
                 <div class="collection-card" onclick="openTheme('color')">
                     <div class="thumb-box">
                         <img src="assets/thumb-color.png" alt="컬러"
@@ -445,10 +384,9 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 2. 호빵맨 -->
                 <div class="collection-card" onclick="openTheme('anpanman')">
                     <div class="thumb-box">
-                        <img src="anpanman/img/home.png" alt="호빵맨"
+                        <img src="anpanman/img/1.png" alt="호빵맨"
                              onerror="handleThumbFallback(this, 'anpanman/1.png', 'anpanman')">
                     </div>
                     <div class="card-info">
@@ -460,11 +398,10 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 3. 치이카와 -->
-                <div class="collection-card" onclick="openTheme('chikawa')">
+                <div class="collection-card" onclick="openTheme('chiikawa')">
                     <div class="thumb-box">
-                        <img src="chikawa/img/1.png" alt="치이카와"
-                             onerror="handleThumbFallback(this, 'chikawa/1.png', 'chiikawa')">
+                        <img src="chiikawa/img/1.png" alt="치이카와"
+                             onerror="handleThumbFallback(this, 'chiikawa/1.png', 'chiikawa')">
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
@@ -476,8 +413,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 4. 산리오 캐릭터즈 (회색 실루엣) -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'sanrio', '산리오 캐릭터즈')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '산리오 캐릭터즈')">
                     <div class="thumb-box">
                         <img src="sanrio/img/1.png" alt="산리오 캐릭터즈"
                              onerror="this.onerror=null; this.src=getThumbSVG('sanrio');">
@@ -493,8 +429,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 5. 짱구는 못말려 (회색 실루엣) -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'shinchan', '짱구는 못말려')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '짱구는 못말려')">
                     <div class="thumb-box">
                         <img src="shinchan/img/1.png" alt="짱구는 못말려"
                              onerror="this.onerror=null; this.src=getThumbSVG('shinchan');">
@@ -510,8 +445,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 6. 포켓몬스터 (회색 실루엣) -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'pokemon', '포켓몬스터')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '포켓몬스터')">
                     <div class="thumb-box">
                         <img src="pokemon/img/1.png" alt="포켓몬스터"
                              onerror="this.onerror=null; this.src=getThumbSVG('pokemon');">
@@ -527,8 +461,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 7. 오늘의 추구미 (회색 실루엣) -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'vibe', '오늘의 추구미')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '오늘의 추구미')">
                     <div class="thumb-box">
                         <img src="vibe/img/1.png" alt="오늘의 추구미"
                              onerror="this.onerror=null; this.src=getThumbSVG('vibe');">
@@ -545,14 +478,12 @@
                 </div>
             </section>
 
-            <!-- 섹션 2: 크루 플레이그라운드 미니앱 (점메추 / 퍼스널컬러) -->
             <section class="section-group">
                 <div class="section-header">
                     <span class="section-label">Crew Playground Mini Apps</span>
                 </div>
 
-                <!-- 미니앱 1. 점메추 -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'lunch', '점메추 (점심메뉴추천)')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '점메추')">
                     <div class="thumb-box">
                         <img src="lunch/img/thumb.png" alt="점메추"
                              onerror="this.onerror=null; this.src=getThumbSVG('lunch');">
@@ -568,8 +499,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 미니앱 2. 퍼스널컬러 -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, 'personal-color', '퍼스널컬러')">
+                <div class="collection-card locked" onclick="openLockedOrReady(this, '퍼스널컬러')">
                     <div class="thumb-box">
                         <img src="personal-color/img/thumb.png" alt="퍼스널컬러"
                              onerror="this.onerror=null; this.src=getThumbSVG('personal');">
@@ -588,14 +518,12 @@
         </main>
     </div>
 
-    <!-- 스낵바 알림 -->
     <div class="snackbar" id="snackbar">오픈 준비 중인 테마입니다!</div>
 
     <script>
         let splashTimeout = null;
         let snackbarTimeout = null;
 
-        // 스플래시 아이콘 경로 자동 폴백 (icon-180.png -> assets/icon-180.png -> 내장 SVG)
         function handleSplashIconError(imgEl) {
             if (!imgEl.dataset.triedAssets) {
                 imgEl.dataset.triedAssets = '1';
@@ -606,7 +534,6 @@
             }
         }
 
-        // 카드 썸네일 다중 경로 폴백 (폴더 분리 전/후 모두 대응)
         function handleThumbFallback(imgEl, altPath, svgType) {
             if (!imgEl.dataset.triedAlt) {
                 imgEl.dataset.triedAlt = '1';
@@ -617,11 +544,9 @@
             }
         }
 
-        // 내장 SVG 썸네일 생성기 (이미지 파일이 없을 때도 고퀄리티 썸네일 유지)
         function getThumbSVG(type) {
             let svg = '';
             if (type === 'splash' || type === 'color') {
-                // 나무 데스크 위 팬톤 컬러칩 그래픽
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#6D4226"/>
                     <g transform="rotate(-10 50 50)">
@@ -635,7 +560,6 @@
                     </g>
                 </svg>`;
             } else if (type === 'anpanman') {
-                // 호빵맨 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#86CEFA"/>
                     <circle cx="50" cy="52" r="34" fill="#FCD3A1" stroke="#4A2C11" stroke-width="3.5"/>
@@ -647,7 +571,6 @@
                     <path d="M 38 66 Q 50 75 62 66" fill="none" stroke="#4A2C11" stroke-width="3.5" stroke-linecap="round"/>
                 </svg>`;
             } else if (type === 'chiikawa') {
-                // 치이카와 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cde6ba"/>
                     <circle cx="33" cy="28" r="11" fill="#ffffff" stroke="#334155" stroke-width="3.5"/>
@@ -660,7 +583,6 @@
                     <path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
                 </svg>`;
             } else if (type === 'sanrio') {
-                // 산리오 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <ellipse cx="50" cy="56" rx="32" ry="26" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
@@ -669,7 +591,6 @@
                     <circle cx="66" cy="34" r="7" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>
                 </svg>`;
             } else if (type === 'shinchan') {
-                // 짱구 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <circle cx="46" cy="54" r="26" fill="#f1f5f9" stroke="#475569" stroke-width="3.5"/>
@@ -678,7 +599,6 @@
                     <path d="M 52 38 Q 60 30 68 38" fill="none" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
                 </svg>`;
             } else if (type === 'pokemon') {
-                // 몬스터볼 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <circle cx="50" cy="50" r="34" fill="#ffffff" stroke="#334155" stroke-width="4"/>
@@ -686,20 +606,17 @@
                     <circle cx="50" cy="50" r="10" fill="#ffffff" stroke="#334155" stroke-width="4"/>
                 </svg>`;
             } else if (type === 'vibe') {
-                // 추구미 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <path d="M50 18 L58 40 L80 48 L58 56 L50 78 L42 56 L20 48 L42 40 Z" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
                 </svg>`;
             } else if (type === 'lunch') {
-                // 점메추 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <path d="M 22 52 L 78 52 A 28 28 0 0 1 22 52 Z" fill="#ffffff" stroke="#475569" stroke-width="4"/>
                     <rect x="38" y="76" width="24" height="6" rx="2" fill="#475569"/>
                 </svg>`;
             } else if (type === 'personal') {
-                // 퍼스널컬러 무지개 실루엣용 썸네일
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <path d="M 18 70 A 32 32 0 0 1 82 70" fill="none" stroke="#475569" stroke-width="10"/>
@@ -710,7 +627,6 @@
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
 
-        // 스플래시 닫기
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
             if (!splash || splash.classList.contains('hidden')) return;
@@ -718,30 +634,23 @@
             if (splashTimeout) clearTimeout(splashTimeout);
         }
 
-        // 활성화된 테마 이동: 같은 폴더 내 파일(color.html)과 하위 폴더(color/index.html) 자동 대응
         async function openTheme(themeKey) {
             const flatFile = `${themeKey}.html`;
             const folderFile = `${themeKey}/index.html`;
-
             try {
-                // 하위 폴더 구조(예: color/index.html)가 존재하는지 먼저 확인 후 이동
                 const res = await fetch(folderFile, { method: 'HEAD' });
                 if (res.ok) {
                     window.location.href = folderFile;
                     return;
                 }
-            } catch (e) {
-                // 로컬 file:// 환경 등에서는 기본 파일로 이동
-            }
+            } catch (e) {}
             window.location.href = flatFile;
         }
 
-        // 잠금(COMING SOON) 카드 클릭 시 스낵바 안내
-        function openLockedOrReady(cardEl, folderKey, title) {
+        function openLockedOrReady(cardEl, title) {
             cardEl.classList.remove('shake');
             void cardEl.offsetWidth;
             cardEl.classList.add('shake');
-
             showSnackbar(`'${title}' 테마는 오픈 준비 중입니다!`);
         }
 
@@ -758,7 +667,7 @@
         window.onload = () => {
             splashTimeout = setTimeout(() => {
                 hideSplash();
-            }, 1450);
+            }, 1400);
         };
     </script>
 </body>
