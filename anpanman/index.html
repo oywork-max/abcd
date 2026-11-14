@@ -462,4 +462,594 @@
             font-size: 0.85rem;
             box-shadow: 0 2.5px 0 var(--anpan-brown), 0 3px 6px rgba(229, 57, 53, 0.45);
             border: 2px solid #ffffff;
-            outline: 2px solid var(--anpan-
+            outline: 2px solid var(--anpan-brown);
+            z-index: 6;
+            opacity: 0;
+            animation: badgeBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* 하단 고정 액션 영역 */
+        .footer-action {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 16px) 14px;
+            background: linear-gradient(to top, rgba(134, 206, 250, 0.98) 65%, rgba(134, 206, 250, 0));
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: var(--anpan-red);
+            color: #ffffff;
+            border: 2.5px solid var(--anpan-brown);
+            border-radius: 16px;
+            padding: 14px 12px;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--anpan-brown), 0 6px 14px rgba(0, 0, 0, 0.2);
+            transition: all 0.15s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--anpan-brown);
+        }
+
+        .action-btn.home-sub-btn {
+            flex: 0.45;
+            background: #ffffff;
+            color: var(--anpan-brown);
+            box-shadow: 0 4px 0 var(--anpan-brown);
+        }
+
+        .action-btn.retry-main-btn {
+            flex: 0.55;
+            background: var(--anpan-yellow);
+            color: var(--anpan-brown);
+            box-shadow: 0 4px 0 var(--anpan-brown);
+        }
+
+        /* 바텀시트 모달 */
+        .bottom-sheet-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(30, 41, 59, 0.55);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bottom-sheet {
+            width: 100%;
+            background: var(--anpan-cream);
+            border-top: 3.5px solid var(--anpan-brown);
+            border-top-left-radius: 26px;
+            border-top-right-radius: 26px;
+            padding: 20px 20px calc(env(safe-area-inset-bottom, 0px) + 28px) 20px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+            box-shadow: 0 -8px 25px rgba(0,0,0,0.2);
+        }
+
+        .bottom-sheet-overlay.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 44px;
+            height: 5px;
+            background: var(--anpan-brown);
+            border-radius: 3px;
+            margin: 0 auto 14px auto;
+            opacity: 0.3;
+        }
+
+        .sheet-msg {
+            font-size: 1.12rem;
+            font-weight: 900;
+            color: var(--anpan-brown);
+            margin-bottom: 18px;
+        }
+
+        .sheet-confirm-btn {
+            width: 100%;
+            background: var(--anpan-red);
+            color: #ffffff;
+            border: 2.5px solid var(--anpan-brown);
+            border-radius: 15px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--anpan-brown);
+            transition: all 0.15s ease;
+        }
+
+        .sheet-confirm-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--anpan-brown);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+
+        <!-- [1] 호빵맨 인트로 스플래시 화면 -->
+        <div class="anpan-splash" id="anpanSplash" onclick="dismissSplash()" ontouchstart="dismissSplash()">
+            <img src="img/splash.jpg" alt="날아라 호빵맨 인트로" 
+                 onerror="handleSplashImgError(this)">
+            
+            <div class="splash-fallback">
+                <div style="font-family:'Jua',sans-serif; font-size:1.4rem; color:#FFEB3B; text-shadow: -2px -2px 0 #4A2C11, 2px -2px 0 #4A2C11, -2px 2px 0 #4A2C11, 2px 2px 0 #4A2C11; margin-bottom:4px;">날아라!</div>
+                <div class="splash-fallback-title">호빵맨</div>
+            </div>
+
+            <div class="splash-touch-hint">✨ 화면을 터치하면 바로 시작합니다</div>
+        </div>
+
+        <!-- [2] 배경 (스카이블루 + 무지개 아치 + 별 장식) -->
+        <svg class="theme-bg-decor" viewBox="0 0 480 900" preserveAspectRatio="none">
+            <g stroke="#4A2C11" stroke-width="2.5" stroke-linejoin="round">
+                <polygon points="75,95 82,110 98,112 86,123 89,139 75,131 61,139 64,123 52,112 68,110" fill="#FFEB3B"/>
+                <polygon points="42,165 46,174 56,175 49,182 51,192 42,187 33,192 35,182 28,175 38,174" fill="#FFEB3B"/>
+                <polygon points="65,235 72,248 86,250 76,260 78,274 65,267 52,274 54,260 44,250 58,248" fill="#FF8A65"/>
+                <polygon points="35,310 42,324 57,326 46,337 49,352 35,344 21,352 24,337 13,326 28,324" fill="#FFEB3B"/>
+                <polygon points="395,105 402,118 416,120 406,130 408,144 395,137 382,144 384,130 374,120 388,118" fill="#FF8A65"/>
+                <polygon points="435,155 441,167 454,169 444,178 447,191 435,184 423,191 426,178 416,169 429,167" fill="#FFEB3B"/>
+                <polygon points="440,245 447,258 461,260 451,270 453,284 440,277 427,284 429,270 419,260 433,258" fill="#FF8A65"/>
+                <polygon points="415,320 422,334 437,336 426,347 429,362 415,354 401,362 404,347 393,336 408,334" fill="#FFEB3B"/>
+            </g>
+
+            <g opacity="0.92">
+                <path d="M-40,560 Q240,690 520,560 L520,900 L-40,900 Z" fill="#8C62AA"/>
+                <path d="M-40,605 Q240,735 520,605 L520,900 L-40,900 Z" fill="#68B85D"/>
+                <path d="M-40,650 Q240,780 520,650 L520,900 L-40,900 Z" fill="#FFF100"/>
+                <path d="M-40,695 Q240,825 520,695 L520,900 L-40,900 Z" fill="#F39800"/>
+                <path d="M-40,740 Q240,870 520,740 L520,900 L-40,900 Z" fill="#E60012"/>
+                <path d="M-40,785 Q240,915 520,785 L520,900 L-40,900 Z" fill="#86CEFA"/>
+            </g>
+
+            <g stroke="#4A2C11" stroke-width="2.5" stroke-linejoin="round">
+                <polygon points="55,815 62,828 76,830 66,840 68,854 55,847 42,854 44,840 34,830 48,828" fill="#FF8A65"/>
+                <polygon points="390,805 398,821 415,823 403,835 406,852 390,843 374,852 377,835 365,823 382,821" fill="#FFEB3B"/>
+                <polygon points="445,780 451,792 464,794 454,803 457,816 445,809 433,816 436,803 426,794 439,792" fill="#FFEB3B"/>
+            </g>
+        </svg>
+
+        <!-- 상단 헤더 -->
+        <header>
+            <button class="nav-btn" onclick="navigateHome()">🏠 홈</button>
+            <div class="header-title">
+                <span class="cheek-dots"><span></span><span></span><span></span></span>
+                <span id="headerTitle">호빵맨 순서뽑기</span>
+            </div>
+            <button class="sound-btn" id="soundToggleBtn" onclick="toggleSound()" title="음성/효과음 켜기·끄기">🔊</button>
+        </header>
+
+        <!-- 캐릭터 명대사 플로팅 토스트 -->
+        <div class="quote-toast" id="quoteToast">
+            <span class="quote-speaker" id="quoteSpeaker">호빵맨</span>
+            <span class="quote-text" id="quoteText">"힘내라! 내 얼굴을 먹어!"</span>
+        </div>
+
+        <!-- [페이지 1] 캐릭터 선택 화면 (4x12 배열, 1~47번) -->
+        <div class="page" id="selectPage">
+            <div class="content-scroll">
+                <div class="character-grid" id="anpanmanGrid"></div>
+            </div>
+            <div class="footer-action">
+                <button class="action-btn" id="selectActionBtn" onclick="openBottomSheet()">🍞 선택하기</button>
+            </div>
+        </div>
+
+        <!-- [페이지 2] 랜덤 순서 결과 화면 (4열 배열) -->
+        <div class="page hidden" id="resultPage">
+            <div class="content-scroll">
+                <div class="character-grid" id="resultGrid"></div>
+            </div>
+            <div class="footer-action">
+                <button class="action-btn home-sub-btn" onclick="navigateHome()">🏠 홈으로</button>
+                <button class="action-btn retry-main-btn" onclick="goBack()">🔄 다시 뽑기</button>
+            </div>
+        </div>
+
+        <!-- 바텀시트 모달 -->
+        <div class="bottom-sheet-overlay" id="bottomSheetOverlay" onclick="closeBottomSheet(event)">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-handle"></div>
+                <div class="sheet-msg" id="sheetMsg">0명의 캐릭터 선택하였습니다.</div>
+                <button class="sheet-confirm-btn" onclick="confirmSelection()">✨ 출발! 순서 결과 보기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 1번 ~ 47번 호빵맨 캐릭터 데이터
+         */
+        const anpanmanCharacters = [
+            { id: 1,  name: '호빵맨',         bg: '#FFCDD2', quote: '힘내라! 내 얼굴을 먹어! 호빵 펀치!', pitch: 1.15, rate: 1.05 },
+            { id: 2,  name: '세균맨',         bg: '#D1C4E9', quote: '하히후헤호~! 꼼짝 마라, 호빵맨!', pitch: 0.78, rate: 1.12 },
+            { id: 3,  name: '짤랑이',         bg: '#F8BBD0', quote: '식빵맨님~ 너무 멋져요! 세균맨, 내 말 들어!', pitch: 1.48, rate: 1.08 },
+            { id: 4,  name: '딸랑이',         bg: '#B3E5FC', quote: '내 파란 눈물에 닿으면 전부 우는 수밖에 없을걸~!', pitch: 1.58, rate: 1.12 },
+            { id: 5,  name: '식빵맨',         bg: '#E1F5FE', quote: '오늘도 산뜻하고 부드러운 식빵을 배달합니다!', pitch: 0.95, rate: 1.0 },
+            { id: 6,  name: '카레빵맨',       bg: '#FFF9C4', quote: '뜨겁고 매콤한 카레 맛 좀 볼래?! 카레 펀치!', pitch: 1.1, rate: 1.12 },
+            { id: 7,  name: '메론빵소녀',     bg: '#DCEDC8', quote: '메론 쥬스~ 멜로멜로 펀치! 헤롱헤롱~', pitch: 1.5, rate: 1.05 },
+            { id: 8,  name: '잼아저씨',       bg: '#FFE0B2', quote: '허허허, 맛있는 새 얼굴이 다 구워졌단다!', pitch: 0.72, rate: 0.92 },
+            { id: 9,  name: '버터누나',       bg: '#FFCCBC', quote: '자, 호빵맨! 새 얼굴을 던질게, 받아!', pitch: 1.35, rate: 1.05 },
+            { id: 10, name: '치즈',           bg: '#EFEBE9', quote: '멍멍! 냄새로 다 찾을 수 있어요, 멍!', pitch: 1.45, rate: 1.15 },
+            { id: 11, name: '크림판다',       bg: '#FFF3E0', quote: '나도 언젠가 호빵맨처럼 멋지게 날 거야! 주먹가위보 펀치!', pitch: 1.4, rate: 1.1 },
+            { id: 12, name: '롤빵소녀',       bg: '#E8EAF6', quote: '메론빵소녀는 내가 지킨다... 로울 리본!', pitch: 0.9, rate: 0.95 },
+            { id: 13, name: '곰팡이 룰루',    bg: '#CFD8DC', quote: '곰팡이~ 곰팡이~ 다 곰팡이 피게 만들어 버릴 거야!', pitch: 1.35, rate: 1.15 },
+            { id: 14, name: '새우튀김덮밥맨', bg: '#FFE082', quote: '바삭바삭 고소한 새우튀김덮밥이 최고라고~!', pitch: 1.18, rate: 1.08 },
+            { id: 15, name: '돼지고기덮밥맨', bg: '#FFCC80', quote: '든든하고 맛있는 돼지고기덮밥 한 그릇 어떠세요유~!', pitch: 0.85, rate: 0.98 },
+            { id: 16, name: '돌솥밥맨',       bg: '#D7CCC8', quote: '방금 지은 따끈따끈한 돌솥밥이 제일이지유~!', pitch: 0.92, rate: 1.0 },
+            { id: 17, name: '해골맨',         bg: '#ECEFF1', quote: '달그락 달그락~ 짤랑이 아가씨를 위해서라면!', pitch: 1.25, rate: 1.1 },
+            { id: 18, name: '베이비맨',       bg: '#FCE4EC', quote: '응애~! 난 세상에서 제일 힘센 아기 베이비맨이야!', pitch: 1.6, rate: 1.12 },
+            { id: 19, name: '주먹밥맨',       bg: '#F1F8E9', quote: '소인은 주먹밥맨! 정의의 지팡이로 물리치겠소!', pitch: 0.95, rate: 1.02 },
+            { id: 20, name: '주먹밥동자',     bg: '#E8F5E9', quote: '주먹밥맨 아저씨처럼 훌륭한 무사가 될 거예요!', pitch: 1.38, rate: 1.08 },
+            { id: 21, name: '기차맨',         bg: '#E0F7FA', quote: '칙칙폭폭 칙칙폭폭! 정해진 시간에 정확히 달립니다!', pitch: 1.05, rate: 1.12 },
+            { id: 22, name: '양선생님',       bg: '#F3E5F5', quote: '자자 여러분~ 오늘 수업을 시작해 볼까요?', pitch: 0.92, rate: 0.95 },
+            { id: 23, name: '하봉이',         bg: '#E0F2F1', quote: '하하하! 다 같이 신나게 뛰어놀자!', pitch: 0.88, rate: 1.02 },
+            { id: 24, name: '코돌이',         bg: '#E1F5FE', quote: '뿌우~! 내 긴 코로 물줄기를 뿜어줄게!', pitch: 1.25, rate: 1.05 },
+            { id: 25, name: '깡총이',         bg: '#FFF8E1', quote: '깡총깡총! 누가 더 높이 뛰나 시합하자!', pitch: 1.35, rate: 1.1 },
+            { id: 26, name: '토순이',         bg: '#FCE4EC', quote: '예쁜 꽃을 찾았어! 다 같이 보러 가자~', pitch: 1.45, rate: 1.05 },
+            { id: 27, name: '세균UFO',        bg: '#EDE7F6', quote: '위잉위잉~ 세균맨님의 최강 로봇 메카 출동이다!', pitch: 0.75, rate: 1.1 },
+            { id: 28, name: '짤랑UFO',        bg: '#FCE4EC', quote: '슝~! 짤랑이 전용 핑크 UFO 나가신다, 비켜라~!', pitch: 1.45, rate: 1.1 },
+            { id: 29, name: '딸랑UFO',        bg: '#E1F5FE', quote: '우주에서도 제일 귀여운 딸랑UFO 등장~!', pitch: 1.55, rate: 1.12 },
+            { id: 30, name: '호빵맨호',       bg: '#FFEBEE', quote: '부릉부릉! 잼아저씨 빵공장의 만능 자동차 호빵맨호 출발!', pitch: 1.0, rate: 1.05 },
+            { id: 31, name: '우당탕 2호',     bg: '#D1C4E9', quote: '쿵쾅쿵쾅! 우당탕 2호의 강력한 해머 공격이다!', pitch: 0.68, rate: 1.0 },
+            { id: 32, name: '두더지전차',     bg: '#D7CCC8', quote: '드르르륵! 땅속 어디든 뚫고 나가는 두더지전차!', pitch: 0.72, rate: 1.05 },
+            { id: 33, name: '레어치즈',       bg: '#FFFDE7', quote: '앙앙! 치즈야, 오늘도 나랑 같이 산책 가자~!', pitch: 1.55, rate: 1.12 },
+            { id: 34, name: '우유소년',       bg: '#E3F2FD', quote: '신선하고 고소한 우유 마시고 쑥쑥 자라세요!', pitch: 1.38, rate: 1.06 },
+            { id: 35, name: '폭폭이',         bg: '#FFECB3', quote: '폭폭~! 연기 나는 굴뚝 기차 폭폭이가 달려요!', pitch: 1.3, rate: 1.1 },
+            { id: 36, name: '야옹이',         bg: '#FFE0B2', quote: '야옹~ 따뜻한 햇살 아래서 낮잠 자는 게 제일 좋아!', pitch: 1.42, rate: 1.05 },
+            { id: 37, name: '대파맨',         bg: '#C8E6C9', quote: '대파의 향긋한 검술! 정의의 대파맨이 간다!', pitch: 0.88, rate: 1.05 },
+            { id: 38, name: '파아저씨',       bg: '#DCEDC8', quote: '허허, 사실 이 몸이 바로 대파맨... 아차, 비밀이지!', pitch: 0.78, rate: 0.95 },
+            { id: 39, name: '가다랑어맨',     bg: '#BBDEFB', quote: '바다의 사나이 가다랑어맨! 최고로 신선한 맛을 보여주지!', pitch: 1.05, rate: 1.08 },
+            { id: 40, name: '새알심',         bg: '#FFF9C4', quote: '동글동글 쫄깃쫄깃~ 귀여운 새알심이에요!', pitch: 1.5, rate: 1.08 },
+            { id: 41, name: '햄버거맨',       bg: '#FFE0B2', quote: '서부의 사나이 햄버거맨! 피클 총을 받아라, 빵야!', pitch: 1.02, rate: 1.08 },
+            { id: 42, name: '볶음국수빵맨',   bg: '#FFF3E0', quote: '철판 위의 뜨거운 열정! 맛있는 볶음국수빵 대령이오!', pitch: 1.08, rate: 1.1 },
+            { id: 43, name: '세균돌이',       bg: '#E8EAF6', quote: '헤헤~ 장난치는 게 세상에서 제일 재밌어!', pitch: 1.35, rate: 1.12 },
+            { id: 44, name: '짤랑순이',       bg: '#FCE4EC', quote: '샤랄라~ 예쁜 변신이라면 나한테 맡겨줘!', pitch: 1.48, rate: 1.08 },
+            { id: 45, name: '롤초밥',         bg: '#E8F5E9', quote: '돌돌 말린 정성 가득 맛있는 롤초밥입니다!', pitch: 1.15, rate: 1.05 },
+            { id: 46, name: '꼬마롤초밥',     bg: '#F1F8E9', quote: '한 입에 쏙! 귀엽고 맛있는 꼬마롤초밥이에요~!', pitch: 1.52, rate: 1.12 },
+            { id: 47, name: '도레미공주',     bg: '#F3E5F5', quote: '도레미파솔라시도~ 아름다운 음악으로 모두를 행복하게 해줄게요!', pitch: 1.45, rate: 1.02 }
+        ];
+
+        let selectedIds = [];
+        let soundEnabled = true;
+        let quoteTimer = null;
+        let audioCtx = null;
+        let splashDismissed = false;
+
+        // 스플래시 이미지 경로 다중 폴백 처리
+        function handleSplashImgError(imgEl) {
+            const step = parseInt(imgEl.dataset.step || '0', 10);
+            const candidates = [
+                'anpanman-splash.jpg',
+                'splash.jpg',
+                'anpanman/splash.jpg',
+                'anpanman/img/splash.jpg',
+                'img/splash.png',
+                'splash.png'
+            ];
+            if (step < candidates.length) {
+                imgEl.dataset.step = String(step + 1);
+                imgEl.src = candidates[step];
+            } else {
+                imgEl.style.display = 'none';
+            }
+        }
+
+        // 캐릭터 1~47번 이미지 다중 경로 및 확장자(.png, .PNG, .jpg, .jpeg, .webp) 자동 탐색
+        function handleCharImgError(imgEl, id, bgColor) {
+            const step = parseInt(imgEl.dataset.step || '0', 10);
+            const candidates = [
+                `anpanman/${id}.png`,
+                `${id}.png`,
+                `anpanman/img/${id}.png`,
+                `img/${id}.PNG`,
+                `anpanman/${id}.PNG`,
+                `${id}.PNG`,
+                `img/${id}.jpg`,
+                `anpanman/${id}.jpg`,
+                `${id}.jpg`,
+                `img/${id}.jpeg`,
+                `anpanman/${id}.jpeg`,
+                `${id}.jpeg`,
+                `img/${id}.webp`,
+                `anpanman/${id}.webp`
+            ];
+            if (step < candidates.length) {
+                imgEl.dataset.step = String(step + 1);
+                imgEl.src = candidates[step];
+            } else {
+                imgEl.onerror = null;
+                imgEl.src = createFallbackSVG(bgColor);
+            }
+        }
+
+        function createFallbackSVG(bgColor) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" fill="${bgColor}"/>
+                <circle cx="50" cy="52" r="34" fill="#FCD3A1" stroke="#4A2C11" stroke-width="3.5"/>
+                <circle cx="33" cy="55" r="7.5" fill="#FF7043"/>
+                <circle cx="67" cy="55" r="7.5" fill="#FF7043"/>
+                <circle cx="50" cy="53" r="8" fill="#E53935" stroke="#4A2C11" stroke-width="2.2"/>
+                <circle cx="39" cy="41" r="4" fill="#4A2C11"/>
+                <circle cx="61" cy="41" r="4" fill="#4A2C11"/>
+                <path d="M 38 66 Q 50 75 62 66" fill="none" stroke="#4A2C11" stroke-width="3.2" stroke-linecap="round"/>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        function getOrderLabel(index) {
+            if (index < 26) {
+                return String.fromCharCode(65 + index);
+            }
+            const first = String.fromCharCode(65 + Math.floor(index / 26) - 1);
+            const second = String.fromCharCode(65 + (index % 26));
+            return first + second;
+        }
+
+        function dismissSplash() {
+            if (splashDismissed) return;
+            splashDismissed = true;
+
+            const splash = document.getElementById('anpanSplash');
+            if (!splash) return;
+
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                if (splash && splash.parentNode) {
+                    splash.style.display = 'none';
+                }
+            }, 460);
+        }
+
+        function navigateHome() {
+            const path = window.location.pathname;
+            if (path.includes('/anpanman/')) {
+                window.location.href = '../index.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playChime(type = 'select') {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'select') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                osc.start(now);
+                osc.stop(now + 0.18);
+            } else if (type === 'fanfare') {
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((freq, idx) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.type = 'triangle';
+                    o.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    g.gain.setValueAtTime(0.16, now + idx * 0.08);
+                    g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.22);
+                    o.start(now + idx * 0.08);
+                    o.stop(now + idx * 0.08 + 0.22);
+                });
+            }
+        }
+
+        function triggerCharacterQuote(char) {
+            const toast = document.getElementById('quoteToast');
+            const speaker = document.getElementById('quoteSpeaker');
+            const text = document.getElementById('quoteText');
+
+            speaker.innerText = char.name;
+            text.innerText = `"${char.quote}"`;
+            toast.classList.add('show');
+
+            if (quoteTimer) clearTimeout(quoteTimer);
+            quoteTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2600);
+
+            if (soundEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(char.quote);
+                utter.lang = 'ko-KR';
+                utter.pitch = char.pitch || 1.0;
+                utter.rate = char.rate || 1.0;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerText = soundEnabled ? '🔊' : '🔇';
+            if (!soundEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // 4x12 그리드 렌더링 (46, 47번까지 즉시 로드되도록 loading="lazy" 제거)
+        function renderGrid() {
+            const grid = document.getElementById('anpanmanGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            anpanmanCharacters.forEach(char => {
+                const isSelected = selectedIds.includes(char.id);
+                const card = document.createElement('div');
+                card.className = `char-card ${isSelected ? 'selected' : ''}`;
+                card.onclick = () => toggleSelect(char);
+
+                card.innerHTML = `
+                    <div class="char-num-tag">#${char.id}</div>
+                    <div class="select-check">✓</div>
+                    <div class="char-img-box" style="background-color: ${char.bg};">
+                        <img src="img/${char.id}.png" alt="${char.name}"
+                             onerror="handleCharImgError(this, ${char.id}, '${char.bg}')">
+                    </div>
+                    <div class="char-name">${char.name}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            const btn = document.getElementById('selectActionBtn');
+            if (btn) {
+                btn.innerText = selectedIds.length > 0 ? `🍞 선택하기 (${selectedIds.length}명)` : `🍞 선택하기`;
+            }
+        }
+
+        function toggleSelect(char) {
+            if (selectedIds.includes(char.id)) {
+                selectedIds = selectedIds.filter(item => item !== char.id);
+            } else {
+                selectedIds.push(char.id);
+                playChime('select');
+                triggerCharacterQuote(char);
+            }
+            renderGrid();
+        }
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function openBottomSheet() {
+            if (selectedIds.length === 0) {
+                alert('최소 1명 이상의 캐릭터를 선택해주세요!');
+                return;
+            }
+            document.getElementById('sheetMsg').innerText = `${selectedIds.length}명의 캐릭터 선택하였습니다.`;
+            document.getElementById('bottomSheetOverlay').classList.add('active');
+        }
+
+        function closeBottomSheet(e) {
+            if (e && e.target.id === 'bottomSheetOverlay') {
+                document.getElementById('bottomSheetOverlay').classList.remove('active');
+            }
+        }
+
+        function confirmSelection() {
+            document.getElementById('bottomSheetOverlay').classList.remove('active');
+            playChime('fanfare');
+
+            const selectPage = document.getElementById('selectPage');
+            const resultPage = document.getElementById('resultPage');
+            const headerTitle = document.getElementById('headerTitle');
+
+            selectPage.classList.add('hidden');
+            headerTitle.innerText = '휴게시간 순서 결과';
+
+            renderResultGrid();
+            resultPage.classList.remove('hidden');
+        }
+
+        function renderResultGrid() {
+            const resultGrid = document.getElementById('resultGrid');
+            resultGrid.innerHTML = '';
+
+            const labels = selectedIds.map((_, idx) => getOrderLabel(idx));
+            const shuffledLabels = shuffleArray(labels);
+
+            selectedIds.forEach((id, index) => {
+                const char = anpanmanCharacters.find(c => c.id === id);
+                const badgeLetter = shuffledLabels[index];
+                const delay = (index * 0.05).toFixed(2);
+
+                const card = document.createElement('div');
+                card.className = 'char-card selected';
+                card.onclick = () => triggerCharacterQuote(char);
+                card.innerHTML = `
+                    <div class="char-num-tag">#${char.id}</div>
+                    <div class="result-badge" style="animation-delay: ${delay}s">${badgeLetter}</div>
+                    <div class="char-img-box" style="background-color: ${char.bg};">
+                        <img src="img/${char.id}.png" alt="${char.name}"
+                             onerror="handleCharImgError(this, ${char.id}, '${char.bg}')">
+                    </div>
+                    <div class="char-name">${char.name}</div>
+                `;
+                resultGrid.appendChild(card);
+            });
+        }
+
+        function goBack() {
+            const selectPage = document.getElementById('selectPage');
+            const resultPage = document.getElementById('resultPage');
+            const headerTitle = document.getElementById('headerTitle');
+
+            resultPage.classList.add('hidden');
+            headerTitle.innerText = '호빵맨 순서뽑기';
+            selectPage.classList.remove('hidden');
+        }
+
+        function initApp() {
+            renderGrid();
+            setTimeout(() => {
+                dismissSplash();
+            }, 1450);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
