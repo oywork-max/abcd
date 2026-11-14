@@ -1,457 +1,765 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#F5F7FA" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="휴게순서뽑기" />
-  <title>휴게시간 순서뽑기</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>올리버스 - 휴게시간 순서뽑기 & 플레이그라운드</title>
+    <!-- Pretendard 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #263449;
+            --primary-lime: #82DC28;
+            --coral-accent: #FF7878;
+            --text-white: #f8fafc;
+            --text-muted: #94a3b8;
+        }
 
-  <!-- 홈화면 및 앱 아이콘 -->
-  <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="icon" type="image/png" href="icon-180.png" />
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
 
-  <!-- Pretendard 폰트 -->
-  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+        }
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        /* 모바일 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100dvh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+        }
 
-  <style>
-    :root {
-      --bg-main: #F5F7FA;
-      --accent-lime: #82DC28;
-      --accent-coral: #FF7878;
-      --accent-sky: #60B6FF;
-      --text-primary: #191F28;
-      --text-secondary: #6B7684;
-    }
+        /* =========================================================
+           1. 스플래시 인트로 화면 (아이콘 스플래시 후 페이드아웃)
+           ========================================================= */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 38%, #1e293b 0%, #090d16 100%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.55s ease, visibility 0.55s ease;
+        }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-primary);
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      min-height: 100dvh;
-      user-select: none;
-    }
+        .splash-icon-wrap {
+            width: 118px;
+            height: 118px;
+            border-radius: 30px;
+            background: linear-gradient(145deg, #263449, #151e2e);
+            padding: 4px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.55),
+                0 0 0 2px rgba(130, 220, 40, 0.35),
+                inset 0 2px 4px rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            animation: floatIcon 1.6s ease-in-out infinite alternate;
+            margin-bottom: 22px;
+        }
 
-    /* 배경 은은한 데코레이션 블롭 */
-    .bg-blob-1 {
-      position: fixed;
-      top: -80px;
-      right: -60px;
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle, rgba(130, 220, 40, 0.15) 0%, rgba(130, 220, 40, 0) 70%);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-    }
+        @keyframes floatIcon {
+            0%   { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-8px) scale(1.03); }
+        }
 
-    .bg-blob-2 {
-      position: fixed;
-      bottom: -90px;
-      left: -70px;
-      width: 280px;
-      height: 280px;
-      background: radial-gradient(circle, rgba(255, 120, 120, 0.12) 0%, rgba(255, 120, 120, 0) 70%);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-    }
+        .splash-icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 26px;
+        }
 
-    /* 스플래시 화면 스타일 */
-    #splash-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: linear-gradient(165deg, #FFFFFF 0%, #F2F6FA 55%, #EBF3E6 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.4s;
-    }
+        .splash-title {
+            font-size: 1.45rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
 
-    #splash-screen.hidden-splash {
-      opacity: 0;
-      transform: scale(1.03);
-      visibility: hidden;
-      pointer-events: none;
-    }
+        .splash-sub {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--primary-lime);
+            letter-spacing: 0.14em;
+            margin-bottom: 28px;
+        }
 
-    .splash-icon-box {
-      width: 116px;
-      height: 116px;
-      border-radius: 32px;
-      background: linear-gradient(145deg, #ffffff, #eef2f6);
-      box-shadow: 
-        0 20px 38px -10px rgba(25, 31, 40, 0.14),
-        0 4px 12px rgba(130, 220, 40, 0.18),
-        inset 0 2px 4px rgba(255, 255, 255, 0.9),
-        inset 0 -4px 8px rgba(0, 0, 0, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      animation: floatIcon 2.2s ease-in-out infinite;
-    }
+        .splash-loader {
+            width: 140px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+        }
 
-    @keyframes floatIcon {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-7px); }
-    }
+        .splash-loader-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-lime), #b8f272);
+            border-radius: 999px;
+            animation: loadProgress 1.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
 
-    .splash-progress-bar {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #82DC28, #4AD295);
-      border-radius: 999px;
-      transition: width 1.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
+        @keyframes loadProgress {
+            0%   { width: 0%; }
+            100% { width: 100%; }
+        }
 
-    /* 컬렉션 카드 스타일 */
-    .collection-card {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      border-radius: 24px;
-      box-shadow: 
-        0 10px 24px -6px rgba(25, 31, 40, 0.06),
-        0 2px 6px -1px rgba(25, 31, 40, 0.03),
-        inset 0 1px 1px rgba(255, 255, 255, 0.85);
-      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      overflow: hidden;
-      text-decoration: none;
-    }
+        /* =========================================================
+           2. 상단 헤더 (배터리/상태바 컬러 완벽 통일)
+           ========================================================= */
+        header {
+            padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+            padding-bottom: 14px;
+            padding-left: 20px;
+            padding-right: 20px;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    .collection-card:active {
-      transform: scale(0.975);
-    }
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    @media (hover: hover) {
-      .collection-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 
-          0 14px 28px -6px rgba(25, 31, 40, 0.1),
-          0 4px 10px -2px rgba(25, 31, 40, 0.04);
-        border-color: rgba(130, 220, 40, 0.5);
-      }
-    }
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-lime);
+            box-shadow: 0 0 10px var(--primary-lime);
+        }
 
-    /* 왼쪽 썸네일 이미지 박스 */
-    .thumb-box {
-      width: 82px;
-      height: 82px;
-      min-width: 82px;
-      border-radius: 20px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 
-        inset 0 2px 5px rgba(255, 255, 255, 0.75),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.05),
-        0 4px 10px rgba(0, 0, 0, 0.04);
-    }
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+        }
 
-    /* 산리오 회색 실루엣 필터 */
-    .silhouette-filter {
-      filter: grayscale(100%) brightness(0.6) contrast(1.25);
-      opacity: 0.85;
-    }
+        .crew-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--primary-lime);
+            background: rgba(130, 220, 40, 0.14);
+            border: 1px solid rgba(130, 220, 40, 0.35);
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+        }
 
-    .card-sanrio {
-      background: rgba(241, 245, 249, 0.85);
-      border: 1px dashed #CBD5E1;
-    }
+        /* =========================================================
+           3. 컬렉션 카드 리스트 (왼쪽 이미지 · 오른쪽 텍스트)
+           ========================================================= */
+        main {
+            flex: 1;
+            padding: 20px 18px calc(env(safe-area-inset-bottom, 0px) + 36px) 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 26px;
+        }
 
-    /* 순차 등장 애니메이션 */
-    @keyframes fadeUpIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .section-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-    .stagger-1 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
-    .stagger-2 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.11s both; }
-    .stagger-3 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.17s both; }
-    .stagger-4 { animation: fadeUpIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.23s both; }
-  </style>
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+            margin-bottom: 2px;
+        }
+
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* 가로형 카드 (좌측 썸네일 이미지 · 우측 테마명) */
+        .collection-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 12px 16px 12px 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            color: var(--text-white);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .collection-card:active {
+            transform: scale(0.97);
+            background: var(--bg-card-hover);
+            border-color: rgba(130, 220, 40, 0.45);
+        }
+
+        /* 좌측 1:1 썸네일 박스 */
+        .thumb-box {
+            width: 74px;
+            height: 74px;
+            border-radius: 18px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .thumb-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 우측 텍스트 영역 */
+        .card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .card-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .collection-order {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--primary-lime);
+            letter-spacing: 0.05em;
+        }
+
+        .badge-new {
+            background: var(--coral-accent);
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 6px;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-soon {
+            background: rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+            letter-spacing: 0.04em;
+        }
+
+        .collection-name {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chevron-icon {
+            color: #64748b;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+
+        /* =========================================================
+           4. 향후 오픈 예정 (회색 실루엣 카드 스타일)
+           ========================================================= */
+        .collection-card.locked {
+            background: rgba(30, 41, 59, 0.55);
+            border-color: rgba(255, 255, 255, 0.04);
+        }
+
+        .collection-card.locked .thumb-box {
+            filter: grayscale(100%) brightness(0.58) contrast(1.1);
+        }
+
+        .collection-card.locked .collection-order {
+            color: #64748b;
+        }
+
+        .collection-card.locked .collection-name {
+            color: #94a3b8;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        @keyframes shakeLocked {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-3px); }
+        }
+
+        .collection-card.shake {
+            animation: shakeLocked 0.32s ease;
+        }
+
+        /* 하단 스낵바 토스트 */
+        .snackbar {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: calc(100% - 36px);
+            max-width: 440px;
+            background: #f8fafc;
+            color: #0f172a;
+            padding: 13px 18px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
 </head>
-<body class="relative flex flex-col items-center justify-center min-h-screen py-6">
+<body>
 
-  <!-- 배경 소프트 블롭 -->
-  <div class="bg-blob-1"></div>
-  <div class="bg-blob-2"></div>
-
-  <!-- ==========================================
-       1. 스플래시 화면 (인트로 아이콘 표시 후 자동 전환)
-  =========================================== -->
-  <div id="splash-screen" onclick="hideSplash()" role="dialog" aria-label="휴게시간 순서뽑기 스플래시 화면">
-    <div class="flex flex-col items-center px-6 text-center max-w-sm w-full">
-      <div class="splash-icon-box mb-5">
-        <img 
-          src="icon-180.png" 
-          alt="휴게시간 순서뽑기 아이콘" 
-          class="w-full h-full object-cover rounded-[32px] absolute inset-0 z-10"
-          onerror="this.style.display='none'"
-        />
-        <!-- 기본 아이콘 그래픽 폴백 -->
-        <svg class="w-20 h-20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="26" y="14" width="52" height="64" rx="14" transform="rotate(10 26 14)" fill="#FF7878" />
-          <rect x="16" y="18" width="52" height="64" rx="14" transform="rotate(-8 16 18)" fill="#60B6FF" />
-          <rect x="22" y="20" width="56" height="64" rx="15" fill="#82DC28" stroke="#FFFFFF" stroke-width="3"/>
-          <circle cx="50" cy="48" r="15" fill="#FFFFFF" />
-          <path d="M50 40V48L55 52" stroke="#191F28" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M43 71H57" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
-          <circle cx="72" cy="24" r="9" fill="#FFE66D" stroke="#FFFFFF" stroke-width="2.5"/>
-          <text x="72" y="27.5" text-anchor="middle" fill="#191F28" font-size="10" font-weight="900">1</text>
-        </svg>
-      </div>
-
-      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-5">
-        휴게시간 순서뽑기
-      </h1>
-
-      <div class="w-40 h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
-        <div id="splash-bar" class="splash-progress-bar"></div>
-      </div>
+    <!-- [1] 스플래시 인트로 화면 -->
+    <div id="splash-screen" onclick="hideSplash()">
+        <div class="splash-icon-wrap">
+            <!-- icon-180.png 또는 assets/icon-180.png 우선 로드, 없을 시 내장 SVG 아이콘 표시 -->
+            <img src="icon-180.png" alt="휴게시간 순서뽑기 아이콘"
+                 onerror="handleSplashIconError(this)">
+        </div>
+        <div class="splash-title">휴게시간 순서뽑기</div>
+        <div class="splash-sub">OLIVERSE CREW HUB</div>
+        <div class="splash-loader">
+            <div class="splash-loader-bar"></div>
+        </div>
     </div>
-  </div>
 
-  <!-- ==========================================
-       2. 메인 컬렉션 선택 화면
-  =========================================== -->
-  <main class="w-full max-w-md px-5 z-10 flex flex-col justify-center">
-    
-    <!-- 심플 헤더 -->
-    <header class="mb-6 flex items-center gap-3.5">
-      <div class="w-12 h-12 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
-        <img 
-          src="icon-180.png" 
-          alt="아이콘" 
-          class="w-full h-full object-cover"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-        />
-        <div style="display:none" class="w-full h-full items-center justify-center bg-gradient-to-br from-[#82DC28]/20 to-[#FF7878]/20 text-xl">
-          🎲
-        </div>
-      </div>
-      <div>
-        <span class="text-[11px] font-extrabold tracking-wider text-[#4a9c06] uppercase block">
-          COLLECTION
-        </span>
-        <h2 class="text-[22px] font-extrabold tracking-tight text-slate-900 leading-tight">
-          휴게시간 순서뽑기
-        </h2>
-      </div>
-    </header>
-
-    <!-- ==========================================
-         3. 컬렉션 카드 목록 (왼쪽 이미지 · 오른쪽 테마명)
-    =========================================== -->
-    <section class="flex flex-col gap-3.5" aria-label="컬렉션 목록">
-
-      <!-- 1. 컬러 (color.html) -->
-      <a href="color.html" class="collection-card stagger-1 p-3.5 flex items-center gap-4 group">
-        <div class="thumb-box bg-gradient-to-br from-[#F0F9E8] via-[#FFF5F5] to-[#EBF6FF]">
-          <img 
-            src="thumb-color.png" 
-            alt="컬러" 
-            class="w-full h-full object-cover absolute inset-0 z-10"
-            onerror="this.style.display='none'"
-          />
-          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="14" y="18" width="26" height="38" rx="7" transform="rotate(-16 14 18)" fill="#FF7878" stroke="#FFFFFF" stroke-width="2.5"/>
-            <rect x="24" y="14" width="26" height="38" rx="7" transform="rotate(-4 24 14)" fill="#FFD166" stroke="#FFFFFF" stroke-width="2.5"/>
-            <rect x="34" y="15" width="26" height="38" rx="7" transform="rotate(9 34 15)" fill="#60B6FF" stroke="#FFFFFF" stroke-width="2.5"/>
-            <rect x="26" y="25" width="28" height="38" rx="8" fill="#82DC28" stroke="#FFFFFF" stroke-width="2.5"/>
-            <circle cx="40" cy="44" r="7.5" fill="#FFFFFF" fill-opacity="0.92"/>
-            <path d="M36.5 44L39 46.5L44 41.5" stroke="#3c8505" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-
-        <div class="flex-1 flex items-center justify-between pr-1">
-          <div>
-            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#82DC28]/20 text-[#3c8505] mb-1">
-              COLLECTION 01
-            </span>
-            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
-              컬러
-            </h3>
-          </div>
-          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </a>
-
-      <!-- 2. 호빵맨 (anpanman.html) -->
-      <a href="anpanman.html" class="collection-card stagger-2 p-3.5 flex items-center gap-4 group">
-        <div class="thumb-box bg-gradient-to-br from-[#FFF3E0] via-[#FFE8D6] to-[#FFDFDF]">
-          <img 
-            src="thumb-anpanman.png" 
-            alt="호빵맨" 
-            class="w-full h-full object-cover absolute inset-0 z-10"
-            onerror="this.style.display='none'"
-          />
-          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="42" r="24" fill="#F4A261" stroke="#FFFFFF" stroke-width="2.5"/>
-            <circle cx="27" cy="43" r="5.5" fill="#FF6B6B"/>
-            <circle cx="53" cy="43" r="5.5" fill="#FF6B6B"/>
-            <circle cx="40" cy="42" r="6.5" fill="#E63946"/>
-            <rect x="38" y="39" width="3" height="3" rx="1" fill="#FFFFFF"/>
-            <rect x="25" y="41" width="2.5" height="2.5" rx="1" fill="#FFFFFF"/>
-            <rect x="51" y="41" width="2.5" height="2.5" rx="1" fill="#FFFFFF"/>
-            <circle cx="33" cy="32" r="2.3" fill="#2B2D42"/>
-            <circle cx="47" cy="32" r="2.3" fill="#2B2D42"/>
-            <path d="M29 27C31 25 35 25 36 27" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
-            <path d="M44 27C45 25 49 25 51 27" stroke="#2B2D42" stroke-width="2" stroke-linecap="round"/>
-            <path d="M33 51C35.5 55 44.5 55 47 51" stroke="#2B2D42" stroke-width="2.3" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <div class="flex-1 flex items-center justify-between pr-1">
-          <div>
-            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FF7878]/18 text-[#d94848] mb-1">
-              COLLECTION 02
-            </span>
-            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
-              호빵맨
-            </h3>
-          </div>
-          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </a>
-
-      <!-- 3. 치이카와 (chikawa.html) -->
-      <a href="chikawa.html" class="collection-card stagger-3 p-3.5 flex items-center gap-4 group">
-        <div class="thumb-box bg-gradient-to-br from-[#FFF0F6] via-[#F0F7FF] to-[#FFFDF0]">
-          <img 
-            src="thumb-chikawa.png" 
-            alt="치이카와" 
-            class="w-full h-full object-cover absolute inset-0 z-10"
-            onerror="this.style.display='none'"
-          />
-          <svg class="w-14 h-14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="25" cy="24" r="7.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
-            <circle cx="55" cy="24" r="7.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
-            <rect x="17" y="23" width="46" height="39" rx="19.5" fill="#FFFFFF" stroke="#4A4E69" stroke-width="2.2"/>
-            <path d="M22 30C27 23 36 23 40 28C44 23 53 23 58 30" stroke="#72B5F2" stroke-width="4" stroke-linecap="round"/>
-            <ellipse cx="27" cy="45" rx="4" ry="2.5" fill="#FF9EBB"/>
-            <ellipse cx="53" cy="45" rx="4" ry="2.5" fill="#FF9EBB"/>
-            <circle cx="32" cy="40" r="2.6" fill="#2B2D42"/>
-            <circle cx="48" cy="40" r="2.6" fill="#2B2D42"/>
-            <circle cx="31.2" cy="39" r="0.9" fill="#FFFFFF"/>
-            <circle cx="47.2" cy="39" r="0.9" fill="#FFFFFF"/>
-            <path d="M37 45.5C38.2 47 39.8 47 40 45.5C40.2 47 41.8 47 43 45.5" stroke="#2B2D42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-
-        <div class="flex-1 flex items-center justify-between pr-1">
-          <div>
-            <div class="flex items-center gap-1.5 mb-1">
-              <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
-                COLLECTION 03
-              </span>
-              <span class="inline-block text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#FF7878] text-white">
-                NEW
-              </span>
+    <!-- [2] 메인 앱 컨테이너 -->
+    <div class="app-container">
+        <header>
+            <div class="brand-wrap">
+                <span class="brand-dot"></span>
+                <h1 class="header-title">휴게시간 순서뽑기</h1>
             </div>
-            <h3 class="text-[19px] font-extrabold text-slate-900 tracking-tight">
-              치이카와
-            </h3>
-          </div>
-          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </a>
+            <span class="crew-badge">CREW ONLY</span>
+        </header>
 
-      <!-- 4. 산리오 캐릭터즈 (sanrio.html - 회색 실루엣) -->
-      <a href="sanrio.html" class="collection-card card-sanrio stagger-4 p-3.5 flex items-center gap-4 group">
-        <div class="thumb-box bg-slate-200/90">
-          <img 
-            src="thumb-sanrio.png" 
-            alt="산리오 캐릭터즈" 
-            class="w-full h-full object-cover absolute inset-0 z-10 silhouette-filter"
-            onerror="this.style.display='none'"
-          />
-          <svg class="w-14 h-14 silhouette-filter" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="25" cy="24" rx="7" ry="14" transform="rotate(-18 25 24)" fill="#475569"/>
-            <ellipse cx="55" cy="24" rx="7" ry="14" transform="rotate(18 55 24)" fill="#475569"/>
-            <ellipse cx="40" cy="45" rx="22" ry="18" fill="#475569"/>
-            <circle cx="52" cy="29" r="4" fill="#1E293B"/>
-            <path d="M44 25C47 23 50 26 50 29C50 32 47 35 44 33Z" fill="#1E293B"/>
-            <path d="M60 25C57 23 54 26 54 29C54 32 57 35 60 33Z" fill="#1E293B"/>
-            <text x="40" y="51" text-anchor="middle" fill="#CBD5E1" font-size="16" font-weight="900">?</text>
-          </svg>
-        </div>
+        <main>
+            <!-- 섹션 1: 휴게시간 순서뽑기 테마 컬렉션 -->
+            <section class="section-group">
+                <div class="section-header">
+                    <span class="section-label">Breaktime Order Collection</span>
+                </div>
 
-        <div class="flex-1 flex items-center justify-between pr-1">
-          <div>
-            <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-200 text-slate-500 mb-1">
-              COMING SOON
-            </span>
-            <h3 class="text-[19px] font-extrabold text-slate-500 tracking-tight">
-              산리오 캐릭터즈
-            </h3>
-          </div>
-          <svg class="w-5 h-5 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </a>
+                <!-- 1. 컬러 -->
+                <div class="collection-card" onclick="openTheme('color')">
+                    <div class="thumb-box">
+                        <img src="assets/thumb-color.png" alt="컬러"
+                             onerror="this.onerror=null; this.src=getThumbSVG('color');">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 01</span>
+                        </div>
+                        <div class="collection-name">컬러</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-    </section>
-  </main>
+                <!-- 2. 호빵맨 -->
+                <div class="collection-card" onclick="openTheme('anpanman')">
+                    <div class="thumb-box">
+                        <img src="anpanman/img/1.png" alt="호빵맨"
+                             onerror="handleThumbFallback(this, 'anpanman/1.png', 'anpanman')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 02</span>
+                        </div>
+                        <div class="collection-name">호빵맨</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-  <script>
-    let splashTimer = null;
+                <!-- 3. 치이카와 -->
+                <div class="collection-card" onclick="openTheme('chikawa')">
+                    <div class="thumb-box">
+                        <img src="chikawa/img/1.png" alt="치이카와"
+                             onerror="handleThumbFallback(this, 'chikawa/1.png', 'chiikawa')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 03</span>
+                            <span class="badge-new">NEW</span>
+                        </div>
+                        <div class="collection-name">치이카와</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-    function startSplash() {
-      const bar = document.getElementById('splash-bar');
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          bar.style.width = '100%';
-        });
-      });
+                <!-- 4. 산리오 캐릭터즈 (회색 실루엣) -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'sanrio', '산리오 캐릭터즈')">
+                    <div class="thumb-box">
+                        <img src="sanrio/img/1.png" alt="산리오 캐릭터즈"
+                             onerror="this.onerror=null; this.src=getThumbSVG('sanrio');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 04</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">산리오 캐릭터즈</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-      splashTimer = setTimeout(() => {
-        hideSplash();
-      }, 1350);
-    }
+                <!-- 5. 짱구는 못말려 (회색 실루엣) -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'shinchan', '짱구는 못말려')">
+                    <div class="thumb-box">
+                        <img src="shinchan/img/1.png" alt="짱구는 못말려"
+                             onerror="this.onerror=null; this.src=getThumbSVG('shinchan');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 05</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">짱구는 못말려</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-    function hideSplash() {
-      clearTimeout(splashTimer);
-      const splash = document.getElementById('splash-screen');
-      if (splash) {
-        splash.classList.add('hidden-splash');
-      }
-    }
+                <!-- 6. 포켓몬스터 (회색 실루엣) -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'pokemon', '포켓몬스터')">
+                    <div class="thumb-box">
+                        <img src="pokemon/img/1.png" alt="포켓몬스터"
+                             onerror="this.onerror=null; this.src=getThumbSVG('pokemon');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 06</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">포켓몬스터</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
 
-    window.addEventListener('DOMContentLoaded', startSplash);
-  </script>
+                <!-- 7. 오늘의 추구미 (회색 실루엣) -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'vibe', '오늘의 추구미')">
+                    <div class="thumb-box">
+                        <img src="vibe/img/1.png" alt="오늘의 추구미"
+                             onerror="this.onerror=null; this.src=getThumbSVG('vibe');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">COLLECTION 07</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">오늘의 추구미</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
+            </section>
+
+            <!-- 섹션 2: 크루 플레이그라운드 미니앱 (점메추 / 퍼스널컬러) -->
+            <section class="section-group">
+                <div class="section-header">
+                    <span class="section-label">Crew Playground Mini Apps</span>
+                </div>
+
+                <!-- 미니앱 1. 점메추 -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'lunch', '점메추 (점심메뉴추천)')">
+                    <div class="thumb-box">
+                        <img src="lunch/img/thumb.png" alt="점메추"
+                             onerror="this.onerror=null; this.src=getThumbSVG('lunch');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">MINI APP 01</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">점메추</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
+
+                <!-- 미니앱 2. 퍼스널컬러 -->
+                <div class="collection-card locked" onclick="openLockedOrReady(this, 'personal-color', '퍼스널컬러')">
+                    <div class="thumb-box">
+                        <img src="personal-color/img/thumb.png" alt="퍼스널컬러"
+                             onerror="this.onerror=null; this.src=getThumbSVG('personal');">
+                        <div class="lock-overlay">🔒</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">MINI APP 02</span>
+                            <span class="badge-soon">COMING SOON</span>
+                        </div>
+                        <div class="collection-name">퍼스널컬러</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 스낵바 알림 -->
+    <div class="snackbar" id="snackbar">오픈 준비 중인 테마입니다!</div>
+
+    <script>
+        let splashTimeout = null;
+        let snackbarTimeout = null;
+
+        // 스플래시 아이콘 경로 자동 폴백 (icon-180.png -> assets/icon-180.png -> 내장 SVG)
+        function handleSplashIconError(imgEl) {
+            if (!imgEl.dataset.triedAssets) {
+                imgEl.dataset.triedAssets = '1';
+                imgEl.src = 'assets/icon-180.png';
+            } else {
+                imgEl.onerror = null;
+                imgEl.src = getThumbSVG('splash');
+            }
+        }
+
+        // 카드 썸네일 다중 경로 폴백 (폴더 분리 전/후 모두 대응)
+        function handleThumbFallback(imgEl, altPath, svgType) {
+            if (!imgEl.dataset.triedAlt) {
+                imgEl.dataset.triedAlt = '1';
+                imgEl.src = altPath;
+            } else {
+                imgEl.onerror = null;
+                imgEl.src = getThumbSVG(svgType);
+            }
+        }
+
+        // 내장 SVG 썸네일 생성기 (이미지 파일이 없을 때도 고퀄리티 썸네일 유지)
+        function getThumbSVG(type) {
+            let svg = '';
+            if (type === 'splash' || type === 'color') {
+                // 나무 데스크 위 팬톤 컬러칩 그래픽
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#6D4226"/>
+                    <g transform="rotate(-10 50 50)">
+                        <rect x="16" y="18" width="44" height="56" rx="4" fill="#FAF8F5"/>
+                        <rect x="20" y="22" width="36" height="36" rx="2" fill="#FF7878"/>
+                    </g>
+                    <g transform="rotate(8 55 55)">
+                        <rect x="38" y="24" width="46" height="58" rx="4" fill="#FAF8F5" stroke="#3E2723" stroke-width="1.5"/>
+                        <rect x="42" y="28" width="38" height="38" rx="2" fill="#82DC28"/>
+                        <rect x="43" y="71" width="22" height="5" rx="1.5" fill="#111111"/>
+                    </g>
+                </svg>`;
+            } else if (type === 'anpanman') {
+                // 호빵맨 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#86CEFA"/>
+                    <circle cx="50" cy="52" r="34" fill="#FCD3A1" stroke="#4A2C11" stroke-width="3.5"/>
+                    <circle cx="33" cy="55" r="8" fill="#FF7043"/>
+                    <circle cx="67" cy="55" r="8" fill="#FF7043"/>
+                    <circle cx="50" cy="53" r="8.5" fill="#E53935" stroke="#4A2C11" stroke-width="2.5"/>
+                    <circle cx="39" cy="40" r="4" fill="#4A2C11"/>
+                    <circle cx="61" cy="40" r="4" fill="#4A2C11"/>
+                    <path d="M 38 66 Q 50 75 62 66" fill="none" stroke="#4A2C11" stroke-width="3.5" stroke-linecap="round"/>
+                </svg>`;
+            } else if (type === 'chiikawa') {
+                // 치이카와 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cde6ba"/>
+                    <circle cx="33" cy="28" r="11" fill="#ffffff" stroke="#334155" stroke-width="3.5"/>
+                    <circle cx="67" cy="28" r="11" fill="#ffffff" stroke="#334155" stroke-width="3.5"/>
+                    <circle cx="50" cy="54" r="32" fill="#ffffff" stroke="#334155" stroke-width="3.5"/>
+                    <circle cx="39" cy="52" r="4" fill="#1e293b"/>
+                    <circle cx="61" cy="52" r="4" fill="#1e293b"/>
+                    <ellipse cx="30" cy="59" rx="5.5" ry="3.2" fill="#fda4af"/>
+                    <ellipse cx="70" cy="59" rx="5.5" ry="3.2" fill="#fda4af"/>
+                    <path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+                </svg>`;
+            } else if (type === 'sanrio') {
+                // 산리오 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <ellipse cx="50" cy="56" rx="32" ry="26" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                    <polygon points="24,42 30,20 44,34" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                    <polygon points="76,42 70,20 56,34" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                    <circle cx="66" cy="34" r="7" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>
+                </svg>`;
+            } else if (type === 'shinchan') {
+                // 짱구 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <circle cx="46" cy="54" r="26" fill="#f1f5f9" stroke="#475569" stroke-width="3.5"/>
+                    <circle cx="64" cy="58" r="18" fill="#f1f5f9" stroke="#475569" stroke-width="3.5"/>
+                    <path d="M 30 38 Q 38 30 46 38" fill="none" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M 52 38 Q 60 30 68 38" fill="none" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+                </svg>`;
+            } else if (type === 'pokemon') {
+                // 몬스터볼 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <circle cx="50" cy="50" r="34" fill="#ffffff" stroke="#334155" stroke-width="4"/>
+                    <path d="M 16 50 A 34 34 0 0 1 84 50 Z" fill="#64748b" stroke="#334155" stroke-width="4"/>
+                    <circle cx="50" cy="50" r="10" fill="#ffffff" stroke="#334155" stroke-width="4"/>
+                </svg>`;
+            } else if (type === 'vibe') {
+                // 추구미 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <path d="M50 18 L58 40 L80 48 L58 56 L50 78 L42 56 L20 48 L42 40 Z" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                </svg>`;
+            } else if (type === 'lunch') {
+                // 점메추 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <path d="M 22 52 L 78 52 A 28 28 0 0 1 22 52 Z" fill="#ffffff" stroke="#475569" stroke-width="4"/>
+                    <rect x="38" y="76" width="24" height="6" rx="2" fill="#475569"/>
+                </svg>`;
+            } else if (type === 'personal') {
+                // 퍼스널컬러 무지개 실루엣용 썸네일
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#cbd5e1"/>
+                    <path d="M 18 70 A 32 32 0 0 1 82 70" fill="none" stroke="#475569" stroke-width="10"/>
+                    <path d="M 28 70 A 22 22 0 0 1 72 70" fill="none" stroke="#94a3b8" stroke-width="10"/>
+                    <circle cx="50" cy="40" r="14" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                </svg>`;
+            }
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        // 스플래시 닫기
+        function hideSplash() {
+            const splash = document.getElementById('splash-screen');
+            if (!splash || splash.classList.contains('hidden')) return;
+            splash.classList.add('hidden');
+            if (splashTimeout) clearTimeout(splashTimeout);
+        }
+
+        // 활성화된 테마 이동: 같은 폴더 내 파일(color.html)과 하위 폴더(color/index.html) 자동 대응
+        async function openTheme(themeKey) {
+            const flatFile = `${themeKey}.html`;
+            const folderFile = `${themeKey}/index.html`;
+
+            try {
+                // 하위 폴더 구조(예: color/index.html)가 존재하는지 먼저 확인 후 이동
+                const res = await fetch(folderFile, { method: 'HEAD' });
+                if (res.ok) {
+                    window.location.href = folderFile;
+                    return;
+                }
+            } catch (e) {
+                // 로컬 file:// 환경 등에서는 기본 파일로 이동
+            }
+            window.location.href = flatFile;
+        }
+
+        // 잠금(COMING SOON) 카드 클릭 시 스낵바 안내
+        function openLockedOrReady(cardEl, folderKey, title) {
+            cardEl.classList.remove('shake');
+            void cardEl.offsetWidth;
+            cardEl.classList.add('shake');
+
+            showSnackbar(`'${title}' 테마는 오픈 준비 중입니다!`);
+        }
+
+        function showSnackbar(msg) {
+            const bar = document.getElementById('snackbar');
+            bar.innerText = msg;
+            bar.classList.add('show');
+            if (snackbarTimeout) clearTimeout(snackbarTimeout);
+            snackbarTimeout = setTimeout(() => {
+                bar.classList.remove('show');
+            }, 2200);
+        }
+
+        window.onload = () => {
+            splashTimeout = setTimeout(() => {
+                hideSplash();
+            }, 1450);
+        };
+    </script>
 </body>
 </html>
