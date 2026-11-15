@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>올리버스 - 퍼스널컬러 16타입 진단</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --primary-lime: #82DC28;
+            --coral-accent: #FF7878;
+            --text-dark: #111111;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            height: 100%;
+            width: 100%;
+            max-width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100dvh;
+            background-color: var(--bg-dark);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 상단 헤더: 블러 없음, 메인 타이틀 중앙 + 우측 1/16 카운터만 배치 */
+        header {
+            padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+            padding-bottom: 14px;
+            padding-left: 16px;
+            padding-right: 16px;
+            background-color: var(--bg-dark);
+            border-bottom: 2px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 30;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.08rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        .step-counter {
+            position: absolute;
+            right: 16px;
+            bottom: 14px;
+            font-size: 0.84rem;
+            font-weight: 900;
+            color: var(--primary-lime);
+        }
+
+        /* 메인 드레이핑 스테이지 (탭하면 다음 컬러로 전환) */
+        .stage-area {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* [1] 방사형 무지개 퍼스널컬러 배경 차트 (예시 사진과 동일한 방사형 핀휠 구조) */
+        .rainbow-wheel {
+            position: absolute;
+            /* 화면 모서리까지 빈틈없이 채우도록 넉넉한 크기로 설정 */
+            width: 160vmax;
+            height: 160vmax;
+            top: 46%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .rainbow-wheel.pop {
+            transform: translate(-50%, -50%) scale(1.03) rotate(4deg);
+        }
+
+        /* [2] 상단 퍼스널컬러 이름 안내 캡슐 배너 (솔리드 화이트) */
+        .color-info-banner {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 28px);
+            background-color: #ffffff;
+            color: var(--text-dark);
+            border: 3px solid #111111;
+            border-radius: 18px;
+            padding: 11px 16px;
+            z-index: 15;
+            box-shadow: 0 6px 0 #111111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            pointer-events: none;
+        }
+
+        .season-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .season-badge {
+            background-color: #111111;
+            color: var(--primary-lime);
+            font-size: 0.68rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+        }
+
+        .color-title-main {
+            font-size: 1.22rem;
+            font-weight: 900;
+            color: #111111;
+            letter-spacing: -0.03em;
+        }
+
+        .color-sub-names {
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: #475569;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        /* [3] 중앙 얼굴 컷아웃 마스크 (첨부 예시처럼 딱 얼굴만 타원형으로 노출) */
+        .face-cutout-frame {
+            position: relative;
+            width: 210px;
+            height: 276px;
+            border-radius: 50% / 50%;
+            overflow: hidden;
+            z-index: 10;
+            background-color: #1e293b;
+            border: 3px solid #111111;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        /* 전면 카메라 비디오 (거울 모드 좌우반전 & 얼굴 중앙 확대) */
+        #cameraVideo, #uploadedPhoto {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transform: scaleX(-1);
+            display: block;
+        }
+
+        #uploadedPhoto {
+            display: none;
+            transform: none;
+        }
+
+        /* 카메라 권한 대기/안내 오버레이 */
+        .camera-permission-box {
+            position: absolute;
+            inset: 0;
+            background-color: #1e293b;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            text-align: center;
+            z-index: 12;
+        }
+
+        .camera-permission-box.hidden {
+            display: none !important;
+        }
+
+        .cam-icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+
+        .cam-guide-text {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            line-height: 1.35;
+            margin-bottom: 12px;
+        }
+
+        .cam-start-btn {
+            background-color: var(--primary-lime);
+            color: #111111;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+
+        .photo-upload-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* [4] 하단 탭 가이드 캡슐 & 우측 하단 원형 셔터/전환 버튼 (예시 사진 우측 하단 흰색 원 재현) */
+        .tap-hint-pill {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #111111;
+            color: #ffffff;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            z-index: 15;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .Quick-circle-btn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 3px solid #111111;
+            box-shadow: 0 4px 0 #111111;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: #111111;
+            cursor: pointer;
+        }
+
+        .Quick-circle-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #111111;
+        }
+
+        /* 하단 고정 푸터 바 (솔리드 다크 바) */
+        .footer-action {
+            padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;
+            background-color: var(--bg-dark);
+            border-top: 2px solid #1e293b;
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 13px;
+            font-size: 0.92rem;
+            font-weight: 900;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .nav-btn.home {
+            flex: 0.38;
+            background-color: #1e293b;
+            color: #ffffff;
+            border: 1px solid #334155;
+        }
+
+        .nav-btn.prev {
+            flex: 0.28;
+            background-color: #334155;
+            color: #ffffff;
+        }
+
+        .nav-btn.next {
+            flex: 0.54;
+            background-color: var(--primary-lime);
+            color: #111111;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <!-- 상단 헤더: 메인 타이틀 + 우측 1/16 카운터 -->
+        <header>
+            <div class="header-title">퍼스널컬러 진단</div>
+            <div class="step-counter" id="stepCounter">1 / 16</div>
+        </header>
+
+        <!-- 메인 진단 스테이지 (화면을 탭하면 다음 퍼스널컬러로 전환) -->
+        <div class="stage-area" id="stageArea" onclick="nextPersonalColor()">
+            
+            <!-- 방사형 무지개 퍼스널컬러 차트 레이어 -->
+            <div class="rainbow-wheel" id="rainbowWheel"></div>
+
+            <!-- 상단 컬러 이름 & 세부 톤 안내 보드 -->
+            <div class="color-info-banner">
+                <div class="season-tag-row">
+                    <span class="season-badge" id="seasonBadge">SPRING WARM</span>
+                </div>
+                <div class="color-title-main" id="colorTitleMain">01. 봄 웜 라이트</div>
+                <div class="color-sub-names" id="colorSubNames">피치 코랄 · 버터 옐로우 · 애플 민트 · 살구 핑크</div>
+            </div>
+
+            <!-- 중앙 얼굴 타원형 컷아웃 -->
+            <div class="face-cutout-frame" onclick="event.stopPropagation(); nextPersonalColor();">
+                <video id="cameraVideo" autoplay playsinline muted></video>
+                <img id="uploadedPhoto" alt="얼굴 사진">
+
+                <!-- 카메라 권한 요청 / 사진 대체 업로드 박스 -->
+                <div class="camera-permission-box" id="camPermissionBox" onclick="event.stopPropagation();">
+                    <div class="cam-icon">📷</div>
+                    <div class="cam-guide-text">얼굴을 맞추기 위해<br>카메라 권한을 허용해주세요</div>
+                    <button class="cam-start-btn" onclick="startCamera()">카메라 켜기</button>
+                    <label class="photo-upload-label">
+                        또는 사진첩에서 얼굴 선택
+                        <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+                    </label>
+                </div>
+            </div>
+
+            <!-- 하단 탭 안내 문구 -->
+            <div class="tap-hint-pill">👆 화면을 탭하면 다음 컬러로 바뀝니다</div>
+
+            <!-- 첨부 사진 우측 하단 흰색 원형 버튼 (전체 16색 무지개와 비교 기능) -->
+            <button class="Quick-circle-btn" onclick="event.stopPropagation(); toggleFullRainbow();" title="기본 16색 무지개 보기">
+                무지개
+            </button>
+        </div>
+
+        <!-- 하단 네비게이션 버튼 -->
+        <div class="footer-action">
+            <button class="nav-btn home" onclick="navigateHome()">🏠 홈으로</button>
+            <button class="nav-btn prev" onclick="prevPersonalColor()">◀ 이전</button>
+            <button class="nav-btn next" onclick="nextPersonalColor()">다음 컬러 ▶</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 퍼스널컬러 16가지 타입 데이터
+         * 각 타입을 대표하는 8가지 베스트 컬러칩이 방사형 무지개 차트(16조각 핀휠)로 펼쳐집니다.
+         */
+        const personalColor16List = [
+            {
+                id: 1,
+                eng: 'SPRING WARM LIGHT',
+                name: '01. 봄 웜 라이트 (Spring Light)',
+                desc: '피치 코랄 · 파스텔 옐로우 · 라이트 살구 · 애플 민트',
+                colors: ['#FFB7B2', '#FFDAC1', '#FFF5BA', '#E2F0CB', '#B5EAD7', '#FFD1DC', '#FFCC99', '#FFFFD1']
+            },
+            {
+                id: 2,
+                eng: 'SPRING WARM BRIGHT',
+                name: '02. 봄 웜 브라이트 (Spring Bright)',
+                desc: '비비드 코랄 · 선샤인 옐로우 · 프레시 그린 · 아쿠아 블루',
+                colors: ['#FF5E5B', '#FF9F1C', '#FFEA00', '#70E000', '#00BBF9', '#FF6B6B', '#FFD166', '#06D6A0']
+            },
+            {
+                id: 3,
+                eng: 'SPRING WARM TRUE',
+                name: '03. 봄 웜 트루 (Spring True)',
+                desc: '오렌지 레드 · 골든 옐로우 · 리프 그린 · 웜 코랄',
+                colors: ['#F94144', '#F3722C', '#F8961E', '#F9C74F', '#90BE6D', '#43AA8B', '#FF7F51', '#FF9B54']
+            },
+            {
+                id: 4,
+                eng: 'SPRING WARM SOFT',
+                name: '04. 봄 웜 소프트 (Spring Soft)',
+                desc: '소프트 살구 · 밀크 옐로우 · 피스타치오 · 웜 로즈',
+                colors: ['#F4A261', '#E9C46A', '#A8DADC', '#F28482', '#F6BD60', '#84A59D', '#F5CAC3', '#E09F3E']
+            },
+            {
+                id: 5,
+                eng: 'SUMMER COOL LIGHT',
+                name: '05. 여름 쿨 라이트 (Summer Light)',
+                desc: '베이비 핑크 · 아이스 블루 · 소프트 라벤더 · 레몬 소다',
+                colors: ['#FDE2E4', '#E2ECE9', '#BEE1E6', '#C5DEDD', '#FAD2E1', '#D8E2DC', '#E8E8E4', '#CDB4DB']
+            },
+            {
+                id: 6,
+                eng: 'SUMMER COOL BRIGHT',
+                name: '06. 여름 쿨 브라이트 (Summer Bright)',
+                desc: '푸시아 핑크 · 스카이 블루 · 오키드 퍼플 · 쿨 민트',
+                colors: ['#FF4D6D', '#FF758F', '#C77DFF', '#7209B7', '#4CC9F0', '#4895EF', '#F72585', '#90E0EF']
+            },
+            {
+                id: 7,
+                eng: 'SUMMER COOL TRUE',
+                name: '07. 여름 쿨 트루 (Summer True)',
+                desc: '로즈 핑크 · 수국 블루 · 라일락 퍼플 · 블루 민트',
+                colors: ['#E5989B', '#B5838D', '#9D8189', '#7F9EB2', '#8E9AAF', '#CBC0D3', '#EFD3D7', '#A9DEF9']
+            },
+            {
+                id: 8,
+                eng: 'SUMMER COOL MUTE',
+                name: '08. 여름 쿨 뮤트 (Summer Mute)',
+                desc: '더스티 로즈 · 그레이시 블루 · 모브 퍼플 · 세이지 민트',
+                colors: ['#B5838D', '#6D6875', '#8E9AAF', '#9A8C98', '#C9ADA7', '#7E8D85', '#A39BA8', '#B8C0FF']
+            },
+            {
+                id: 9,
+                eng: 'AUTUMN WARM MUTE',
+                name: '09. 가을 웜 뮤트 (Autumn Mute)',
+                desc: '오트밀 베이지 · 드라이 로즈 · 올리브 카키 · 소프트 머스타드',
+                colors: ['#DDB892', '#E6CCB2', '#B08968', '#A5A58D', '#B7B7A4', '#CB997E', '#D4A373', '#CCD5AE']
+            },
+            {
+                id: 10,
+                eng: 'AUTUMN WARM SOFT',
+                name: '10. 가을 웜 소프트 (Autumn Soft)',
+                desc: '살구 브라운 · 황토 옐로우 · 모스 그린 · 테라코타 코랄',
+                colors: ['#E07A5F', '#F2CC8F', '#81B29A', '#D4A373', '#E5989B', '#B56576', '#C9ADA7', '#A3B18A']
+            },
+            {
+                id: 11,
+                eng: 'AUTUMN WARM TRUE',
+                name: '11. 가을 웜 트루 (Autumn True)',
+                desc: '펌킨 오렌지 · 머스타드 골드 · 포레스트 카키 · 시나몬 브라운',
+                colors: ['#BC4749', '#D97706', '#CA8A04', '#65A30D', '#B45309', '#9A3412', '#A16207', '#4D7C0F']
+            },
+            {
+                id: 12,
+                eng: 'AUTUMN WARM DEEP',
+                name: '12. 가을 웜 딥 (Autumn Deep)',
+                desc: '칠리 브릭레드 · 다크 초콜릿 · 딥 카키 · 버건디 브라운',
+                colors: ['#7F1D1D', '#7C2D12', '#78350F', '#365314', '#14532D', '#451A03', '#991B1B', '#3F6212']
+            },
+            {
+                id: 13,
+                eng: 'WINTER COOL BRIGHT',
+                name: '13. 겨울 쿨 브라이트 (Winter Bright)',
+                desc: '마젠타 핫핑크 · 일렉트릭 블루 · 네온 그린 · 로얄 퍼플',
+                colors: ['#FF007F', '#00F5D4', '#00BBF9', '#FEE440', '#9B5DE5', '#F15BB5', '#00509D', '#38B000']
+            },
+            {
+                id: 14,
+                eng: 'WINTER COOL TRUE',
+                name: '14. 겨울 쿨 트루 (Winter True)',
+                desc: '루비 레드 · 코발트 블루 · 에메랄드 파인 · 플럼 퍼플',
+                colors: ['#D90429', '#1D4ED8', '#047857', '#6D28D9', '#BE185D', '#0F172A', '#E11D48', '#2563EB']
+            },
+            {
+                id: 15,
+                eng: 'WINTER COOL DEEP',
+                name: '15. 겨울 쿨 딥 (Winter Deep)',
+                desc: '와인 버건디 · 미드나잇 네이비 · 딥 플럼 · 다크 파인그린',
+                colors: ['#590D22', '#800F2F', '#1E1B4B', '#172554', '#064E3B', '#3B0764', '#4C0519', '#090D16']
+            },
+            {
+                id: 16,
+                eng: 'WINTER COOL DARK',
+                name: '16. 겨울 쿨 다크 (Winter Dark)',
+                desc: '차콜 블랙 · 아이스 실버 · 다크 바이올렛 · 나이트 블루',
+                colors: ['#18181B', '#27272A', '#312E81', '#1E293B', '#4C1D95', '#0F172A', '#3F3F46', '#701A75']
+            }
+        ];
+
+        // 첨부하신 예시 이미지와 똑같은 16색 전체 무지개 핀휠 팔레트
+        const fullRainbow16Colors = [
+            '#E63946', '#F3722C', '#F8961E', '#F9C74F',
+            '#90BE6D', '#43AA8B', '#2EC4B6', '#3A86FF',
+            '#4361EE', '#7209B7', '#B5179E', '#F72585',
+            '#FF5D8F', '#FF8FA3', '#FF9F1C', '#FFBF69'
+        ];
+
+        let currentIndex = 0;
+        let isFullRainbowMode = false;
+        let audioCtx = null;
+
+        // 탭할 때 경쾌한 틱/차임 효과음
+        function playTapSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33 + (currentIndex * 22), now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.09);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        // 방사형 무지개(conic-gradient) 생성 함수 (16조각 칼각 핀휠)
+        function buildConicGradient(colorArray) {
+            // 8색이면 2번 반복하여 16조각 무지개 핀휠로 구성
+            const sixteen = colorArray.length === 16 ? colorArray : [...colorArray, ...colorArray];
+            const sliceDeg = 360 / sixteen.length;
+            const stops = sixteen.map((hex, idx) => {
+                const start = (idx * sliceDeg).toFixed(2);
+                const end = ((idx + 1) * sliceDeg).toFixed(2);
+                return `${hex} ${start}deg ${end}deg`;
+            });
+            return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')})`;
+        }
+
+        // 화면에 현재 퍼스널컬러 차트와 이름 렌더링
+        function renderCurrentColor() {
+            const wheel = document.getElementById('rainbowWheel');
+            const badge = document.getElementById('seasonBadge');
+            const title = document.getElementById('colorTitleMain');
+            const sub = document.getElementById('colorSubNames');
+            const counter = document.getElementById('stepCounter');
+
+            // 살짝 회전하는 팝 애니메이션
+            wheel.classList.remove('pop');
+            void wheel.offsetWidth;
+            wheel.classList.add('pop');
+
+            if (isFullRainbowMode) {
+                wheel.style.background = buildConicGradient(fullRainbow16Colors);
+                badge.innerText = 'ALL 16 RAINBOW WHEEL';
+                title.innerText = '16색 종합 무지개 차트';
+                sub.innerText = '화면을 탭하면 1번 봄 웜 라이트부터 차례대로 진단합니다';
+                counter.innerText = 'ALL';
+                return;
+            }
+
+            const item = personalColor16List[currentIndex];
+            wheel.style.background = buildConicGradient(item.colors);
+            badge.innerText = item.eng;
+            title.innerText = item.name;
+            sub.innerText = item.desc;
+            counter.innerText = `${currentIndex + 1} / 16`;
+        }
+
+        // 화면 탭 -> 다음 퍼스널컬러로 이동
+        function nextPersonalColor() {
+            playTapSound();
+            if (isFullRainbowMode) {
+                isFullRainbowMode = false;
+                currentIndex = 0;
+            } else {
+                currentIndex = (currentIndex + 1) % personalColor16List.length;
+            }
+            renderCurrentColor();
+        }
+
+        // 이전 퍼스널컬러로 이동
+        function prevPersonalColor() {
+            playTapSound();
+            isFullRainbowMode = false;
+            currentIndex = (currentIndex - 1 + personalColor16List.length) % personalColor16List.length;
+            renderCurrentColor();
+        }
+
+        // 우측 하단 '무지개' 원형 버튼 클릭 시 16색 전체 무지개 차트 토글
+        function toggleFullRainbow() {
+            playTapSound();
+            isFullRainbowMode = !isFullRainbowMode;
+            renderCurrentColor();
+        }
+
+        // 전면 카메라 시작 (getUserMedia)
+        async function startCamera() {
+            const video = document.getElementById('cameraVideo');
+            const permBox = document.getElementById('camPermissionBox');
+            const photo = document.getElementById('uploadedPhoto');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 720 },
+                        height: { ideal: 960 }
+                    },
+                    audio: false
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                photo.style.display = 'none';
+                permBox.classList.add('hidden');
+            } catch (err) {
+                alert('카메라 권한을 사용할 수 없습니다. 아래 [사진첩에서 얼굴 선택]을 눌러 셀카 사진으로 진단해보세요!');
+            }
+        }
+
+        // 카메라 대신 셀카 사진 업로드 시 처리
+        function handlePhotoUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const video = document.getElementById('cameraVideo');
+                const photo = document.getElementById('uploadedPhoto');
+                const permBox = document.getElementById('camPermissionBox');
+
+                photo.src = e.target.result;
+                photo.style.display = 'block';
+                video.style.display = 'none';
+                permBox.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 홈으로 이동 (폴더 구조 및 루트 구조 모두 호환)
+        function navigateHome() {
+            const path = window.location.pathname;
+            if (path.includes('/personal-color/')) {
+                window.location.href = '../index.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 페이지 진입 시 초기 컬러 차트 렌더링 & 카메라 자동 실행 시도
+        window.onload = () => {
+            renderCurrentColor();
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                startCamera();
+            }
+        };
+    </script>
+</body>
+</html>
