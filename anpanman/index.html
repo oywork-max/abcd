@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>휴게시간 순서뽑기 - 호빵맨 테마 (47인)</title>
 
-    <!-- 스플래시 강제 종료 안전장치 (1.3초 후 무조건 DOM에서 삭제) -->
+    <!-- [안전장치] 스플래시 화면이 절대 멈추지 않도록 1.3초 후 무조건 DOM에서 완전 삭제 -->
     <script>
         function forceRemoveSplash() {
             var splash = document.getElementById('anpanSplash');
@@ -19,7 +19,7 @@
                 if (splash && splash.parentNode) {
                     splash.parentNode.removeChild(splash);
                 }
-            }, 350);
+            }, 320);
         }
         setTimeout(forceRemoveSplash, 1300);
         window.addEventListener('DOMContentLoaded', function() {
@@ -27,8 +27,26 @@
         });
     </script>
 
+    <!-- 폰트 프리커넥트 및 로드 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <!-- [초고속 로딩] 첫 화면 상단에 바로 보이는 img/1.png ~ img/12.png 최우선 프리로드 -->
+    <link rel="preload" as="image" href="img/splash.jpg" fetchpriority="high">
+    <link rel="preload" as="image" href="img/1.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/2.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/3.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/4.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/5.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/6.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/7.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/8.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/9.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/10.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/11.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/12.png" fetchpriority="high">
+
     <style>
         :root {
             --sky-bg: #86CEFA;
@@ -72,7 +90,9 @@
             box-shadow: 0 0 35px rgba(0,0,0,0.45);
         }
 
-        /* 인트로 스플래시 화면 */
+        /* =========================================================
+           1. 인트로 스플래시 화면 (img/splash.jpg 직결)
+           ========================================================= */
         .anpan-splash {
             position: absolute;
             inset: 0;
@@ -82,7 +102,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.32s ease;
             opacity: 1;
             cursor: pointer;
         }
@@ -132,6 +152,9 @@
             z-index: 5;
         }
 
+        /* =========================================================
+           2. 호빵맨 테마 배경 장식 (스카이블루 + 무지개 아치 + 별)
+           ========================================================= */
         .theme-bg-decor {
             position: absolute;
             inset: 0;
@@ -140,7 +163,9 @@
             overflow: hidden;
         }
 
-        /* 상단 헤더: 블러 및 좌우 버튼 제거, 메인 타이틀 중앙 + 우측 선택 인원만 배치 */
+        /* =========================================================
+           3. 상단 헤더 (블러/좌측버튼 제거, 중앙 타이틀 + 우측 인원수만 표시)
+           ========================================================= */
         header {
             padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
             padding-bottom: 12px;
@@ -174,7 +199,7 @@
             color: var(--anpan-red);
         }
 
-        /* 명대사 플로팅 말풍선 배너 */
+        /* 캐릭터 클릭 시 명대사 토스트 */
         .quote-toast {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 58px);
@@ -192,7 +217,7 @@
             z-index: 30;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .quote-toast.show {
@@ -219,6 +244,7 @@
             word-break: keep-all;
         }
 
+        /* 페이지 전환 레이어 */
         .page {
             flex: 1;
             min-height: 0;
@@ -233,6 +259,7 @@
             display: none !important;
         }
 
+        /* 컨텐츠 스크롤 영역 (46, 47번까지 여유 있게 올라오도록 하단 패딩 150px) */
         .content-scroll {
             flex: 1;
             min-height: 0;
@@ -243,6 +270,7 @@
             padding: 12px 12px 150px 12px;
         }
 
+        /* 4x12 격자 그리드 (좌우 잘림 원천 차단) */
         .character-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -251,6 +279,7 @@
             margin: 0 auto;
         }
 
+        /* 캐릭터 카드 */
         .char-card {
             width: 100%;
             min-width: 0;
@@ -281,6 +310,7 @@
             transform: translateY(-2px);
         }
 
+        /* 좌측 상단 번호 태그 (솔리드 브라운) */
         .char-num-tag {
             position: absolute;
             top: 4px;
@@ -291,11 +321,12 @@
             font-weight: 800;
             padding: 1px 4px;
             border-radius: 4px;
-            z-index: 3;
+            z-index: 5;
             pointer-events: none;
             line-height: 1.1;
         }
 
+        /* 선택 체크 뱃지 */
         .select-check {
             position: absolute;
             top: -4px;
@@ -315,7 +346,7 @@
             opacity: 0;
             transform: scale(0.4);
             transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 4;
+            z-index: 6;
         }
 
         .char-card.selected .select-check {
@@ -323,7 +354,9 @@
             transform: scale(1);
         }
 
-        /* 눈/얼굴 잘림 없이 원본 이미지 비율 그대로 온전히 표시 (contain) */
+        /* =========================================================
+           4. 스켈레톤 로더 + 눈/얼굴 잘림 없는 원본 비율(contain) 이미지 박스
+           ========================================================= */
         .char-img-box {
             width: 100%;
             height: 76%;
@@ -333,15 +366,56 @@
             align-items: center;
             justify-content: center;
             padding: 2px;
-            background: #ffffff;
+            position: relative;
+            background-color: var(--skel-bg, #FFF3E0);
+        }
+
+        @keyframes skeletonWave {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .skeleton-loader {
+            position: absolute;
+            inset: 0;
+            background-color: var(--skel-bg, #FFF3E0);
+            z-index: 2;
+            transition: opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        .skeleton-loader::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.65) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: skeletonWave 1.1s infinite;
+        }
+
+        .char-img-box.loaded .skeleton-loader {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .char-img-box img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* 눈이나 얼굴이 절대 잘리지 않도록 원본 비율 유지 */
             object-position: center;
             display: block;
+            opacity: 0;
+            transition: opacity 0.22s ease;
+            position: relative;
+            z-index: 3;
+        }
+
+        .char-img-box.loaded img {
+            opacity: 1;
         }
 
         .char-name {
@@ -357,6 +431,7 @@
             letter-spacing: -0.04em;
         }
 
+        /* 결과 화면 우측 상단 알파벳 배지 + 바운스 등장 */
         @keyframes badgeBounceIn {
             0%   { opacity: 0; transform: scale(0.2) translateY(-20px); }
             50%  { opacity: 1; transform: scale(1.22) translateY(2px); }
@@ -428,19 +503,20 @@
         }
 
         .action-btn.home-sub-btn {
-            flex: 0.45;
+            flex: 0.42;
             background: #ffffff;
             color: var(--anpan-brown);
             box-shadow: 0 4px 0 var(--anpan-brown);
         }
 
         .action-btn.retry-main-btn {
-            flex: 0.55;
+            flex: 0.58;
             background: var(--anpan-yellow);
             color: var(--anpan-brown);
             box-shadow: 0 4px 0 var(--anpan-brown);
         }
 
+        /* 바텀시트 모달 (블러 제거) */
         .bottom-sheet-overlay {
             position: absolute;
             inset: 0;
@@ -509,9 +585,10 @@
 
     <div class="mobile-container">
 
+        <!-- [1] 호빵맨 인트로 스플래시 화면 (img/splash.jpg 직결) -->
         <div class="anpan-splash" id="anpanSplash" onclick="forceRemoveSplash()" ontouchstart="forceRemoveSplash()">
-            <img id="splashImgEl" src="anpanman/splash.jpg" alt="날아라 호빵맨 인트로" 
-                 onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src='img/splash.jpg';}else if(!this.dataset.t2){this.dataset.t2=1;this.src='anpanman-splash.jpg';}else if(!this.dataset.t3){this.dataset.t3=1;this.src='splash.jpg';}else{this.style.display='none';}">
+            <img id="splashImgEl" src="img/splash.jpg" alt="날아라 호빵맨 인트로" 
+                 onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src='img/anpanman-splash.jpg';}else if(!this.dataset.t2){this.dataset.t2=1;this.src='splash.jpg';}else{this.style.display='none';}">
             
             <div class="splash-fallback">
                 <div style="font-family:'Jua',sans-serif; font-size:1.4rem; color:#FFEB3B; text-shadow: -2px -2px 0 #4A2C11, 2px -2px 0 #4A2C11, -2px 2px 0 #4A2C11, 2px 2px 0 #4A2C11; margin-bottom:4px;">날아라!</div>
@@ -521,6 +598,7 @@
             <div class="splash-touch-hint">✨ 화면을 터치하면 바로 시작합니다</div>
         </div>
 
+        <!-- [2] 배경 (스카이블루 + 무지개 아치 + 별 장식) -->
         <svg class="theme-bg-decor" viewBox="0 0 480 900" preserveAspectRatio="none">
             <g stroke="#4A2C11" stroke-width="2.5" stroke-linejoin="round">
                 <polygon points="75,95 82,110 98,112 86,123 89,139 75,131 61,139 64,123 52,112 68,110" fill="#FFEB3B"/>
@@ -543,25 +621,30 @@
             </g>
         </svg>
 
+        <!-- 상단 헤더: 메인 타이틀 중앙 + 우측 선택 인원 카운터 -->
         <header>
             <div class="header-title" id="headerTitle">호빵맨 순서뽑기</div>
             <div class="selected-counter" id="selectedCounter">0명 선택</div>
         </header>
 
+        <!-- 명대사 플로팅 토스트 -->
         <div class="quote-toast" id="quoteToast">
             <span class="quote-speaker" id="quoteSpeaker">호빵맨</span>
             <span class="quote-text" id="quoteText">"힘내라! 내 얼굴을 먹어!"</span>
         </div>
 
+        <!-- [페이지 1] 캐릭터 선택 화면 (4x12 배열, 1~47번) -->
         <div class="page" id="selectPage">
             <div class="content-scroll">
                 <div class="character-grid" id="anpanmanGrid"></div>
             </div>
             <div class="footer-action">
+                <button class="action-btn home-sub-btn" onclick="navigateHome()">🏠 홈으로</button>
                 <button class="action-btn" id="selectActionBtn" onclick="openBottomSheet()">🍞 선택하기</button>
             </div>
         </div>
 
+        <!-- [페이지 2] 랜덤 순서 결과 화면 (ABCD 순 정렬) -->
         <div class="page hidden" id="resultPage">
             <div class="content-scroll">
                 <div class="character-grid" id="resultGrid"></div>
@@ -572,6 +655,7 @@
             </div>
         </div>
 
+        <!-- 바텀시트 모달 -->
         <div class="bottom-sheet-overlay" id="bottomSheetOverlay" onclick="closeBottomSheet(event)">
             <div class="bottom-sheet" onclick="event.stopPropagation()">
                 <div class="sheet-handle"></div>
@@ -582,6 +666,9 @@
     </div>
 
     <script>
+        /**
+         * 1번 ~ 47번 호빵맨 캐릭터 데이터
+         */
         const anpanmanCharacters = [
             { id: 1,  name: '호빵맨',         bg: '#FFCDD2', quote: '힘내라! 내 얼굴을 먹어! 호빵 펀치!', pitch: 1.15, rate: 1.05 },
             { id: 2,  name: '세균맨',         bg: '#D1C4E9', quote: '하히후헤호~! 꼼짝 마라, 호빵맨!', pitch: 0.78, rate: 1.12 },
@@ -650,25 +737,27 @@
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
 
-        function bindCharacterImage(imgEl, id, bgColor) {
-            const paths = [
-                `anpanman/${id}.png`,
-                `img/${id}.png`,
-                `${id}.png`,
-                `anpanman/${id}.jpg`,
-                `img/${id}.jpg`
-            ];
-            let idx = 0;
+        // [핵심] 모든 이미지를 불필요한 탐색 루프 없이 img/${id}.png 에서 다이렉트로 즉시 로드!
+        function loadCharacterImageDirect(imgEl, boxEl, char) {
+            imgEl.onload = function() {
+                boxEl.classList.add('loaded');
+            };
             imgEl.onerror = function() {
-                idx++;
-                if (idx < paths.length) {
-                    imgEl.src = paths[idx];
+                if (!imgEl.dataset.triedJpg) {
+                    imgEl.dataset.triedJpg = '1';
+                    imgEl.src = `img/${char.id}.jpg`;
                 } else {
                     imgEl.onerror = null;
-                    imgEl.src = createFallbackSVG(bgColor);
+                    imgEl.src = createFallbackSVG(char.bg);
+                    boxEl.classList.add('loaded');
                 }
             };
-            imgEl.src = paths[0];
+
+            imgEl.decoding = 'async';
+            if (char.id <= 16) {
+                imgEl.fetchPriority = 'high';
+            }
+            imgEl.src = `img/${char.id}.png`;
         }
 
         function getOrderLabel(index) {
@@ -758,6 +847,7 @@
             }
         }
 
+        // 최초 1회만 47개 카드를 DOM에 생성 (클릭 시 재로딩 없음)
         function initGridOnce() {
             const grid = document.getElementById('anpanmanGrid');
             if (!grid) return;
@@ -772,15 +862,17 @@
                 card.innerHTML = `
                     <div class="char-num-tag">#${char.id}</div>
                     <div class="select-check">✓</div>
-                    <div class="char-img-box" style="background-color: ${char.bg};">
+                    <div class="char-img-box" style="--skel-bg: ${char.bg};">
+                        <div class="skeleton-loader"></div>
                         <img alt="${char.name}">
                     </div>
                     <div class="char-name">${char.name}</div>
                 `;
                 grid.appendChild(card);
 
+                const boxEl = card.querySelector('.char-img-box');
                 const imgEl = card.querySelector('img');
-                bindCharacterImage(imgEl, char.id, char.bg);
+                loadCharacterImageDirect(imgEl, boxEl, char);
             });
         }
 
@@ -861,7 +953,7 @@
 
             shuffledCharIds.forEach((id, index) => {
                 const char = anpanmanCharacters.find(c => c.id === id);
-                const badgeLetter = getOrderLabel(index); // A, B, C, D 순서대로!
+                const badgeLetter = getOrderLabel(index); // A, B, C, D 순서대로 정렬!
                 const delay = (index * 0.05).toFixed(2);
 
                 const card = document.createElement('div');
@@ -870,15 +962,17 @@
                 card.innerHTML = `
                     <div class="char-num-tag">#${char.id}</div>
                     <div class="result-badge" style="animation-delay: ${delay}s">${badgeLetter}</div>
-                    <div class="char-img-box" style="background-color: ${char.bg};">
+                    <div class="char-img-box" style="--skel-bg: ${char.bg};">
+                        <div class="skeleton-loader"></div>
                         <img alt="${char.name}">
                     </div>
                     <div class="char-name">${char.name}</div>
                 `;
                 resultGrid.appendChild(card);
 
+                const boxEl = card.querySelector('.char-img-box');
                 const imgEl = card.querySelector('img');
-                bindCharacterImage(imgEl, char.id, char.bg);
+                loadCharacterImageDirect(imgEl, boxEl, char);
             });
         }
 
@@ -892,7 +986,11 @@
             selectPage.classList.remove('hidden');
         }
 
-        initGridOnce();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGridOnce);
+        } else {
+            initGridOnce();
+        }
     </script>
 </body>
 </html>
