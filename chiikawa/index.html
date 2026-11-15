@@ -5,7 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
     <title>휴게시간 순서뽑기 - 치이카와 테마</title>
+
+    <!-- 폰트 프리커넥트 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
+
+    <!-- [속도 극대화] 첫 화면에 바로 보이는 img/1.png ~ img/9.png 최우선 프리로드 -->
+    <link rel="preload" as="image" href="img/1.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/2.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/3.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/4.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/5.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/6.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/7.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/8.png" fetchpriority="high">
+    <link rel="preload" as="image" href="img/9.png" fetchpriority="high">
+
     <style>
         :root {
             --primary: #82DC28;
@@ -130,7 +145,7 @@
             color: var(--text-main);
         }
 
-        /* 우측 하단 귀여운 BGM 플로팅 캡슐 (헤더를 건드리지 않음) */
+        /* 우측 하단 BGM 플로팅 캡슐 */
         .bgm-pill {
             position: absolute;
             right: 14px;
@@ -209,10 +224,9 @@
             position: relative;
             box-shadow: 0 6px 14px rgba(0, 0, 0, 0.07);
             border: 3px solid transparent;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s ease, box-shadow 0.18s ease;
         }
 
-        /* 클릭 시 먼작귀 특유의 말랑한 젤리 바운스 */
         @keyframes jellyPop {
             0%   { transform: scale(0.9); }
             45%  { transform: scale(1.06) translateY(-4px); }
@@ -259,20 +273,80 @@
             transform: scale(1);
         }
 
+        /* 파스텔 쉬머 스켈레톤(Skeleton) + 부드러운 페이드인 */
         .char-img-box {
             width: 76%;
             aspect-ratio: 1 / 1;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            background-color: var(--skel-bg, #f1f5f9);
+        }
+
+        @keyframes skeletonWave {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes pulseSilhouette {
+            0%, 100% { transform: scale(0.94); opacity: 0.45; }
+            50%      { transform: scale(1.04); opacity: 0.75; }
+        }
+
+        .skeleton-loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--skel-bg, #f1f5f9);
+            z-index: 2;
+            transition: opacity 0.22s ease;
+            overflow: hidden;
+        }
+
+        .skeleton-loader::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.65) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: skeletonWave 1.1s infinite;
+        }
+
+        .skeleton-ears {
+            width: 38px;
+            height: 38px;
+            fill: #ffffff;
+            animation: pulseSilhouette 1.2s ease-in-out infinite;
+        }
+
+        .char-img-box.loaded .skeleton-loader {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .char-img-box img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            opacity: 0;
+            transform: scale(0.92);
+            transition: opacity 0.24s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 3;
+        }
+
+        .char-img-box.loaded img {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .char-name {
@@ -323,7 +397,7 @@
                 badgeIdleBounce 1.8s ease-in-out 0.7s infinite;
         }
 
-        /* 하단 고정 버튼 영역 (솔리드 화이트 바) */
+        /* 하단 고정 버튼 영역 */
         .footer-action {
             position: absolute;
             bottom: 0;
@@ -405,7 +479,6 @@
             margin-bottom: 22px;
         }
 
-        /* 컨페티 캔버스 */
         #confettiCanvas {
             position: absolute;
             inset: 0;
@@ -420,13 +493,6 @@
 
     <div class="mobile-container" onclick="ensureBgmStartedOnce()">
         <canvas id="confettiCanvas"></canvas>
-
-        <!-- 외부 MP3 파일을 넣으실 경우 자동 연동 (없으면 내장 치이카와 신디사이저 BGM 자동 재생) -->
-        <audio id="externalBgm" loop preload="auto">
-            <source src="chiikawa/bgm.mp3" type="audio/mpeg">
-            <source src="img/bgm.mp3" type="audio/mpeg">
-            <source src="bgm.mp3" type="audio/mpeg">
-        </audio>
 
         <svg class="scenery-layer" viewBox="0 0 480 120" preserveAspectRatio="none">
             <path d="M0,90 L85,35 L190,85 L330,28 L460,85 L480,75 L480,120 L0,120 Z" fill="#b7b1cb" stroke="#6d5959" stroke-width="3"/>
@@ -480,39 +546,132 @@
     </div>
 
     <script>
-        /**
-         * 치이카와 15인 캐릭터 데이터 + 클릭 시 나오는 귀여운 시그니처 사운드/감탄사
-         */
         const chiikawaCharacters = [
-            { id: 1,  name: '치이카와',       color: '#FFF9FA', quote: '와...!! 에-! 으앙~!',           freq: 659.25 },
-            { id: 2,  name: '하치와레',       color: '#E3F2FD', quote: '어라?! 어떻게든 되겠지~!',      freq: 587.33 },
-            { id: 3,  name: '우사기',         color: '#FFF9C4', quote: '우라-!! 야하-!! 푸루야~!',       freq: 783.99 },
-            { id: 4,  name: '랏코',           color: '#EFEBE9', quote: '강해지고 싶나? 달콤한 파르페 최고!', freq: 440.00 },
+            { id: 1,  name: '치이카와',       color: '#FFE4E8', quote: '와...!! 에-! 으앙~!',           freq: 659.25 },
+            { id: 2,  name: '하치와레',       color: '#DDF0FF', quote: '어라?! 어떻게든 되겠지~!',      freq: 587.33 },
+            { id: 3,  name: '우사기',         color: '#FFF3B8', quote: '우라-!! 야하-!! 푸루야~!',       freq: 783.99 },
+            { id: 4,  name: '랏코',           color: '#EDE4DC', quote: '강해지고 싶나? 달콤한 파르페 최고!', freq: 440.00 },
             { id: 5,  name: '쿠리만쥬',       color: '#FFE0B2', quote: '하아ー... 크으~!',              freq: 392.00 },
-            { id: 6,  name: '시사',           color: '#FFF59D', quote: '스승님~! 열심히 일하겠습니다!',  freq: 698.46 },
-            { id: 7,  name: '모몽가',         color: '#F3E5F5', quote: '봐라 봐라! 귀여운 척 좀 해봤다!', freq: 739.99 },
-            { id: 8,  name: '카니',           color: '#FFCDD2', quote: '모몽가랑 같이 헌책방 갈래~!',    freq: 659.25 },
-            { id: 9,  name: '파자마 파티즈',  color: '#E8F5E9', quote: '우와와 우와~ 파자마 파티~♪',     freq: 880.00 },
-            { id: 10, name: '풍뎅이',         color: '#D7CCC8', quote: '부스스... 찹쌀떡처럼 말랑말랑~',  freq: 830.61 },
-            { id: 11, name: '고블린',         color: '#C8E6C9', quote: '감옥에서 탈출?! 버섯 볶음 먹자!', freq: 493.88 },
-            { id: 12, name: '포쉐트 갑옷 씨', color: '#CFD8DC', quote: '직접 만든 귀여운 파자마 어때?',   freq: 349.23 },
-            { id: 13, name: '세이렌',         color: '#B2EBF2', quote: '랄랄라~ 내 노래를 들어줘~♪',     freq: 783.99 },
-            { id: 14, name: '아노코',         color: '#FCE4EC', quote: '쿵... 쿵... (해맑은 미소)',      freq: 329.63 },
-            { id: 15, name: '꿀맛맨',         color: '#FFE082', quote: '이거 정말 꿀맛이로구나~!!',      freq: 523.25 }
+            { id: 6,  name: '시사',           color: '#FFF199', quote: '스승님~! 열심히 일하겠습니다!',  freq: 698.46 },
+            { id: 7,  name: '모몽가',         color: '#F0DDF8', quote: '봐라 봐라! 귀여운 척 좀 해봤다!', freq: 739.99 },
+            { id: 8,  name: '카니',           color: '#FFD1D6', quote: '모몽가랑 같이 헌책방 갈래~!',    freq: 659.25 },
+            { id: 9,  name: '파자마 파티즈',  color: '#DCF5E0', quote: '우와와 우와~ 파자마 파티~♪',     freq: 880.00 },
+            { id: 10, name: '풍뎅이',         color: '#E6DAD2', quote: '부스스... 찹쌀떡처럼 말랑말랑~',  freq: 830.61 },
+            { id: 11, name: '고블린',         color: '#D2F0D4', quote: '감옥에서 탈출?! 버섯 볶음 먹자!', freq: 493.88 },
+            { id: 12, name: '포쉐트 갑옷 씨', color: '#DCE4E8', quote: '직접 만든 귀여운 파자마 어때?',   freq: 349.23 },
+            { id: 13, name: '세이렌',         color: '#C8F2F8', quote: '랄랄라~ 내 노래를 들어줘~♪',     freq: 783.99 },
+            { id: 14, name: '아노코',         color: '#FADCE8', quote: '쿵... 쿵... (해맑은 미소)',      freq: 329.63 },
+            { id: 15, name: '꿀맛맨',         color: '#FFE590', quote: '이거 정말 꿀맛이로구나~!!',      freq: 523.25 }
         ];
 
         let selectedIds = [];
-        let lastClickedId = null;
         let quoteTimer = null;
 
+        function createFallbackSVG(char) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="22" fill="${char.color}"/>
+                <circle cx="50" cy="54" r="30" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                <circle cx="33" cy="30" r="10" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                <circle cx="67" cy="30" r="10" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
+                <circle cx="40" cy="52" r="3.5" fill="#1e293b"/>
+                <circle cx="60" cy="52" r="3.5" fill="#1e293b"/>
+                <ellipse cx="32" cy="58" rx="5" ry="3" fill="#fda4af"/>
+                <ellipse cx="68" cy="58" rx="5" ry="3" fill="#fda4af"/>
+                <path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        // [핵심] 모든 이미지를 불필요한 404 탐색 없이 img/${id}.png 에서 다이렉트로 즉시 로드!
+        function loadCharacterImageDirect(imgEl, boxEl, char) {
+            imgEl.onload = function() {
+                boxEl.classList.add('loaded');
+            };
+            imgEl.onerror = function() {
+                // 혹시 확장자가 .jpg 인 경우만 1회 확인 후 바로 SVG 폴백
+                if (!imgEl.dataset.triedJpg) {
+                    imgEl.dataset.triedJpg = '1';
+                    imgEl.src = `img/${char.id}.jpg`;
+                } else {
+                    imgEl.onerror = null;
+                    imgEl.src = createFallbackSVG(char);
+                    boxEl.classList.add('loaded');
+                }
+            };
+
+            imgEl.decoding = 'async';
+            if (char.id <= 9) {
+                imgEl.fetchPriority = 'high';
+            }
+            imgEl.src = `img/${char.id}.png`;
+        }
+
+        function getSkeletonHTML() {
+            return `
+                <div class="skeleton-loader">
+                    <svg class="skeleton-ears" viewBox="0 0 64 64">
+                        <circle cx="20" cy="20" r="8"/>
+                        <circle cx="44" cy="20" r="8"/>
+                        <circle cx="32" cy="36" r="18"/>
+                    </svg>
+                </div>
+            `;
+        }
+
+        function initGridOnce() {
+            const grid = document.getElementById('chiikawaGrid');
+            grid.innerHTML = '';
+
+            chiikawaCharacters.forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'char-card';
+                card.id = `chiikawa-card-${char.id}`;
+                card.onclick = () => toggleSelect(char);
+
+                card.innerHTML = `
+                    <div class="select-check">✓</div>
+                    <div class="char-img-box" style="--skel-bg: ${char.color};">
+                        ${getSkeletonHTML()}
+                        <img alt="${char.name}">
+                    </div>
+                    <div class="char-name">${char.name}</div>
+                `;
+                grid.appendChild(card);
+
+                const boxEl = card.querySelector('.char-img-box');
+                const imgEl = card.querySelector('img');
+                loadCharacterImageDirect(imgEl, boxEl, char);
+            });
+        }
+
+        function updateSelectionUI(justClickedId = null) {
+            chiikawaCharacters.forEach(char => {
+                const card = document.getElementById(`chiikawa-card-${char.id}`);
+                if (!card) return;
+
+                if (selectedIds.includes(char.id)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+
+                card.classList.remove('just-clicked');
+                if (justClickedId === char.id) {
+                    void card.offsetWidth;
+                    card.classList.add('just-clicked');
+                }
+            });
+
+            document.getElementById('selectedCounter').innerText = `${selectedIds.length}명 선택`;
+        }
+
         // =========================================================
-        // 사운드 & 먼작귀풍 배경음악(BGM) 엔진 (Web Audio API + 외부 MP3 하이브리드)
+        // 사운드 & 먼작귀풍 배경음악(BGM) 엔진
         // =========================================================
         let audioCtx = null;
         let soundEnabled = true;
         let bgmStarted = false;
         let bgmLoopTimer = null;
-        let usingExternalMp3 = false;
 
         function initAudio() {
             if (!audioCtx) {
@@ -524,55 +683,49 @@
             }
         }
 
-        // 먼작귀(치이카와) 엔딩 '혼자서도 할 수 있어' / '파자마 파티즈' 느낌의 통통 튀는 오르골 멜로디 시퀀스
         const chiikawaMelody = [
-            // 마디 1: 통통 튀는 밝은 오프닝 (도-미-솔-도-라-솔-미-레)
-            { note: 523.25, bass: 261.63, dur: 0.22 }, // C5
-            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
-            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
-            { note: 1046.50,bass: 0,      dur: 0.32 }, // C6
-            { note: 880.00, bass: 349.23, dur: 0.22 }, // A5
-            { note: 783.99, bass: 0,      dur: 0.22 }, // G5
-            { note: 659.25, bass: 392.00, dur: 0.28 }, // E5
+            { note: 523.25, bass: 261.63, dur: 0.22 },
+            { note: 659.25, bass: 0,      dur: 0.22 },
+            { note: 783.99, bass: 392.00, dur: 0.22 },
+            { note: 1046.50,bass: 0,      dur: 0.32 },
+            { note: 880.00, bass: 349.23, dur: 0.22 },
+            { note: 783.99, bass: 0,      dur: 0.22 },
+            { note: 659.25, bass: 392.00, dur: 0.28 },
             { note: 0,      bass: 0,      dur: 0.14 },
-            // 마디 2: 아기자기한 전개 (파-라-솔-미-레-파-미-도)
-            { note: 698.46, bass: 349.23, dur: 0.22 }, // F5
-            { note: 880.00, bass: 0,      dur: 0.22 }, // A5
-            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
-            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
-            { note: 587.33, bass: 293.66, dur: 0.22 }, // D5
-            { note: 698.46, bass: 0,      dur: 0.22 }, // F5
-            { note: 659.25, bass: 392.00, dur: 0.22 }, // E5
-            { note: 587.33, bass: 0,      dur: 0.26 }, // D5
-            // 마디 3: 우와와 우와~ 리듬 (도-미-솔-미-라-솔-파-미)
-            { note: 523.25, bass: 261.63, dur: 0.22 }, // C5
-            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
-            { note: 783.99, bass: 392.00, dur: 0.22 }, // G5
-            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
-            { note: 880.00, bass: 349.23, dur: 0.26 }, // A5
-            { note: 783.99, bass: 0,      dur: 0.22 }, // G5
-            { note: 698.46, bass: 293.66, dur: 0.22 }, // F5
-            { note: 659.25, bass: 0,      dur: 0.22 }, // E5
-            // 마디 4: 귀엽게 마무리 (레-미-파-솔-도~)
-            { note: 587.33, bass: 392.00, dur: 0.20 }, // D5
-            { note: 659.25, bass: 0,      dur: 0.20 }, // E5
-            { note: 698.46, bass: 392.00, dur: 0.20 }, // F5
-            { note: 783.99, bass: 0,      dur: 0.24 }, // G5
-            { note: 1046.50,bass: 261.63, dur: 0.42 }, // C6
+            { note: 698.46, bass: 349.23, dur: 0.22 },
+            { note: 880.00, bass: 0,      dur: 0.22 },
+            { note: 783.99, bass: 392.00, dur: 0.22 },
+            { note: 659.25, bass: 0,      dur: 0.22 },
+            { note: 587.33, bass: 293.66, dur: 0.22 },
+            { note: 698.46, bass: 0,      dur: 0.22 },
+            { note: 659.25, bass: 392.00, dur: 0.22 },
+            { note: 587.33, bass: 0,      dur: 0.26 },
+            { note: 523.25, bass: 261.63, dur: 0.22 },
+            { note: 659.25, bass: 0,      dur: 0.22 },
+            { note: 783.99, bass: 392.00, dur: 0.22 },
+            { note: 659.25, bass: 0,      dur: 0.22 },
+            { note: 880.00, bass: 349.23, dur: 0.26 },
+            { note: 783.99, bass: 0,      dur: 0.22 },
+            { note: 698.46, bass: 293.66, dur: 0.22 },
+            { note: 659.25, bass: 0,      dur: 0.22 },
+            { note: 587.33, bass: 392.00, dur: 0.20 },
+            { note: 659.25, bass: 0,      dur: 0.20 },
+            { note: 698.46, bass: 392.00, dur: 0.20 },
+            { note: 783.99, bass: 0,      dur: 0.24 },
+            { note: 1046.50,bass: 261.63, dur: 0.42 },
             { note: 0,      bass: 0,      dur: 0.30 }
         ];
 
         let melodyStep = 0;
 
         function playSynthBgmStep() {
-            if (!soundEnabled || usingExternalMp3) return;
+            if (!soundEnabled) return;
             initAudio();
             if (!audioCtx) return;
 
             const step = chiikawaMelody[melodyStep];
             const now = audioCtx.currentTime;
 
-            // 메인 멜로디 (맑은 오르골 / 마림바 톤)
             if (step.note > 0) {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -589,7 +742,6 @@
                 osc.stop(now + step.dur + 0.02);
             }
 
-            // 통통 튀는 우쿨렐레/피치카토 베이스 반주
             if (step.bass > 0) {
                 const bOsc = audioCtx.createOscillator();
                 const bGain = audioCtx.createGain();
@@ -613,22 +765,7 @@
         function startBgm() {
             if (!soundEnabled || bgmStarted) return;
             bgmStarted = true;
-
-            const extAudio = document.getElementById('externalBgm');
-            if (extAudio) {
-                extAudio.volume = 0.35;
-                const playPromise = extAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        usingExternalMp3 = true;
-                    }).catch(() => {
-                        usingExternalMp3 = false;
-                        if (bgmLoopTimer) clearTimeout(bgmLoopTimer);
-                        playSynthBgmStep();
-                    });
-                    return;
-                }
-            }
+            if (bgmLoopTimer) clearTimeout(bgmLoopTimer);
             playSynthBgmStep();
         }
 
@@ -637,10 +774,6 @@
             if (bgmLoopTimer) {
                 clearTimeout(bgmLoopTimer);
                 bgmLoopTimer = null;
-            }
-            const extAudio = document.getElementById('externalBgm');
-            if (extAudio) {
-                extAudio.pause();
             }
         }
 
@@ -664,7 +797,6 @@
             }
         }
 
-        // [효과음 1] 캐릭터 클릭 시 귀여운 '뽀옥~!' 물방울 팝 사운드
         function playChiikawaClickSound(char, isSelecting) {
             if (!soundEnabled) return;
             initAudio();
@@ -677,7 +809,6 @@
             gain.connect(audioCtx.destination);
 
             if (isSelecting) {
-                // 귀여운 2단 물방울 상승음 (뽀-옥!)
                 const baseFreq = char.freq || 659.25;
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(baseFreq * 0.75, now);
@@ -688,7 +819,6 @@
                 osc.start(now);
                 osc.stop(now + 0.16);
             } else {
-                // 선택 해제 시 작고 부드러운 '톡' 사운드
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(520, now);
                 osc.frequency.exponentialRampToValueAtTime(320, now + 0.08);
@@ -700,7 +830,6 @@
             }
         }
 
-        // [효과음 2] 바텀시트 열릴 때 '띠리링~' 알림음
         function playSheetOpenSound() {
             if (!soundEnabled) return;
             initAudio();
@@ -721,14 +850,12 @@
             });
         }
 
-        // [효과음 3] 결과 발표 시 '따라라라~ 짠!' 실로폰 팡파르 + 알파벳 배지 바운스 싱크음
         function playResultFanfare(badgeCount) {
             if (!soundEnabled) return;
             initAudio();
             if (!audioCtx) return;
 
             const now = audioCtx.currentTime;
-            // 신나는 치이카와 팡파르 화음 (도-미-솔-도-솔-도!)
             const fanfareNotes = [
                 { f: 523.25, t: 0.00, d: 0.12 },
                 { f: 659.25, t: 0.09, d: 0.12 },
@@ -751,7 +878,6 @@
                 osc.stop(now + n.t + n.d + 0.02);
             });
 
-            // 각 캐릭터의 A, B, C, D 배지가 통통 튀어나올 때 맞춘 방울 소리
             const maxPop = Math.min(badgeCount, 10);
             for (let i = 0; i < maxPop; i++) {
                 const delay = i * 0.08 + 0.15;
@@ -768,7 +894,6 @@
             }
         }
 
-        // 캐릭터 말풍선 표시
         function showCharacterQuote(char) {
             const toast = document.getElementById('quoteToast');
             const speaker = document.getElementById('quoteSpeaker');
@@ -784,82 +909,19 @@
             }, 2200);
         }
 
-        function createFallbackSVG(char) {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                <rect width="100" height="100" rx="22" fill="${char.color}"/>
-                <circle cx="50" cy="54" r="30" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                <circle cx="33" cy="30" r="10" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                <circle cx="67" cy="30" r="10" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                <circle cx="40" cy="52" r="3.5" fill="#1e293b"/>
-                <circle cx="60" cy="52" r="3.5" fill="#1e293b"/>
-                <ellipse cx="32" cy="58" rx="5" ry="3" fill="#fda4af"/>
-                <ellipse cx="68" cy="58" rx="5" ry="3" fill="#fda4af"/>
-                <path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
-            </svg>`;
-            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-        }
-
-        function bindChiikawaImage(imgEl, id, char) {
-            const paths = [
-                `chiikawa/${id}.png`,
-                `img/${id}.png`,
-                `chiikawa/img/${id}.png`,
-                `${id}.png`
-            ];
-            let idx = 0;
-            imgEl.onerror = function() {
-                idx++;
-                if (idx < paths.length) {
-                    imgEl.src = paths[idx];
-                } else {
-                    imgEl.onerror = null;
-                    imgEl.src = createFallbackSVG(char);
-                }
-            };
-            imgEl.src = paths[0];
-        }
-
-        function renderGrid() {
-            const grid = document.getElementById('chiikawaGrid');
-            grid.innerHTML = '';
-
-            chiikawaCharacters.forEach(char => {
-                const isSelected = selectedIds.includes(char.id);
-                const isJustClicked = (lastClickedId === char.id);
-                const card = document.createElement('div');
-                card.className = `char-card ${isSelected ? 'selected' : ''} ${isJustClicked ? 'just-clicked' : ''}`;
-                card.onclick = () => toggleSelect(char);
-
-                card.innerHTML = `
-                    <div class="select-check">✓</div>
-                    <div class="char-img-box">
-                        <img alt="${char.name}">
-                    </div>
-                    <div class="char-name">${char.name}</div>
-                `;
-                grid.appendChild(card);
-
-                const imgEl = card.querySelector('img');
-                bindChiikawaImage(imgEl, char.id, char);
-            });
-
-            document.getElementById('selectedCounter').innerText = `${selectedIds.length}명 선택`;
-        }
-
         function toggleSelect(char) {
             ensureBgmStartedOnce();
 
             if (selectedIds.includes(char.id)) {
                 selectedIds = selectedIds.filter(i => i !== char.id);
-                lastClickedId = null;
                 playChiikawaClickSound(char, false);
+                updateSelectionUI(null);
             } else {
                 selectedIds.push(char.id);
-                lastClickedId = char.id;
                 playChiikawaClickSound(char, true);
                 showCharacterQuote(char);
+                updateSelectionUI(char.id);
             }
-            renderGrid();
         }
 
         function shuffleArray(arr) {
@@ -901,12 +963,10 @@
             renderResultGrid();
             resultPage.classList.remove('hidden');
 
-            // 결과 팡파르 사운드 & 파스텔 컨페티 실행
             playResultFanfare(selectedIds.length);
             launchConfetti();
         }
 
-        // 선택된 캐릭터들을 랜덤으로 섞은 뒤 A, B, C, D... 순서대로 정렬하여 표시
         function renderResultGrid() {
             const resultGrid = document.getElementById('resultGrid');
             resultGrid.innerHTML = '';
@@ -926,15 +986,17 @@
                 };
                 card.innerHTML = `
                     <div class="result-badge" style="animation-delay: ${delay}s, ${parseFloat(delay) + 0.65}s">${badgeLetter}</div>
-                    <div class="char-img-box">
+                    <div class="char-img-box" style="--skel-bg: ${char.color};">
+                        ${getSkeletonHTML()}
                         <img alt="${char.name}">
                     </div>
                     <div class="char-name">${char.name}</div>
                 `;
                 resultGrid.appendChild(card);
 
+                const boxEl = card.querySelector('.char-img-box');
                 const imgEl = card.querySelector('img');
-                bindChiikawaImage(imgEl, char.id, char);
+                loadCharacterImageDirect(imgEl, boxEl, char);
             });
         }
 
@@ -945,7 +1007,6 @@
 
             resultPage.classList.add('hidden');
             headerTitle.innerText = '치이카와 선택하기';
-            lastClickedId = null;
             selectPage.classList.remove('hidden');
         }
 
@@ -958,7 +1019,6 @@
             }
         }
 
-        // 치이카와 파스텔 컨페티 효과
         function launchConfetti() {
             const canvas = document.getElementById('confettiCanvas');
             const ctx = canvas.getContext('2d');
@@ -1003,9 +1063,11 @@
             animate();
         }
 
-        window.onload = () => {
-            renderGrid();
-        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGridOnce);
+        } else {
+            initGridOnce();
+        }
     </script>
 </body>
 </html>
