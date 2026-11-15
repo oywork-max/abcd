@@ -6,8 +6,13 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>올리버스 - 휴게시간 순서뽑기</title>
+    <title>올리버스 - 휴게시간 순서뽑기 & 플레이그라운드</title>
+
+    <!-- 폰트 및 주요 썸네일 프리로드 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
+    <link rel="preload" as="image" href="img/thumb.png">
+
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -49,6 +54,7 @@
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
         }
 
+        /* 스플래시 인트로 화면 */
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -123,7 +129,7 @@
             height: 100%;
             background: var(--primary-lime);
             border-radius: 999px;
-            animation: loadProgress 1.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: loadProgress 1.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         @keyframes loadProgress {
@@ -131,6 +137,7 @@
             100% { width: 100%; }
         }
 
+        /* 상단 헤더: 블러 및 부가 버튼 완전 제거, 메인 타이틀만 중앙 배치 */
         header {
             padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
             padding-bottom: 16px;
@@ -154,6 +161,7 @@
             text-align: center;
         }
 
+        /* 메인 카드 리스트 */
         main {
             flex: 1;
             padding: 20px 18px calc(env(safe-area-inset-bottom, 0px) + 36px) 18px;
@@ -181,6 +189,7 @@
             text-transform: uppercase;
         }
 
+        /* 좌측 이미지 · 우측 테마명 카드 */
         .collection-card {
             background: var(--bg-card);
             border: 1px solid #334155;
@@ -281,6 +290,7 @@
             margin-left: 4px;
         }
 
+        /* 향후 오픈 예정 (회색 실루엣 카드 스타일) */
         .collection-card.locked {
             background: #151e2e;
             border-color: #1e293b;
@@ -347,10 +357,11 @@
 </head>
 <body>
 
+    <!-- [1] 스플래시 인트로 화면 -->
     <div id="splash-screen" onclick="hideSplash()">
         <div class="splash-icon-wrap">
-            <img src="icon-180.png" alt="휴게시간 순서뽑기 아이콘"
-                 onerror="handleSplashIconError(this)">
+            <img src="img/icon-180.png" alt="휴게시간 순서뽑기 아이콘"
+                 onerror="handleImgFallback(this, ['icon-180.png', 'assets/icon-180.png'], 'splash')">
         </div>
         <div class="splash-title">휴게시간 순서뽑기</div>
         <div class="splash-sub">OLIVERSE CREW HUB</div>
@@ -359,21 +370,24 @@
         </div>
     </div>
 
+    <!-- [2] 메인 허브 컨테이너 -->
     <div class="app-container">
         <header>
             <h1 class="header-title">휴게시간 순서뽑기</h1>
         </header>
 
         <main>
+            <!-- 섹션 1: 휴게시간 순서뽑기 컬렉션 -->
             <section class="section-group">
                 <div class="section-header">
                     <span class="section-label">Breaktime Order Collection</span>
                 </div>
 
+                <!-- 1. 컬러 -->
                 <div class="collection-card" onclick="openTheme('color')">
                     <div class="thumb-box">
-                        <img src="assets/thumb-color.png" alt="컬러"
-                             onerror="this.onerror=null; this.src=getThumbSVG('color');">
+                        <img src="img/thumb-color.png" alt="컬러"
+                             onerror="handleImgFallback(this, ['assets/thumb-color.png', 'thumb-color.png'], 'color')">
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
@@ -384,10 +398,11 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 2. 호빵맨 -->
                 <div class="collection-card" onclick="openTheme('anpanman')">
                     <div class="thumb-box">
-                        <img src="anpanman/img/home.png" alt="호빵맨"
-                             onerror="handleThumbFallback(this, 'anpanman/1.png', 'anpanman')">
+                        <img src="img/1.png" alt="호빵맨"
+                             onerror="handleImgFallback(this, ['anpanman/img/1.png', 'anpanman/1.png', 'img/thumb-anpanman.png'], 'anpanman')">
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
@@ -398,10 +413,11 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 3. 치이카와 -->
                 <div class="collection-card" onclick="openTheme('chiikawa')">
                     <div class="thumb-box">
                         <img src="chiikawa/img/1.png" alt="치이카와"
-                             onerror="handleThumbFallback(this, 'chiikawa/1.png', 'chiikawa')">
+                             onerror="handleImgFallback(this, ['img/thumb-chiikawa.png', 'chiikawa/1.png', 'img/1.png'], 'chiikawa')">
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
@@ -413,6 +429,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 4. 산리오 캐릭터즈 (회색 실루엣) -->
                 <div class="collection-card locked" onclick="openLockedOrReady(this, '산리오 캐릭터즈')">
                     <div class="thumb-box">
                         <img src="sanrio/img/1.png" alt="산리오 캐릭터즈"
@@ -429,6 +446,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 5. 짱구는 못말려 (회색 실루엣) -->
                 <div class="collection-card locked" onclick="openLockedOrReady(this, '짱구는 못말려')">
                     <div class="thumb-box">
                         <img src="shinchan/img/1.png" alt="짱구는 못말려"
@@ -445,6 +463,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 6. 포켓몬스터 (회색 실루엣) -->
                 <div class="collection-card locked" onclick="openLockedOrReady(this, '포켓몬스터')">
                     <div class="thumb-box">
                         <img src="pokemon/img/1.png" alt="포켓몬스터"
@@ -461,6 +480,7 @@
                     <span class="chevron-icon">›</span>
                 </div>
 
+                <!-- 7. 오늘의 추구미 (회색 실루엣) -->
                 <div class="collection-card locked" onclick="openLockedOrReady(this, '오늘의 추구미')">
                     <div class="thumb-box">
                         <img src="vibe/img/1.png" alt="오늘의 추구미"
@@ -478,11 +498,29 @@
                 </div>
             </section>
 
+            <!-- 섹션 2: 크루 플레이그라운드 미니앱 -->
             <section class="section-group">
                 <div class="section-header">
                     <span class="section-label">Crew Playground Mini Apps</span>
                 </div>
 
+                <!-- [오픈 완료] 미니앱 1. 퍼스널컬러 (personal-color/index.html 연동 & img/thumb.png 반영) -->
+                <div class="collection-card" onclick="window.location.href='personal-color/index.html'">
+                    <div class="thumb-box">
+                        <img src="img/thumb.png" alt="퍼스널컬러"
+                             onerror="handleImgFallback(this, ['personal-color/img/thumb.png', 'personal-color/thumb.png', 'thumb.png'], 'personal')">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag-row">
+                            <span class="collection-order">MINI APP 01</span>
+                            <span class="badge-new">NEW</span>
+                        </div>
+                        <div class="collection-name">퍼스널컬러</div>
+                    </div>
+                    <span class="chevron-icon">›</span>
+                </div>
+
+                <!-- 미니앱 2. 점메추 (회색 실루엣) -->
                 <div class="collection-card locked" onclick="openLockedOrReady(this, '점메추')">
                     <div class="thumb-box">
                         <img src="lunch/img/thumb.png" alt="점메추"
@@ -491,26 +529,10 @@
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
-                            <span class="collection-order">MINI APP 01</span>
-                            <span class="badge-soon">COMING SOON</span>
-                        </div>
-                        <div class="collection-name">점메추</div>
-                    </div>
-                    <span class="chevron-icon">›</span>
-                </div>
-
-                <div class="collection-card locked" onclick="openLockedOrReady(this, '퍼스널컬러')">
-                    <div class="thumb-box">
-                        <img src="personal-color/img/thumb.png" alt="퍼스널컬러"
-                             onerror="this.onerror=null; this.src=getThumbSVG('personal');">
-                        <div class="lock-overlay">🔒</div>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-tag-row">
                             <span class="collection-order">MINI APP 02</span>
                             <span class="badge-soon">COMING SOON</span>
                         </div>
-                        <div class="collection-name">퍼스널컬러</div>
+                        <div class="collection-name">점메추</div>
                     </div>
                     <span class="chevron-icon">›</span>
                 </div>
@@ -524,20 +546,12 @@
         let splashTimeout = null;
         let snackbarTimeout = null;
 
-        function handleSplashIconError(imgEl) {
-            if (!imgEl.dataset.triedAssets) {
-                imgEl.dataset.triedAssets = '1';
-                imgEl.src = 'assets/icon-180.png';
-            } else {
-                imgEl.onerror = null;
-                imgEl.src = getThumbSVG('splash');
-            }
-        }
-
-        function handleThumbFallback(imgEl, altPath, svgType) {
-            if (!imgEl.dataset.triedAlt) {
-                imgEl.dataset.triedAlt = '1';
-                imgEl.src = altPath;
+        // 다중 경로 폴백 처리기 (img/thumb.png -> personal-color/img/thumb.png -> 내장 SVG 순으로 안전하게 로드)
+        function handleImgFallback(imgEl, altPaths, svgType) {
+            const step = parseInt(imgEl.dataset.step || '0', 10);
+            if (step < altPaths.length) {
+                imgEl.dataset.step = String(step + 1);
+                imgEl.src = altPaths[step];
             } else {
                 imgEl.onerror = null;
                 imgEl.src = getThumbSVG(svgType);
@@ -582,6 +596,14 @@
                     <ellipse cx="70" cy="59" rx="5.5" ry="3.2" fill="#fda4af"/>
                     <path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
                 </svg>`;
+            } else if (type === 'personal') {
+                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="#FFE4E8"/>
+                    <path d="M 14 78 A 36 36 0 0 1 86 78" fill="none" stroke="#FF7878" stroke-width="9"/>
+                    <path d="M 23 78 A 27 27 0 0 1 77 78" fill="none" stroke="#FFD54F" stroke-width="9"/>
+                    <path d="M 32 78 A 18 18 0 0 1 68 78" fill="none" stroke="#82DC28" stroke-width="9"/>
+                    <ellipse cx="50" cy="46" rx="16" ry="20" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+                </svg>`;
             } else if (type === 'sanrio') {
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" fill="#cbd5e1"/>
@@ -615,13 +637,6 @@
                     <rect width="100" height="100" fill="#cbd5e1"/>
                     <path d="M 22 52 L 78 52 A 28 28 0 0 1 22 52 Z" fill="#ffffff" stroke="#475569" stroke-width="4"/>
                     <rect x="38" y="76" width="24" height="6" rx="2" fill="#475569"/>
-                </svg>`;
-            } else if (type === 'personal') {
-                svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <rect width="100" height="100" fill="#cbd5e1"/>
-                    <path d="M 18 70 A 32 32 0 0 1 82 70" fill="none" stroke="#475569" stroke-width="10"/>
-                    <path d="M 28 70 A 22 22 0 0 1 72 70" fill="none" stroke="#94a3b8" stroke-width="10"/>
-                    <circle cx="50" cy="40" r="14" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
                 </svg>`;
             }
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
@@ -664,11 +679,13 @@
             }, 2200);
         }
 
-        window.onload = () => {
-            splashTimeout = setTimeout(() => {
-                hideSplash();
-            }, 1400);
-        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                splashTimeout = setTimeout(hideSplash, 1300);
+            });
+        } else {
+            splashTimeout = setTimeout(hideSplash, 1300);
+        }
     </script>
 </body>
 </html>
