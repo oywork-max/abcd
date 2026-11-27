@@ -65,6 +65,7 @@
             align-items: center;
             justify-content: center;
             transition: opacity 0.45s ease, visibility 0.45s ease;
+            overflow: hidden;
         }
 
         #splash-screen.hidden {
@@ -129,7 +130,7 @@
             height: 100%;
             background: var(--primary-lime);
             border-radius: 999px;
-            animation: loadProgress 1.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: loadProgress 1.95s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         @keyframes loadProgress {
@@ -137,7 +138,62 @@
             100% { width: 100%; }
         }
 
-        /* 상단 헤더: 블러 및 부가 버튼 완전 제거, 메인 타이틀만 중앙 배치 */
+        /* 스플래시 하단 오픈 안내 바텀시트 */
+        .splash-bottom-sheet {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            background: #1e293b;
+            border-top: 1.5px solid #334155;
+            border-radius: 26px 26px 0 0;
+            padding: 14px 22px calc(env(safe-area-inset-bottom, 0px) + 26px);
+            box-shadow: 0 -14px 36px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transform: translate(-50%, 110%);
+            transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 1000;
+        }
+
+        .splash-bottom-sheet.show {
+            transform: translate(-50%, 0%);
+        }
+
+        .sheet-handle {
+            width: 38px;
+            height: 4px;
+            border-radius: 999px;
+            background: #475569;
+            margin-bottom: 4px;
+        }
+
+        .sheet-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 120, 120, 0.16);
+            color: var(--coral-accent);
+            border: 1px solid rgba(255, 120, 120, 0.35);
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+        }
+
+        .sheet-message {
+            font-size: 1.08rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        /* 상단 헤더 */
         header {
             padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
             padding-bottom: 16px;
@@ -357,7 +413,7 @@
 </head>
 <body>
 
-    <!-- [1] 스플래시 인트로 화면 -->
+    <!-- [1] 스플래시 인트로 화면 (기존 로고 + 게이지바 + 오픈 안내 바텀시트) -->
     <div id="splash-screen" onclick="hideSplash()">
         <div class="splash-icon-wrap">
             <img src="img/icon-180.png" alt="휴게시간 순서뽑기 아이콘"
@@ -367,6 +423,13 @@
         <div class="splash-sub">OLIVERSE CREW HUB</div>
         <div class="splash-loader">
             <div class="splash-loader-bar"></div>
+        </div>
+
+        <!-- 하단 바텀시트 -->
+        <div class="splash-bottom-sheet" id="splashBottomSheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-badge">🎀 NEW OPEN</div>
+            <div class="sheet-message">산리오 캐릭터즈 오픈 했습니다</div>
         </div>
     </div>
 
@@ -422,24 +485,22 @@
                     <div class="card-info">
                         <div class="card-tag-row">
                             <span class="collection-order">COLLECTION 03</span>
-                            <span class="badge-new">NEW</span>
                         </div>
                         <div class="collection-name">치이카와</div>
                     </div>
                     <span class="chevron-icon">›</span>
                 </div>
 
-                <!-- 4. 산리오 캐릭터즈 (회색 실루엣) -->
-                <div class="collection-card locked" onclick="openLockedOrReady(this, '산리오 캐릭터즈')">
+                <!-- 4. 산리오 캐릭터즈 (오픈 활성화 + NEW 배지) -->
+                <div class="collection-card" onclick="openTheme('sanrio')">
                     <div class="thumb-box">
                         <img src="sanrio/img/1.png" alt="산리오 캐릭터즈"
-                             onerror="this.onerror=null; this.src=getThumbSVG('sanrio');">
-                        <div class="lock-overlay">🔒</div>
+                             onerror="handleImgFallback(this, ['img/thumb-sanrio.png', 'sanrio/1.png', 'img/1.png'], 'sanrio')">
                     </div>
                     <div class="card-info">
                         <div class="card-tag-row">
                             <span class="collection-order">COLLECTION 04</span>
-                            <span class="badge-soon">COMING SOON</span>
+                            <span class="badge-new">NEW</span>
                         </div>
                         <div class="collection-name">산리오 캐릭터즈</div>
                     </div>
@@ -504,7 +565,7 @@
                     <span class="section-label">Crew Playground Mini Apps</span>
                 </div>
 
-                <!-- [오픈 완료] 미니앱 1. 퍼스널컬러 (personal-color/index.html 연동 & img/thumb.png 반영) -->
+                <!-- [오픈 완료] 미니앱 1. 퍼스널컬러 -->
                 <div class="collection-card" onclick="window.location.href='personal-color/index.html'">
                     <div class="thumb-box">
                         <img src="img/thumb.png" alt="퍼스널컬러"
@@ -543,10 +604,11 @@
     <div class="snackbar" id="snackbar">오픈 준비 중인 테마입니다!</div>
 
     <script>
+        let sheetShowTimer = null;
+        let sheetHideTimer = null;
         let splashTimeout = null;
         let snackbarTimeout = null;
 
-        // 다중 경로 폴백 처리기 (img/thumb.png -> personal-color/img/thumb.png -> 내장 SVG 순으로 안전하게 로드)
         function handleImgFallback(imgEl, altPaths, svgType) {
             const step = parseInt(imgEl.dataset.step || '0', 10);
             if (step < altPaths.length) {
@@ -606,11 +668,14 @@
                 </svg>`;
             } else if (type === 'sanrio') {
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <rect width="100" height="100" fill="#cbd5e1"/>
-                    <ellipse cx="50" cy="56" rx="32" ry="26" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                    <polygon points="24,42 30,20 44,34" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                    <polygon points="76,42 70,20 56,34" fill="#ffffff" stroke="#475569" stroke-width="3.5"/>
-                    <circle cx="66" cy="34" r="7" fill="#94a3b8" stroke="#475569" stroke-width="2.5"/>
+                    <rect width="100" height="100" fill="#FFE4EE"/>
+                    <ellipse cx="50" cy="56" rx="32" ry="26" fill="#ffffff" stroke="#FF5C8A" stroke-width="3.5"/>
+                    <polygon points="24,42 30,20 44,34" fill="#ffffff" stroke="#FF5C8A" stroke-width="3.5"/>
+                    <polygon points="76,42 70,20 56,34" fill="#ffffff" stroke="#FF5C8A" stroke-width="3.5"/>
+                    <circle cx="66" cy="34" r="7" fill="#FF5C8A" stroke="#ffffff" stroke-width="2"/>
+                    <circle cx="39" cy="54" r="3.5" fill="#2B2428"/>
+                    <circle cx="61" cy="54" r="3.5" fill="#2B2428"/>
+                    <ellipse cx="50" cy="60" rx="4" ry="2.8" fill="#FFD166"/>
                 </svg>`;
             } else if (type === 'shinchan') {
                 svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -642,11 +707,36 @@
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
 
+        function startSplashSequence() {
+            const sheet = document.getElementById('splashBottomSheet');
+
+            // 1) 바텀시트 올라오기
+            sheetShowTimer = setTimeout(() => {
+                if (sheet) sheet.classList.add('show');
+            }, 220);
+
+            // 2) 바텀시트 다시 내려가기
+            sheetHideTimer = setTimeout(() => {
+                if (sheet) sheet.classList.remove('show');
+            }, 1750);
+
+            // 3) 바텀시트가 들어가면서 메인 화면으로 전환
+            splashTimeout = setTimeout(() => {
+                hideSplash();
+            }, 2100);
+        }
+
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
+            const sheet = document.getElementById('splashBottomSheet');
             if (!splash || splash.classList.contains('hidden')) return;
+
+            if (sheet) sheet.classList.remove('show');
             splash.classList.add('hidden');
-            if (splashTimeout) clearTimeout(splashTimeout);
+
+            clearTimeout(sheetShowTimer);
+            clearTimeout(sheetHideTimer);
+            clearTimeout(splashTimeout);
         }
 
         async function openTheme(themeKey) {
@@ -680,11 +770,9 @@
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                splashTimeout = setTimeout(hideSplash, 1300);
-            });
+            document.addEventListener('DOMContentLoaded', startSplashSequence);
         } else {
-            splashTimeout = setTimeout(hideSplash, 1300);
+            startSplashSequence();
         }
     </script>
 </body>
