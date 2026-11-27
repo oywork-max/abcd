@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>산리오 캐릭터즈 휴게시간 순서뽑기</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
@@ -18,7 +18,8 @@
       --shadow-clay: 0 8px 20px rgba(255, 120, 152, 0.14), inset 0 -3px 6px rgba(255, 120, 152, 0.08);
       --shadow-card: 0 4px 12px rgba(43, 36, 40, 0.06);
       --radius-lg: 22px;
-      --radius-md: 16px;
+      --radius-md: 14px;
+      --grid-cols: 3;
     }
 
     * {
@@ -29,17 +30,27 @@
       user-select: none;
     }
 
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
+      touch-action: pan-y;
+    }
+
     body {
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
       background: linear-gradient(180deg, #FFF3F8 0%, #F9FBFF 100%);
       color: var(--text-main);
-      min-height: 100vh;
-      padding: 18px 16px 48px;
+      min-height: 100dvh;
+      padding: 16px 12px calc(env(safe-area-inset-bottom, 0px) + 40px);
     }
 
     .app-container {
-      max-width: 480px;
+      width: 100%;
+      max-width: 100%;
       margin: 0 auto;
+      overflow-x: hidden;
     }
 
     /* ===== 상단 헤더 ===== */
@@ -47,6 +58,7 @@
       position: relative;
       text-align: center;
       margin-bottom: 16px;
+      padding: 0 44px;
     }
 
     .sound-toggle {
@@ -90,7 +102,7 @@
     }
 
     .header h1 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.03em;
       color: var(--text-main);
@@ -104,20 +116,22 @@
 
     /* ===== 상단 결과 카드 섹션 ===== */
     .result-section {
+      width: 100%;
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
       box-shadow: var(--shadow-clay);
-      transition: all 0.3s ease;
+      overflow: hidden;
     }
 
     .result-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      gap: 8px;
     }
 
     .result-title {
@@ -135,6 +149,7 @@
       background: #FFF0F5;
       padding: 4px 10px;
       border-radius: 999px;
+      flex-shrink: 0;
     }
 
     .result-empty {
@@ -147,25 +162,29 @@
       border-radius: 14px;
     }
 
-    /* 결과 카드 그리드 (A, B, C, D 순서) */
+    /* 결과 카드 영역: 모바일 2x2 비율 & 가로 중앙 정렬 */
     .result-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      padding: 4px 4px 2px 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
     }
 
     .result-card {
       position: relative;
+      width: calc((100% - 10px) / 2);
+      max-width: 190px;
+      aspect-ratio: 1 / 1;
       background: #FFF9FB;
       border: 2px solid #FFD6E2;
       border-radius: 14px;
-      aspect-ratio: 1 / 1;
-      padding: 6px;
+      padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: visible; /* 배지가 오른쪽 상단에 살짝 걸치도록 허용 */
+      overflow: hidden;
       opacity: 0;
       transform: translateY(10px) scale(0.92);
       animation: popIn 0.42s cubic-bezier(0.22, 1.25, 0.36, 1) forwards;
@@ -174,8 +193,8 @@
     .result-card img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      border-radius: 10px;
+      object-fit: cover;
+      display: block;
     }
 
     @keyframes popIn {
@@ -185,24 +204,24 @@
       }
     }
 
-    /* ===== 오른쪽 상단에 살짝 걸치는 ABCD 배지 (1.2배 확대) ===== */
+    /* ===== 오른쪽 상단 ABCD 배지 (클래스 내부 안전 배치) ===== */
     .order-badge {
       position: absolute;
-      top: -7px;
-      right: -7px;
-      min-width: 29px;
-      height: 29px;
+      top: 5px;
+      right: 5px;
+      min-width: 28px;
+      height: 28px;
       padding: 0 7px;
       border-radius: 999px;
       background: linear-gradient(135deg, #FF7898, #FF4F7B);
       color: #FFFFFF;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(255, 79, 123, 0.42);
-      border: 2.5px solid #FFFFFF;
+      box-shadow: 0 3px 8px rgba(255, 79, 123, 0.4);
+      border: 2px solid #FFFFFF;
       z-index: 10;
       letter-spacing: -0.02em;
       pointer-events: none;
@@ -211,9 +230,10 @@
     /* ===== 컨트롤 버튼 바 ===== */
     .controls {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
       gap: 8px;
       margin-bottom: 16px;
+      width: 100%;
     }
 
     .btn {
@@ -222,8 +242,9 @@
       font-family: inherit;
       font-weight: 700;
       font-size: 14px;
-      padding: 13px 16px;
+      padding: 13px 14px;
       cursor: pointer;
+      white-space: nowrap;
       transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
     }
 
@@ -247,25 +268,62 @@
       background: #FFFFFF;
       color: var(--text-main);
       border: 1.5px solid var(--border);
-      padding: 13px 14px;
     }
 
-    /* ===== 3x8 캐릭터 선택 그리드 ===== */
+    /* ===== 캐릭터 선택 헤더 & PC/태블릿 배열 조절 ===== */
     .grid-section-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
       font-size: 13px;
       font-weight: 700;
       color: var(--text-sub);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       padding: 0 2px;
+      width: 100%;
+    }
+
+    .grid-label-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .grid-label-right {
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    /* PC/태블릿 전용 배열 조정 컨트롤 (모바일 숨김) */
+    .layout-controls {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--border);
+      padding: 3px;
+      border-radius: 999px;
+    }
+
+    .layout-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-sub);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .layout-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
     }
 
     .btn-shuffle {
@@ -286,23 +344,28 @@
       background: #FFF0F5;
     }
 
+    /* ===== 캐릭터 선택 그리드 (패딩 0, 클래스 이탈 방지) ===== */
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr); /* 3열 x 8행 */
-      gap: 12px;
-      padding-top: 4px;
+      grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .char-card {
       position: relative;
+      width: 100%;
+      min-width: 0;
       background: var(--surface);
-      border: 2px solid transparent;
+      border: 2.5px solid transparent;
       border-radius: var(--radius-md);
       aspect-ratio: 1 / 1;
-      padding: 8px;
+      padding: 0;
       box-shadow: var(--shadow-card);
       cursor: pointer;
-      overflow: visible; /* 배지가 오른쪽 상단에 살짝 걸치도록 허용 */
+      overflow: hidden;
       transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
       display: flex;
       align-items: center;
@@ -310,21 +373,20 @@
     }
 
     .char-card:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
     .char-card.selected {
       border-color: var(--primary);
-      background: #FFF3F7;
-      box-shadow: 0 6px 16px rgba(255, 120, 152, 0.24);
+      box-shadow: 0 4px 14px rgba(255, 120, 152, 0.3);
     }
 
     .select-check {
       position: absolute;
       top: 6px;
       left: 6px;
-      width: 21px;
-      height: 21px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: var(--accent);
       color: #FFFFFF;
@@ -336,8 +398,10 @@
       opacity: 0;
       transform: scale(0.5);
       transition: all 0.18s cubic-bezier(0.22, 1.3, 0.36, 1);
-      z-index: 4;
-      box-shadow: 0 2px 6px rgba(130, 220, 40, 0.4);
+      z-index: 6;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(130, 220, 40, 0.45);
+      pointer-events: none;
     }
 
     .char-card.selected .select-check {
@@ -348,8 +412,7 @@
     /* ===== 스켈레톤 로딩 애니메이션 ===== */
     .skeleton {
       position: absolute;
-      inset: 8px;
-      border-radius: 12px;
+      inset: 0;
       background: linear-gradient(
         110deg,
         #F4EBF0 25%,
@@ -375,11 +438,11 @@
     .char-img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      border-radius: 10px;
+      object-fit: cover;
+      display: block;
       opacity: 0;
-      transform: scale(0.88);
-      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1);
+      transform: scale(0.92);
+      transition: opacity 0.38s ease, transform 0.38s cubic-bezier(0.22, 1.2, 0.36, 1);
       z-index: 1;
     }
 
@@ -393,8 +456,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: #FFF5F8;
       color: #C799AA;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       gap: 4px;
       z-index: 1;
@@ -402,16 +468,6 @@
 
     .img-fallback span {
       font-size: 22px;
-    }
-
-    .char-num {
-      position: absolute;
-      bottom: 5px;
-      left: 7px;
-      font-size: 10px;
-      font-weight: 700;
-      color: #B9A7B0;
-      z-index: 3;
     }
 
     /* ===== 컨페티 캔버스 ===== */
@@ -440,6 +496,9 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
       z-index: 1000;
       white-space: nowrap;
+      max-width: calc(100vw - 24px);
+      overflow: hidden;
+      text-overflow: ellipsis;
       opacity: 0;
       transition: transform 0.35s cubic-bezier(0.22, 1.25, 0.36, 1), opacity 0.3s ease;
     }
@@ -447,6 +506,38 @@
     .toast.show {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
+    }
+
+    /* ===== 태블릿 & PC 반응형 (MAX 너비 960px, 배열 조절 노출) ===== */
+    @media (min-width: 640px) {
+      body {
+        padding: 28px 24px 56px;
+      }
+
+      .app-container {
+        max-width: 960px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+      }
+
+      .layout-controls {
+        display: inline-flex;
+      }
+
+      .character-grid {
+        gap: 12px;
+      }
+
+      .result-grid {
+        gap: 14px;
+      }
+
+      .result-card {
+        width: calc((100% - 42px) / 4);
+        max-width: 185px;
+      }
     }
   </style>
 </head>
@@ -463,7 +554,7 @@
       <p>참여할 캐릭터를 선택하고 순서를 뽑아보세요!</p>
     </header>
 
-    <!-- 2. 상단 결과 카드 영역 (A, B, C, D 순서) -->
+    <!-- 2. 상단 결과 카드 영역 (A, B, C, D 순서 / 가로 중앙 정렬) -->
     <section class="result-section" aria-label="순서뽑기 결과">
       <div class="result-header">
         <div class="result-title">✨ 순서뽑기 결과 (A → Z)</div>
@@ -481,9 +572,17 @@
       <button class="btn btn-secondary" id="resetBtn">초기화</button>
     </div>
 
-    <!-- 4. 3x8 캐릭터 선택 그리드 (1~24 랜덤 배치) -->
+    <!-- 4. 캐릭터 선택 그리드 (랜덤 배치 + PC/태블릿 열 조절) -->
     <div class="grid-section-label">
-      <span>캐릭터 선택 (3 × 8)</span>
+      <div class="grid-label-left">
+        <span>캐릭터 선택</span>
+        <div class="layout-controls" id="layoutControls" aria-label="캐릭터 배열 조정">
+          <button type="button" class="layout-btn" data-cols="3">3열</button>
+          <button type="button" class="layout-btn" data-cols="4">4열</button>
+          <button type="button" class="layout-btn active" data-cols="6">6열</button>
+          <button type="button" class="layout-btn" data-cols="8">8열</button>
+        </div>
+      </div>
       <div class="grid-label-right">
         <span id="selectedHint">0 / 24 선택됨</span>
         <button class="btn-shuffle" id="shuffleGridBtn" type="button">🔀 섞기</button>
@@ -498,6 +597,7 @@
     let orderMap = new Map();
     let toastTimer = null;
     let soundEnabled = true;
+    let desktopCols = 6; // PC/태블릿 기본 6열 (사용자 조정 가능)
 
     const characterGrid = document.getElementById('characterGrid');
     const resultBody = document.getElementById('resultBody');
@@ -508,7 +608,29 @@
     const resetBtn = document.getElementById('resetBtn');
     const shuffleGridBtn = document.getElementById('shuffleGridBtn');
     const soundToggle = document.getElementById('soundToggle');
+    const layoutControls = document.getElementById('layoutControls');
     const toastEl = document.getElementById('toast');
+
+    // ===== 반응형 열 개수 동기화 (모바일 3열 고정, PC/태블릿 조정 가능) =====
+    function applyGridColumns() {
+      const isDesktopOrTablet = window.innerWidth >= 640;
+      const cols = isDesktopOrTablet ? desktopCols : 3;
+      characterGrid.style.setProperty('--grid-cols', cols);
+    }
+
+    layoutControls.addEventListener('click', (e) => {
+      const btn = e.target.closest('.layout-btn');
+      if (!btn) return;
+      desktopCols = Number(btn.dataset.cols);
+      layoutControls.querySelectorAll('.layout-btn').forEach((b) => {
+        b.classList.toggle('active', b === btn);
+      });
+      applyGridColumns();
+      playClickSound();
+    });
+
+    window.addEventListener('resize', applyGridColumns);
+    applyGridColumns();
 
     // ===== Web Audio API 효과음 엔진 =====
     let audioCtx = null;
@@ -610,10 +732,8 @@
       if (soundEnabled) playClickSound();
     });
 
-    // 인덱스(0~23) -> 알파벳(A~X)
     const getLetter = (index) => String.fromCharCode(65 + index);
 
-    // Fisher-Yates 셔플
     function shuffleArray(arr) {
       const copy = [...arr];
       for (let i = copy.length - 1; i > 0; i--) {
@@ -623,11 +743,10 @@
       return copy;
     }
 
-    // 3x8 그리드 랜덤 순서 렌더링 (스켈레톤 애니메이션 포함)
+    // 캐릭터 그리드 랜덤 렌더링 (패딩 없음, 번호 없음)
     function renderGrid() {
       characterGrid.innerHTML = '';
 
-      // 매번 1~24번 사진 순서를 랜덤으로 섞음
       const randomIds = shuffleArray(
         Array.from({ length: TOTAL_CHARACTERS }, (_, idx) => idx + 1)
       );
@@ -645,10 +764,6 @@
         check.className = 'select-check';
         check.textContent = '✓';
 
-        const num = document.createElement('div');
-        num.className = 'char-num';
-        num.textContent = String(id).padStart(2, '0');
-
         const img = document.createElement('img');
         img.className = 'char-img';
         img.src = `img/${id}.png`;
@@ -659,7 +774,7 @@
         fallback.className = 'img-fallback';
         fallback.innerHTML = `<span>🎀</span><div>img/${id}.png</div>`;
 
-        const staggerDelay = (orderIndex + 1) * 35;
+        const staggerDelay = (orderIndex + 1) * 30;
 
         const revealImage = () => {
           setTimeout(() => {
@@ -679,15 +794,13 @@
         img.addEventListener('load', revealImage);
         img.addEventListener('error', revealFallback);
 
-        // 캐시된 이미지도 스켈레톤 애니메이션 후 자연스럽게 노출
         if (img.complete) {
           if (img.naturalWidth > 0) revealImage();
           else revealFallback();
         }
 
-        card.append(skeleton, check, img, fallback, num);
+        card.append(skeleton, check, img, fallback);
 
-        // 이미 뽑힌 결과가 있다면 우측 상단 배지 유지
         if (orderMap.has(id)) {
           const badge = document.createElement('div');
           badge.className = 'order-badge';
@@ -736,7 +849,7 @@
       });
     }
 
-    // 상단 결과 카드 렌더링 (A, B, C, D 순서)
+    // 상단 결과 카드 렌더링 (가로 중앙 정렬 + 2x2 비율)
     function renderResults(shuffledIds) {
       const grid = document.createElement('div');
       grid.className = 'result-grid';
@@ -753,14 +866,12 @@
 
         const img = document.createElement('img');
         img.src = `img/${id}.png`;
-        img.alt = `${letter}번 산리오 캐릭터 ${id}`;
+        img.alt = `${letter}번 산리오 캐릭터`;
         img.onerror = () => {
           img.style.display = 'none';
           const fb = document.createElement('div');
-          fb.style.fontSize = '12px';
-          fb.style.fontWeight = '700';
-          fb.style.color = '#C799AA';
-          fb.textContent = `#${id}`;
+          fb.style.fontSize = '22px';
+          fb.textContent = '🎀';
           card.appendChild(fb);
         };
 
@@ -818,87 +929,3 @@
     });
 
     // 그리드 사진 순서 다시 섞기
-    shuffleGridBtn.addEventListener('click', () => {
-      playClickSound();
-      renderGrid();
-    });
-
-    // 초기화 (사진 순서도 새로 섞임)
-    resetBtn.addEventListener('click', () => {
-      selectedIds.clear();
-      orderMap.clear();
-      resultBody.innerHTML = '<div class="result-empty">아래에서 캐릭터를 선택한 뒤 <b>순서 뽑기</b>를 눌러주세요.</div>';
-      renderGrid();
-      updateUIState();
-      playClickSound(true);
-    });
-
-    // ===== 컨페티 애니메이션 =====
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    let confettiParticles = [];
-    let confettiAnimId = null;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function launchConfetti() {
-      const colors = ['#FF7898', '#82DC28', '#FFD166', '#6EC6FF', '#C78BFF', '#FF9F68'];
-      confettiParticles = Array.from({ length: 95 }, () => ({
-        x: canvas.width * (0.2 + Math.random() * 0.6),
-        y: canvas.height * 0.18,
-        vx: (Math.random() - 0.5) * 11,
-        vy: -Math.random() * 10 - 3,
-        size: 6 + Math.random() * 6,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 12,
-        gravity: 0.28,
-        opacity: 1
-      }));
-
-      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
-      animateConfetti();
-    }
-
-    function animateConfetti() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let activeCount = 0;
-
-      confettiParticles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += p.gravity;
-        p.vx *= 0.99;
-        p.rotation += p.rotationSpeed;
-        if (p.y > canvas.height * 0.72) p.opacity -= 0.025;
-
-        if (p.opacity > 0 && p.y < canvas.height + 20) {
-          activeCount++;
-          ctx.save();
-          ctx.globalAlpha = Math.max(p.opacity, 0);
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rotation * Math.PI) / 180);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-          ctx.restore();
-        }
-      });
-
-      if (activeCount > 0) {
-        confettiAnimId = requestAnimationFrame(animateConfetti);
-      } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-
-    // 초기 실행 (랜덤 배치)
-    renderGrid();
-    updateUIState();
-  </script>
-</body>
-</html>
