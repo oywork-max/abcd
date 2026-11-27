@@ -929,3 +929,86 @@
     });
 
     // 그리드 사진 순서 다시 섞기
+    shuffleGridBtn.addEventListener('click', () => {
+      playClickSound();
+      renderGrid();
+    });
+
+    // 초기화
+    resetBtn.addEventListener('click', () => {
+      selectedIds.clear();
+      orderMap.clear();
+      resultBody.innerHTML = '<div class="result-empty">아래에서 캐릭터를 선택한 뒤 <b>순서 뽑기</b>를 눌러주세요.</div>';
+      renderGrid();
+      updateUIState();
+      playClickSound(true);
+    });
+
+    // ===== 컨페티 애니메이션 =====
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti() {
+      const colors = ['#FF7898', '#82DC28', '#FFD166', '#6EC6FF', '#C78BFF', '#FF9F68'];
+      confettiParticles = Array.from({ length: 95 }, () => ({
+        x: canvas.width * (0.2 + Math.random() * 0.6),
+        y: canvas.height * 0.18,
+        vx: (Math.random() - 0.5) * 11,
+        vy: -Math.random() * 10 - 3,
+        size: 6 + Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 12,
+        gravity: 0.28,
+        opacity: 1
+      }));
+
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let activeCount = 0;
+
+      confettiParticles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.99;
+        p.rotation += p.rotationSpeed;
+        if (p.y > canvas.height * 0.72) p.opacity -= 0.025;
+
+        if (p.opacity > 0 && p.y < canvas.height + 20) {
+          activeCount++;
+          ctx.save();
+          ctx.globalAlpha = Math.max(p.opacity, 0);
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        }
+      });
+
+      if (activeCount > 0) {
+        confettiAnimId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    renderGrid();
+    updateUIState();
+  </script>
+</body>
+</html>
