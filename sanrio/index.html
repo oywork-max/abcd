@@ -204,7 +204,7 @@
       }
     }
 
-    /* ===== 오른쪽 상단 ABCD 배지 (클래스 내부 안전 배치) ===== */
+    /* ===== 오른쪽 상단 ABCD 배지 ===== */
     .order-badge {
       position: absolute;
       top: 5px;
@@ -227,10 +227,10 @@
       pointer-events: none;
     }
 
-    /* ===== 컨트롤 버튼 바 ===== */
+    /* ===== 컨트롤 버튼 바 (순서 뽑기 + 초기화) ===== */
     .controls {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       margin-bottom: 16px;
       width: 100%;
@@ -242,7 +242,7 @@
       font-family: inherit;
       font-weight: 700;
       font-size: 14px;
-      padding: 13px 14px;
+      padding: 13px 16px;
       cursor: pointer;
       white-space: nowrap;
       transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.15s ease;
@@ -297,7 +297,6 @@
       gap: 8px;
     }
 
-    /* PC/태블릿 전용 배열 조정 컨트롤 (모바일 숨김) */
     .layout-controls {
       display: none;
       align-items: center;
@@ -344,7 +343,7 @@
       background: #FFF0F5;
     }
 
-    /* ===== 캐릭터 선택 그리드 (패딩 0, 클래스 이탈 방지) ===== */
+    /* ===== 캐릭터 선택 그리드 ===== */
     .character-grid {
       display: grid;
       grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
@@ -508,7 +507,7 @@
       opacity: 1;
     }
 
-    /* ===== 태블릿 & PC 반응형 (MAX 너비 960px, 배열 조절 노출) ===== */
+    /* ===== 태블릿 & PC 반응형 ===== */
     @media (min-width: 640px) {
       body {
         padding: 28px 24px 56px;
@@ -554,7 +553,7 @@
       <p>참여할 캐릭터를 선택하고 순서를 뽑아보세요!</p>
     </header>
 
-    <!-- 2. 상단 결과 카드 영역 (A, B, C, D 순서 / 가로 중앙 정렬) -->
+    <!-- 2. 상단 결과 카드 영역 -->
     <section class="result-section" aria-label="순서뽑기 결과">
       <div class="result-header">
         <div class="result-title">✨ 순서뽑기 결과 (A → Z)</div>
@@ -568,11 +567,10 @@
     <!-- 3. 액션 버튼 -->
     <div class="controls">
       <button class="btn btn-primary" id="drawBtn" disabled>🎲 순서 뽑기</button>
-      <button class="btn btn-secondary" id="selectAllBtn">전체</button>
       <button class="btn btn-secondary" id="resetBtn">초기화</button>
     </div>
 
-    <!-- 4. 캐릭터 선택 그리드 (랜덤 배치 + PC/태블릿 열 조절) -->
+    <!-- 4. 캐릭터 선택 그리드 -->
     <div class="grid-section-label">
       <div class="grid-label-left">
         <span>캐릭터 선택</span>
@@ -597,21 +595,20 @@
     let orderMap = new Map();
     let toastTimer = null;
     let soundEnabled = true;
-    let desktopCols = 6; // PC/태블릿 기본 6열 (사용자 조정 가능)
+    let desktopCols = 6;
 
     const characterGrid = document.getElementById('characterGrid');
     const resultBody = document.getElementById('resultBody');
     const resultCount = document.getElementById('resultCount');
     const selectedHint = document.getElementById('selectedHint');
     const drawBtn = document.getElementById('drawBtn');
-    const selectAllBtn = document.getElementById('selectAllBtn');
     const resetBtn = document.getElementById('resetBtn');
     const shuffleGridBtn = document.getElementById('shuffleGridBtn');
     const soundToggle = document.getElementById('soundToggle');
     const layoutControls = document.getElementById('layoutControls');
     const toastEl = document.getElementById('toast');
 
-    // ===== 반응형 열 개수 동기화 (모바일 3열 고정, PC/태블릿 조정 가능) =====
+    // ===== 반응형 열 개수 동기화 =====
     function applyGridColumns() {
       const isDesktopOrTablet = window.innerWidth >= 640;
       const cols = isDesktopOrTablet ? desktopCols : 3;
@@ -743,7 +740,7 @@
       return copy;
     }
 
-    // 캐릭터 그리드 랜덤 렌더링 (패딩 없음, 번호 없음)
+    // 캐릭터 그리드 랜덤 렌더링
     function renderGrid() {
       characterGrid.innerHTML = '';
 
@@ -831,7 +828,6 @@
       resultCount.textContent = `선택 ${count}명`;
       selectedHint.textContent = `${count} / ${TOTAL_CHARACTERS} 선택됨`;
       drawBtn.disabled = count < 1;
-      selectAllBtn.textContent = count === TOTAL_CHARACTERS ? '해제' : '전체';
     }
 
     function updateGridBadges() {
@@ -849,7 +845,7 @@
       });
     }
 
-    // 상단 결과 카드 렌더링 (가로 중앙 정렬 + 2x2 비율)
+    // 상단 결과 카드 렌더링
     function renderResults(shuffledIds) {
       const grid = document.createElement('div');
       grid.className = 'result-grid';
@@ -908,24 +904,6 @@
       playResultFanfare();
       launchConfetti();
       showToast('순서뽑기 결과가 나왔습니다.');
-    });
-
-    // 전체 선택 / 해제
-    selectAllBtn.addEventListener('click', () => {
-      const cards = document.querySelectorAll('.char-card');
-      if (selectedIds.size === TOTAL_CHARACTERS) {
-        selectedIds.clear();
-        cards.forEach((c) => c.classList.remove('selected'));
-        playSelectSound(false);
-      } else {
-        cards.forEach((c) => {
-          const id = Number(c.dataset.id);
-          selectedIds.add(id);
-          c.classList.add('selected');
-        });
-        playSelectSound(true);
-      }
-      updateUIState();
     });
 
     // 그리드 사진 순서 다시 섞기
